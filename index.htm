@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OSM CODES</title>
+  <link rel="shortcut icon" type="image/png" href="/resources/img/address_for_all-01-colorful.ico.png" />
+  <script>
+  function sel_jurL1(abbrev,optc) {
+    if (abbrev>'') {
+      let jL2dom = document.getElementById(optc+'_jurL2');
+      let fcall = "sel_jurL2(this.value,'"+optc+"')"
+      let s = '<select name="states" onchange="'+fcall+'"><option value="">-- States--</option>'
+      let lst = (optc=='wrk')? approved_jurisdictions[abbrev]: jurisdictions[abbrev];
+      for ( var i of Object.keys(lst) ){
+         s = s + '<option>'+i
+      }
+      jL2dom.innerHTML=s+"</select>"
+      let jL3dom = document.getElementById(optc+'_jurL3');
+      jL3dom.innerHTML=""
+    }
+  }
+  function sel_jurL2(abbrev,optc) {
+    if (abbrev>'') {
+      let country = document.getElementById(optc+'_jurL1').value;
+      let state = document.querySelector('#'+optc+'_jurL2 select').value;
+      let jL3dom = document.getElementById(optc+'_jurL3');
+      let fcall = "sel_jurL3(this.value,'"+optc+"')"
+      let s = '<select name="cities" onchange="'+fcall+'"><option value="">-- Cities --</option>'
+      let lst = (optc=='wrk')? approved_jurisdictions[country][state]: jurisdictions[country][state];
+      for ( var i of lst ){
+         s = s + '<option>'+i
+      }
+      jL3dom.innerHTML=s+"</select>"
+    }
+  }
+  function sel_jurL3(abbrev,optc) {
+      let country = document.getElementById(optc+'_jurL1').value;
+      let state = document.querySelector('#'+optc+'_jurL2 select').value;
+      if (optc=='wrk' || (approved_jurisdictions[country] && approved_jurisdictions[country][state] && approved_jurisdictions[country][state].includes(abbrev)) || confirm("It is not working,\nit is only to see city at the map ok?")) {
+       window.location.href = 'https://osm.codes/' + country+'-'+state+'-'+abbrev
+      }
+  }
+
+  </script>
+</head>
+
+<body style="padding:1em">
+<p>The OSMcodes infrastructure is under testing and construction.</p> 
+<p><a href="https://OSM.codes/">OSM.codes</a> is the "OpenStreetMap Codes", and a project maintained by <a target="_blanck" href="https://AddressForAll.org/">AddressForAll Institute</a>.
+</p>
+
+<h2>Options</h2>
+<p>OSMcodes are sovereign decisions of each country about its <a target="_blanck" title="see Wikipedia explanation on geocodes" href="https://en.wikipedia.org/wiki/Geocode">geocodes</a>,
+   and some countries are implementing it. Postal and Scientific OSMcodes applications are interoperable.
+</p>
+ 
+
+<p><b><i>Postal OSMcodes</i></b>, by jurisdiction:
+<ul>
+  <li>Work cases: 
+<select name="countries1" id="wrk_jurL1" onchange="sel_jurL1(this.value,'wrk')">
+  <option value="">-- Country --</option>
+  <option value="BR">BR - Brazil</option>
+  <option value="CO">CO - Colombia</option>
+  <option value="UY">UY - Uruguay</option>
+</select> &nbsp; <span id="wrk_jurL2"></span> &nbsp; <span id="wrk_jurL3"></span>
+<br/>&nbsp;</li>
+  <li>Full list:
+<select name="countries2" id="sel_jurL1" onchange="sel_jurL1(this.value,'sel')">
+  <option value="">-- Country --</option>
+  <option value="BR">BR - Brazil</option>
+  <option value="CO">CO - Colombia</option>
+  <option value="EC">EC - Equador</option>
+  <option value="UY">UY - Uruguay</option>
+</select> &nbsp; <span id="sel_jurL2"></span> &nbsp; <span id="sel_jurL3"></span>
+</li>
+</ul>
+</p>
+
+
+<p><b><i>Scientific OSMcodes</i></b> and <i>scientific grid</i>, by country:
+<ul>
+ <li><a href="https://OSM.codes/BR+D">Brazil</a> 
+ <li><a href="https://OSM.codes/CO+08">Colombia</a>
+ <li><a href="https://OSM.codes/EC+08">Ecuador</a>
+ <li><a href="https://OSM.codes/UY+B">Uruguay</a>
+</ul>
+</p>
+
+<!--
+<hr/>
+
+<h2>Foundations</h2>
+
+
+<p>The country's sovereign decisions are limited by mathematical constraints and statistical evidence:
+<ul>
+ <li>The geographic projections are limited to Statistical applications: population census and DGGS standard need <a href="https://en.wikipedia.org/wiki/Equal-area_map">Equal Area projection</a>.
+ <li>The multiporpuse geocodes (postal and scientifi applications) demand hierarchical geocodes and hierarchical grids: they are limited to quadrilateral grids and base4 geocode internal representation.
+ <li>Compressed human-readable representation for base4 are only possible using base16h, or "hierarchical hexadecimals", as described at  
+ https://ppkrauss.github.io/Sfc4q/ 
+ <li>
+</ul>
+</p>
+-->
+<script src="jurisdictions_select.js"></script><!-- basta incluir um asterisco nos aprovados, e depois remover -->
+<script src="approved_jurisdictions_select.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+#map {
+	position: absolute;
+	width: 70vw;
+	height: 100vh;
+	float: left;
+	top: 0;
+	left: 0
+}
+
+#custom-map-controls {
+	position: absolute;
+	width: 30vw;
+	height: 90vh;
+	float: right;
+	top: 0;
+	right: 0;
+	padding-top:1%;
+	padding-left:1%;
+	padding-right:1%;
+	box-sizing: border-box
+}
+
+#custom-map-controlsa {
+	float: left;
+	padding-top:2%;
+	padding-bottom:2%;
+}
+
+#custom-map-controlsb {
+	float: left;
+	padding-top:2%;
+}
+
+#custom-map-controlsb .leaflet-control {
+	clear:none;
+}
+
+.leaflet-control .leaflet-control-encode {
+	padding-top:2%;
+}
+
+.leaflet-tooltip.tooltipbase16h {
+	border-left-color: rgb(255, 250, 205, 1);
+	background-color: rgb(255, 250, 205, 1)
+}
+
+.leaflet-tooltip.tooltipbase16h1c {
+	border-left-color: rgb(255, 250, 205, 1);
+	background-color: rgb(255, 250, 205, 1)
+}
