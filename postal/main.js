@@ -707,7 +707,7 @@ function generateSelectGrid(grids)
         htmlB += '<option value="grid' + (grids[i]+1) + '"> grade de pontos</option>'
     }
 
-    return '<option>sem grade</option>' + htmlA + htmlB
+    return '<option value="">sem grade</option>' + htmlA + htmlB
 }
 
 function generateSelectBase(bases)
@@ -826,7 +826,7 @@ function getEncode(data)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
-        let grid = document.getElementById('grid').valuetoggleCoverLayers
+        let grid = document.getElementById('grid').value
         // let base = document.getElementById('base').value
 
         var base = defaultMapBase
