@@ -31,6 +31,10 @@
       window.location.href = 'https://osm.codes/postal/' + country+'-'+state+'-'+abbrev
   }
 
+function latRound(x) {
+  return Number.parseFloat(x).toFixed(6);
+  // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
+}
 
 
 ///////////// Original
@@ -1123,7 +1127,8 @@ function onMapClick(e)
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
-    document.getElementById('fieldencode').value = e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level;
+    document.getElementById('fieldencode').value = latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+    // or e.latlng['lat'].toPrecision(8)
 
     layerMarkerCurrent.clearLayers();
 
