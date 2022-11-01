@@ -1,3 +1,12 @@
+@font-face {
+  font-family: 'FE-Schrift';
+  src: URL('EuroPlate.woff2') format('woff2');
+}
+
+code#postalCode {
+    font-family: "FE-Schrift";
+}
+
 #map {
 	position: absolute;
 	width: 70vw;
