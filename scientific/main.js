@@ -1,3 +1,42 @@
+// New adds
+
+  function sel_jurL1(abbrev) {
+    if (abbrev>'') {
+      let jL2dom = document.getElementById('sel_jurL2');
+      let s = '<select name="states" onchange="sel_jurL2(this.value)"><option value="">-- States--</option>'
+      for ( var i of Object.keys(jurisdictions[abbrev]) ){
+         s = s + '<option>'+i
+      }
+      jL2dom.innerHTML=s+"</select>"
+      let jL3dom = document.getElementById('sel_jurL3');
+      jL3dom.innerHTML=""
+    }
+  }
+  function sel_jurL2(abbrev) {
+    if (abbrev>'') {
+      let country = document.getElementById('sel_jurL1').value;
+      let state = document.querySelector('#sel_jurL2 select').value;
+      let jL3dom = document.getElementById('sel_jurL3');
+      let s = '<select name="cities" onchange="sel_jurL3(this.value)"><option value="">-- Cities --</option>'
+      for ( var i of jurisdictions[country][state] ){
+         s = s + '<option>'+i
+      }
+      jL3dom.innerHTML=s+"</select>"
+    }
+  }
+  function sel_jurL3(abbrev) {
+      let country = document.getElementById('sel_jurL1').value;
+      let state = document.querySelector('#sel_jurL2 select').value;
+      window.location.href = 'https://osm.codes/postal/' + country+'-'+state+'-'+abbrev
+  }
+
+function latRound(x) {
+  return Number.parseFloat(x).toFixed(6);
+  // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
+}
+
+
+///////////// Original
 var uri_base = "https://osm.codes"
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -55,7 +94,7 @@ var overlays = {
     'Jurisdictions': layerJurisdAll,
 };
 
-var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46341,32768,23170.5,16384,11585.2,8192,5792.6,4096,2896.3,2048,1448.2,1024,724.1,512,362,256,181,128,90.5,64,45.3,32,22.6,16,11.3,8,5.7,4,2.8,2,1.4,1];
+var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];
 
 // var levelValues =  [600000,400000,300000,200000,150000,100000,75000,50000,40000,25000,20000,15000,10000,6000,5000,3500,2500,1500,1250,750,600,450,300,225,150,100,75,50,40,25,20,15,8,7,5,3,2,1.4,1,0.7,0];
 
@@ -81,6 +120,7 @@ var countries = {
                 iniLevel: 0,
                 modLevel: 5,
                 iniDigit: 1,
+                levelDefault: 35,
                 symbol: '~',
                 placeholderDecode: 'BR~42',
                 placeholderEncode: '-15.7,-47.8;u=10',
@@ -130,6 +170,7 @@ var countries = {
                 iniLevel: 4,
                 modLevel: 5,
                 iniDigit: 1,
+                levelDefault: 39,
                 symbol: '~',
                 placeholderDecode: 'CO~3D5',
                 placeholderEncode: '3.5,-72.3;u=10',
@@ -168,6 +209,7 @@ var countries = {
                 iniLevel: 5,
                 modLevel: 5,
                 iniDigit: 1,
+                levelDefault: 30,
                 symbol: '~',
                 placeholderDecode: 'EC~5P',
                 placeholderEncode: '-1.1,-78.4;u=10',
@@ -206,6 +248,7 @@ var countries = {
                 iniLevel: 6,
                 modLevel: 5,
                 iniDigit: 1,
+                levelDefault: 36,
                 symbol: '~',
                 placeholderDecode: 'UY~3',
                 placeholderEncode: '-32.9,-55.9;u=10',
@@ -250,6 +293,22 @@ var countries = {
 };
 
 var defaultMap = countries['CO'];
+var defaultMapBase = defaultMap.scientificBase;
+let ptname = window.location.pathname;
+
+for(var key in countries)
+{
+    let regex = new RegExp("^/?" + key + ".*","i");
+
+    if(regex.test(ptname))
+    {
+        // document.getElementById('country').value = key;
+        defaultMap = countries[key];
+        defaultMapBase = defaultMap.scientificBase;
+        // console.log(defaultMap)
+        break;
+    }
+}
 
 var map = L.map('map',{
     center: defaultMap.center,
@@ -258,7 +317,8 @@ var map = L.map('map',{
     renderer: L.svg(),
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
 
-var toggleTooltipStatus = true;
+var toggleTooltipStatus = false;
+var toggleCoverStatus = false;
 
 map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topright'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
@@ -289,7 +349,7 @@ searchJurisdiction.onAdd = function (map) {
 
     this.search.type = 'text';
     this.search.placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
-    this.search.id = 'textsearchjurisdiction';
+    this.search.id = 'fieldjurisdiction';
     this.button.type = 'button';
     this.button.innerHTML= "Jurisdiction";
 
@@ -311,8 +371,8 @@ searchDecode.onAdd = function (map) {
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.search.type = 'text';
-    this.search.placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.defaultBase].placeholderDecode;
-    this.search.id = 'textsearchbar';
+    this.search.placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    this.search.id = 'fielddecode';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
 
@@ -331,8 +391,8 @@ searchDecodeList.onAdd = function (map) {
     this.search    = L.DomUtil.create('textarea', '', this.container);
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
-    this.search.placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[defaultMap.defaultBase].placeholderList;
-    this.search.id = 'listtextsearchbar';
+    this.search.placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderList;
+    this.search.id = 'fielddecodelist';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
 
@@ -352,8 +412,8 @@ searchEncode.onAdd = function (map) {
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.search.type = 'text';
-    this.search.placeholder = 'lat,lng, e.g.: ' + defaultMap.bases[defaultMap.defaultBase].placeholderEncode;
-    this.search.id = 'latlngtextbar';
+    this.search.placeholder = 'lat,lng, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+    this.search.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
 
@@ -371,7 +431,7 @@ country.onAdd = function (map) {
     this.select_country = L.DomUtil.create('select', '', this.container);
 
     this.label_country.for = 'country';
-    this.label_country.innerHTML = '<p><b>Scientific OSMcodes</b><br/>Select a level and click into the map!</p><hr/>Country: ';
+    this.label_country.innerHTML = 'Country: ';
     this.select_country.id = 'country';
     this.select_country.name = 'country';
     this.select_country.innerHTML = generateSelectCountries(countries);
@@ -394,13 +454,13 @@ level.onAdd = function (map) {
     this.label_grid.innerHTML = ' with grid: ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
-    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.defaultBase].selectGrid)
+    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
-    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.defaultBase],defaultMap.defaultBase);
+    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -501,11 +561,11 @@ zoomAll.onAdd = function (map) {
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
-country.addTo(map);
+// country.addTo(map);
 searchJurisdiction.addTo(map);
 searchDecode.addTo(map);
 searchEncode.addTo(map);
-baseLevel.addTo(map);
+// baseLevel.addTo(map);
 level.addTo(map);
 clear.addTo(map);
 fitBounds.addTo(map);
@@ -514,12 +574,13 @@ toggleTooltip.addTo(map);
 searchDecodeList.addTo(map);
 zoomAll.addTo(map);
 
-var a = document.getElementById('custom-map-controls');
-a.appendChild(country.getContainer());
+var a = document.getElementById('custom-map-controlsa');
+var b = document.getElementById('custom-map-controlsb');
+// a.appendChild(country.getContainer());
 a.appendChild(searchJurisdiction.getContainer());
 a.appendChild(searchDecode.getContainer());
 a.appendChild(searchEncode.getContainer());
-a.appendChild(baseLevel.getContainer());
+// a.appendChild(baseLevel.getContainer());
 a.appendChild(level.getContainer());
 a.appendChild(clear.getContainer());
 a.appendChild(fitBounds.getContainer());
@@ -543,46 +604,49 @@ function clearAll()
     clearAllLayers();
 
     toggleCountry()
-//     map.setView(defaultMap.center, defaultMap.zoom);
+    map.setView(defaultMap.center, defaultMap.zoom);
 
-//     document.getElementById('listtextsearchbar').value = '';
-//     document.querySelector('#base').value = defaultMap.defaultBase;
+//     document.getElementById('fielddecodelist').value = '';
+//     document.querySelector('#base').value = defaultMapBase;
 //     document.querySelector('#country').value = defaultMap.isocode;
 //     document.querySelector('#grid').value = '';
-//     document.getElementById('latlngtextbar').value = '';
-//     document.getElementById('textsearchbar').value = '';
+//     document.getElementById('fieldencode').value = '';
+//     document.getElementById('fielddecode').value = '';
 //     document.getElementById('base').innerHTML = generateSelectBase(defaultMap.selectedBases);
 //     toggleLevelBase()
 }
 
 function toggleCountry()
 {
-    document.getElementById('listtextsearchbar').value = '';
-
+    // document.getElementById('fielddecodelist').value = '';
+    // 
     clearAllLayers();
+    // 
+    // let countryValue = document.getElementById('country').value;
+    // 
+    // map.setView(countries[countryValue].center, countries[countryValue].zoom);
+    // document.getElementById('base').innerHTML = generateSelectBase(countries[countryValue].selectedBases);
+    // document.getElementById('base').value = countries[countryValue].scientificBase;
+    // 
+    // document.getElementById('fieldjurisdiction').placeholder = 'e.g.: ' + countries[countryValue].jurisdictionPlaceholder;
 
-    let countryValue = document.getElementById('country').value;
-
-    map.setView(countries[countryValue].center, countries[countryValue].zoom);
-    document.getElementById('base').innerHTML = generateSelectBase(countries[countryValue].selectedBases);
-    document.getElementById('base').value = countries[countryValue].defaultBase;
-
-    document.getElementById('textsearchjurisdiction').placeholder = 'e.g.: ' + countries[countryValue].jurisdictionPlaceholder;
-
+    defaultMapBase = defaultMap.defaultBase;
+    
     toggleLevelBase();
 }
 
 function toggleLevelBase()
 {
-    let countryValue = document.getElementById('country').value;
-    let baseValue = document.getElementById('base').value;
+    // let countryValue = document.getElementById('country').value;
+    // let base = document.getElementById('base').value;
+    var base = defaultMapBase;
 
-    document.getElementById('level_size').innerHTML = generateSelectLevel(countries[countryValue].bases[baseValue],baseValue);
-    document.getElementById('grid').innerHTML = generateSelectGrid(countries[countryValue].bases[baseValue].selectGrid);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[base],base);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[base].selectGrid);
 
-    document.getElementById('textsearchbar').placeholder = 'geocode, e.g.: ' + countries[countryValue].bases[baseValue].placeholderDecode;
-    document.getElementById('listtextsearchbar').placeholder = 'list geocodes, e.g.: ' + countries[countryValue].bases[baseValue].placeholderList;
-    document.getElementById('latlngtextbar').placeholder = 'lat,lng, e.g.: ' + countries[countryValue].bases[baseValue].placeholderEncode;
+    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[base].placeholderDecode;
+    // document.getElementById('fielddecodelist').placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[base].placeholderList;
+    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[base].placeholderEncode;
 }
 
 function toggleTooltipLayers()
@@ -657,32 +721,50 @@ function generateSelectLevel(base,baseValue)
     return html
 }
 
+function generateSelectLevel2(base,baseValue,size)
+{
+    let html = '';
+
+    let m=0;
+
+    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
+    {
+        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
+
+        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+    }
+
+    return html
+}
+
 function searchDecodeGgeocode(data)
 {
-    let input = document.getElementById('textsearchbar').value
+    let input = document.getElementById('fielddecode').value
 
     if(input !== null && input !== '')
     {
         var uri = uri_base + "/geo:osmcodes:" + input + ".json"
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter);
-        document.getElementById('textsearchbar').value = '';
+        document.getElementById('fielddecode').value = '';
     }
 }
 
 function searchDecodeListGgeocode(data)
 {
-    let input = document.getElementById('listtextsearchbar').value;
+    let input = document.getElementById('fielddecodelist').value;
     let countryValue = document.getElementById('country').value;
-    let baseValue = document.getElementById('base').value;
+    // let base = document.getElementById('base').value;
+
+    var base = defaultMapBase;
 
     console.log(input);
     if(input !== null && input !== '')
     {
-        var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[baseValue].symbol + sortAndRemoveDuplicates(input) + ".json"
+        var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[base].symbol + sortAndRemoveDuplicates(input) + ".json"
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter);
-        document.getElementById('listtextsearchbar').value = '';
+        document.getElementById('fielddecodelist').value = '';
 
         checkCountry(input);
     }
@@ -690,17 +772,19 @@ function searchDecodeListGgeocode(data)
 
 function searchDecodeJurisdiction(data)
 {
-    let input = document.getElementById('textsearchjurisdiction').value
+    let input = document.getElementById('fieldjurisdiction').value
     let jcover = document.getElementById('jcover')
+
+    var base = defaultMapBase
 
     if(input !== null && input !== '')
     {
-        let uri = uri_base + "/geo:iso_ext:" + input + ".json" + (jcover.checked ? '/cover' : '') + (document.getElementById('base').value == 'base16h' ? '/base16h' : (document.getElementById('base').value == 'base16h1c' ? '/base16h1c' : ''));
+        let uri = uri_base + "/geo:iso_ext:" + input + ".json" + (jcover.checked ? '/cover' : '') + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
 
         if(jcover.checked)
         {
             loadGeojson(uri,[layerCoverAll],loadGeojsonFitCenter);
-            document.getElementById('textsearchjurisdiction').value = '';
+            document.getElementById('fieldjurisdiction').value = '';
         }
 
         uri = uri_base + "/geo:iso_ext:" + input + ".json";
@@ -712,7 +796,7 @@ function searchDecodeJurisdiction(data)
 
 function searchEncodeGgeocode(data)
 {
-    let input = document.getElementById('latlngtextbar').value
+    let input = document.getElementById('fieldencode').value
 
     if(input !== null && input !== '')
     {
@@ -727,7 +811,7 @@ function searchEncodeGgeocode(data)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter)
-//         document.getElementById('latlngtextbar').value = '';
+//         document.getElementById('fieldencode').value = '';
     }
 }
 
@@ -770,6 +854,7 @@ function onEachFeature(feature,layer)
         value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
 
         var popupContent = "";
+        const reg = /(...)(?!$)/g
 
         if(feature.properties.short_code )
         {
@@ -788,6 +873,10 @@ function onEachFeature(feature,layer)
             popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
             popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
+            document.getElementById('fielddecode').value = defaultMap.isocode + defaultMap.bases[defaultMapBase].symbol + feature.properties.code;
+            
+            document.getElementById('sciCode').innerHTML = (feature.properties.code).replace(reg, '$1.');
+            
             if(feature.properties.prefix )
             {
                 popupContent += "Prefix: " + feature.properties.prefix + "<br>";
@@ -817,13 +906,18 @@ function onEachFeature(feature,layer)
         {
             var layerTooltip = feature.properties.code;
         }
+
+        if(feature.properties.side)
+        {
+            document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,feature.properties.side);
+        }
         
         layer.bindTooltip(layerTooltip,{permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
     }
 
     if(!feature.properties.code_subcell && !feature.properties.osm_id)
     {
-        let listBar = document.getElementById('listtextsearchbar');
+        let listBar = document.getElementById('fielddecodelist');
 
         listBar.value = sortAndRemoveDuplicates((listBar.value ? listBar.value + ',': '') + feature.properties.code)
     }
@@ -924,7 +1018,7 @@ function loadGeojson(uri,arrayLayer,afterLoad)
         {
             arrayLayer[i].addData(data.features);
         }
-
+       
         afterLoad(arrayLayer[0]);
         
         if(data.features.length = 1)
@@ -964,12 +1058,12 @@ function loadGeojson(uri,arrayLayer,afterLoad)
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
-    let grid = document.getElementById('grid')
-    let base = document.getElementById('base')
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base.value != 'base32' ? '/' + base.value : '') + (grid.value ? '/' + grid.value : '')
+    let grid = document.getElementById('grid').value
+    var base = defaultMapBase
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
-    document.getElementById('latlngtextbar').value = e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level;
+    document.getElementById('fieldencode').value = e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level;
 
     layerMarkerCurrent.clearLayers();
 
@@ -999,7 +1093,7 @@ function checkCountry(string)
 
         if(regex.test(string))
         {
-            document.getElementById('country').value = key;
+            defaultMap = countries[key];
             toggleCountry();
             break;
         }
@@ -1021,12 +1115,15 @@ function checkBase(string)
 
             if(regex2.test(string))
             {
-                document.getElementById('base').value = countries[key].scientificBase;
+                // document.getElementById('base').value = countries[key].scientificBase;
+                defaultMapBase = countries[key].scientificBase;
             }
             else
             {
-                document.getElementById('base').value = countries[key].postalcodeBase;
+                // document.getElementById('base').value = countries[key].postalcodeBase;
+                defaultMapBase = countries[key].postalcodeBase;
             }
+            // console.log(defaultMapBase)
             toggleLevelBase();
             break;
         }
@@ -1088,4 +1185,3 @@ if(pathname !== "/view/")
     checkCountry(pathname);
     checkBase(pathname);
 }
-

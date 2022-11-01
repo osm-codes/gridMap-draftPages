@@ -756,6 +756,22 @@ function generateSelectLevel(base,baseValue)
     return html
 }
 
+function generateSelectLevel2(base,baseValue,size)
+{
+    let html = '';
+
+    let m=0;
+
+    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
+    {
+        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
+
+        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+    }
+
+    return html
+}
+
 function getDecode(data)
 {
     let input = document.getElementById('fielddecode').value
@@ -1108,22 +1124,6 @@ function loadGeojson(uri,arrayLayer,afterLoad)
         fixZOrder(overlays);
     })
     .catch(err => {})
-}
-
-function generateSelectLevel2(base,baseValue,size)
-{
-    let html = '';
-
-    let m=0;
-
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
-    {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-    }
-
-    return html
 }
 
 function onMapClick(e)
