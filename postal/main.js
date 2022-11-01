@@ -890,6 +890,11 @@ function onEachFeature(feature,layer)
 
         var popupContent = "";
 
+        if(feature.properties.scientic_code )
+        {
+            document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+        }
+
         if(feature.properties.short_code )
         {
             popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.') + "</code></big><br>";

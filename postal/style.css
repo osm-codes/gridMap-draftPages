@@ -29,6 +29,7 @@
 #custom-map-controlsb {
 	float: left;
 	padding-top:2%;
+	padding-bottom:2%;
 }
 
 #custom-map-controlsb .leaflet-control {
