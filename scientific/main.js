@@ -844,6 +844,8 @@ function onEachFeature(feature,layer)
         popupContent += "area: " + feature.properties.area + "<br>";
         popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
 
+        document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
+
         layer.bindPopup(popupContent);
     }
     else
@@ -987,6 +989,15 @@ function loadGeojsonFitCenter(featureGroup)
     fitbd.checked ? map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4)))) : '';
 }
 
+function loadGeojsonFitCenterlayerCurrentJurisd(featureGroup)
+{
+    map.fitBounds(featureGroup.getBounds(),{reset: true});
+    let zoom = map.getZoom();
+    map.options.minZoom = map.getZoom();
+    // map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
+    // console.log(map.getZoom())
+}
+
 // https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
 function fixZOrder(dataLayers) {
 
@@ -1026,18 +1037,18 @@ function loadGeojson(uri,arrayLayer,afterLoad)
             console.log(data.features[0])
             console.log(data.features)
 
-            if(data.features[0].properties.short_code)
+            if(data.features[0].properties.code)
             {
-                console.log(data.features[0].properties.short_code)
+                console.log(data.features[0].properties.code)
 
                 //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-                var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
-                const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
+                var nextURL = window.location.protocol + "//" + window.location.host + "/" + defaultMap.isocode + defaultMap.bases[defaultMapBase].symbol + data.features[0].properties.code + window.location.search
+                const nextTitle = 'OSM.codes: ' + data.features[0].properties.code;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
             }
-            if(data.features[0].properties.isolabel_ext)
+            else if(data.features[0].properties.isolabel_ext)
             {
                 console.log(data.features[0].properties.isolabel_ext)
 
@@ -1046,7 +1057,7 @@ function loadGeojson(uri,arrayLayer,afterLoad)
                 const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
                 const nextState = { additionalInformation: 'to canonical.' };
 
-                window.history.pushState(nextState, nextTitle, nextURL);
+                // window.history.pushState(nextState, nextTitle, nextURL);
             }
         }
 
@@ -1143,6 +1154,7 @@ if(pathname !== "/view/")
     }
     else
     {
+        var uriApiJurisd = ''
         if (pathname.match(/\/base16\/grid/))
         {
             var uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
@@ -1154,10 +1166,12 @@ if(pathname !== "/view/")
         else if (pathname.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
+            uriApiJurisd = uri.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:osmcodes:$1.json");
+            uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/CO-\d+$/i))
         {
@@ -1166,6 +1180,7 @@ if(pathname !== "/view/")
         else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
             var uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
+            uriApiJurisd = uri.replace(/\/((([A-Z]{2})-\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/BR-\d+$/i))
         {
@@ -1174,11 +1189,17 @@ if(pathname !== "/view/")
         else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
+            uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
         }
         else
         {
             var uriApi = uri + '.json';
         }
+        if(uriApiJurisd !== null && uriApiJurisd !== '')
+        {
+            loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
+        }
+
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
     }
 
