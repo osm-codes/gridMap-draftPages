@@ -897,7 +897,9 @@ function onEachFeature(feature,layer)
 
         if(feature.properties.short_code )
         {
-            popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.') + "</code></big><br>";
+            document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
+
+            popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
             popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
             popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
             popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
@@ -908,7 +910,7 @@ function onEachFeature(feature,layer)
         }
         else
         {
-            popupContent += "Code: <big><code>" + (feature.properties.code).replace(reg, '$1.') + "</code></big><br>";
+            popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
             popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
             popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -931,7 +933,7 @@ function onEachFeature(feature,layer)
         }
         else if(feature.properties.short_code)
         {
-            var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
+            var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
         }
         else if(feature.properties.index)
         {
@@ -939,7 +941,7 @@ function onEachFeature(feature,layer)
         }
         else
         {
-            var layerTooltip = (feature.properties.code).replace(reg, '$1.');
+            var layerTooltip = (feature.properties.code);
         }
         
         layer.bindTooltip(layerTooltip,{permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
