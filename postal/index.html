@@ -12,21 +12,25 @@
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
 </head><body>
 <section id="map"></section>
+
 <aside id="custom-map-controls">
-<h1>Postal OSMcodes<span id="nameJurisd"></span></h1>
-<h2></h2>
+
+<!--- h1>Postal OSMcodes<span id="nameJurisd"></span></h1 -->
+<h3>Postal code: <code id="postalCode"></code> <br/> <span id="nameJurisd"></span></h3>
+
 <p>Select a level and click into the map!</p>
 <hr />
 <div class="leaflet-control-container" id="custom-map-controlsa">
-<p>Postal code: <code id="postalCode"></code></p>
 </div>
 <hr style="clear:both" />
 <div class="leaflet-control-container" id="custom-map-controlsb"></div>
 <hr style="clear:both" />
 <p>Equivalent cell in the Scientic grid: <code id="sciCode"></code></p>
+<p>Back to <a href="https://osm.codes">OSMcodes and other countries</a></p>
 <!-- <p>Zoom level: <span id="zoom"></span></p> -->
 </aside>
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
 <script src="/postal/main.js"></script>
 </body></html>
+

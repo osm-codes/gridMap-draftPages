@@ -1199,10 +1199,11 @@ if(pathname !== "/view/")
         {
             loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
         }
-
+        
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
     }
 
     checkCountry(pathname);
     checkBase(pathname);
 }
+

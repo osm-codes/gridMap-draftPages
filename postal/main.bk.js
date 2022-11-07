@@ -31,10 +31,6 @@
       window.location.href = 'https://osm.codes/postal/' + country+'-'+state+'-'+abbrev
   }
 
-function latRound(x) {
-  return Number.parseFloat(x).toFixed(6);
-  // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
-}
 
 
 ///////////// Original
@@ -452,7 +448,7 @@ level.onAdd = function (map) {
     this.select_grid   = L.DomUtil.create('select', '', this.container);
 
     this.label_grid.for = 'grid';
-    this.label_grid.innerHTML = ' ';
+    this.label_grid.innerHTML = ' grid: ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
     this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
@@ -707,11 +703,11 @@ function generateSelectGrid(grids)
 
     for (let i = 0; i < grids.length; i++)
     {
-        htmlA += '<option value="grid' +  grids[i]    + '">Grid</option>'
-        htmlB += '<option value="grid' + (grids[i]+1) + '">Points</option>'
+        htmlA += '<option value="grid' +  grids[i]    + '"> com grade </option>'
+        htmlB += '<option value="grid' + (grids[i]+1) + '"> grade de pontos</option>'
     }
 
-    return '<option value="">Cell</option>' + htmlB + htmlA
+    return '<option value="">sem grade</option>' + htmlA + htmlB
 }
 
 function generateSelectBase(bases)
@@ -751,22 +747,6 @@ function generateSelectLevel(base,baseValue)
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
         html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-    }
-
-    return html
-}
-
-function generateSelectLevel2(base,baseValue,size)
-{
-    let html = '';
-
-    let m=0;
-
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
-    {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
     }
 
     return html
@@ -893,14 +873,10 @@ function onEachFeature(feature,layer)
         popupContent += "area: " + feature.properties.area + "<br>";
         popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
 
-        document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
-
         layer.bindPopup(popupContent);
     }
     else
     {
-        const reg = /(...)(?!$)/g
-        // console.log( "AB233CC".replace(reg, '$1.') )
         sufix_area =(feature.properties.area<1000000)? 'm2': 'km2';
         value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
         sufix_side =(feature.properties.side<1000)? 'm': 'km';
@@ -908,16 +884,9 @@ function onEachFeature(feature,layer)
 
         var popupContent = "";
 
-        if(feature.properties.scientic_code )
-        {
-            document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
-        }
-
         if(feature.properties.short_code )
         {
-            document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
-
-            popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
+            popupContent += "Postal code: <big><code>" + feature.properties.short_code.split(/[~]/)[1] + "</code></big><br>";
             popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
             popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
             popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
@@ -928,7 +897,7 @@ function onEachFeature(feature,layer)
         }
         else
         {
-            popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+            popupContent += "Code: <big><code>" + feature.properties.code + "</code></big><br>";
             popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
             popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -951,7 +920,7 @@ function onEachFeature(feature,layer)
         }
         else if(feature.properties.short_code)
         {
-            var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
+            var layerTooltip = '.' + feature.properties.short_code.split(/[~]/)[1];
         }
         else if(feature.properties.index)
         {
@@ -959,7 +928,7 @@ function onEachFeature(feature,layer)
         }
         else
         {
-            var layerTooltip = (feature.properties.code);
+            var layerTooltip = feature.properties.code;
         }
         
         layer.bindTooltip(layerTooltip,{permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
@@ -1128,6 +1097,22 @@ function loadGeojson(uri,arrayLayer,afterLoad)
     .catch(err => {})
 }
 
+function generateSelectLevel2(base,baseValue,size)
+{
+    let html = '';
+
+    let m=0;
+
+    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
+    {
+        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
+
+        html += '<option value="' + levelValues[i] + (size <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+    }
+
+    return html
+}
+
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
@@ -1138,8 +1123,7 @@ function onMapClick(e)
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
-    document.getElementById('fieldencode').value = latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    // or e.latlng['lat'].toPrecision(8)
+    document.getElementById('fieldencode').value = e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level;
 
     layerMarkerCurrent.clearLayers();
 
@@ -1220,7 +1204,6 @@ if(pathname !== "/view/")
     }
     else
     {
-        var uriApiJurisd = ''
         if (pathname.match(/\/base16\/grid/))
         {
             var uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
@@ -1232,12 +1215,10 @@ if(pathname !== "/view/")
         else if (pathname.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/CO-\d+$/i))
         {
@@ -1246,7 +1227,6 @@ if(pathname !== "/view/")
         else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
             var uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/((([A-Z]{2})-\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
         }
         else if (pathname.match(/\/BR-\d+$/i))
         {
@@ -1255,17 +1235,11 @@ if(pathname !== "/view/")
         else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
             var uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
         }
         else
         {
             var uriApi = uri + '.json';
         }
-        if(uriApiJurisd !== null && uriApiJurisd !== '')
-        {
-            loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
-        }
-        
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
     }
 }

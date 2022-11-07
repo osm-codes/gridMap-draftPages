@@ -10,22 +10,27 @@
 <link rel="stylesheet" href="/scientific/style.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
-</head><body>
+</head>
+
+<body>
+
 <section id="map"></section>
+
 <aside id="custom-map-controls">
-<h1>Scientific OSMcodes<span id="nameJurisd"></span></h1>
-<h2></h2>
+<h3>Scientific OSMcode: <code id="sciCode"></code> <span id="nameJurisd"></span></h3>
 <p>Select a level and click into the map!</p>
 <hr />
-<div class="leaflet-control-container" id="custom-map-controlsa">
-<p>Scientific code: <code id="sciCode"></code></p>
-</div>
+<div class="leaflet-control-container" id="custom-map-controlsa"></div>
 <hr style="clear:both" />
 <div class="leaflet-control-container" id="custom-map-controlsb"></div>
 <hr style="clear:both" />
 <p>Zoom level: <span id="zoom"></span></p>
 </aside>
+
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
 <script src="/scientific/main.js"></script>
-</body></html>
+
+</body>
+</html>
+

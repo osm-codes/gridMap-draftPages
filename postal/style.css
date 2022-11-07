@@ -3,9 +3,15 @@
   src: URL('EuroPlate.woff2') format('woff2');
 }
 
-code#postalCode {
+h2, h3 {
+   color: #666;
+}
+
+#postalCode {
+    color: #000;
     font-family: "FE-Schrift";
-	font-size: 150%;
+    font-size: 150%;
+    letter-spacing: 1.5pt;
 }
 
 #map {
@@ -46,7 +52,7 @@ code#postalCode {
 	clear:none;
 }
 
-.leaflet-control .leaflet-control-encode {
+.leaflet-control-encode {
 	padding-top:2%;
 }
 
@@ -59,3 +65,4 @@ code#postalCode {
 	border-left-color: rgb(255, 250, 205, 1);
 	background-color: rgb(255, 250, 205, 1)
 }
+
