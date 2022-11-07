@@ -73,13 +73,13 @@ var layerPolygonAll = new L.geoJSON(null,{
 
 var layerJurisdAll = new L.geoJSON(null,{
             style: style,
-            onEachFeature: onEachFeature,
+            onEachFeature: onEachFeatureJurisd,
             pointToLayer: pointToLayer,
         });
 
 var layerCoverAll = new L.geoJSON(null,{
             style: style,
-            onEachFeature: onEachFeature,
+            onEachFeature: onEachFeatureCoverAll,
             pointToLayer: pointToLayer,
         });
 
@@ -296,6 +296,8 @@ var countries = {
 var defaultMap = countries['CO'];
 var defaultMapBase = defaultMap.postalcodeBase;
 let ptname = window.location.pathname;
+
+var arrayOfSideCoverCell = new Array();
 
 for(var key in countries)
 {
@@ -752,8 +754,14 @@ function generateSelectLevel(base,baseValue)
 
         // html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
 
-
-        html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
+        {
+            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        }
+        else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
+        {
+            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        }
     }
 
     return html
@@ -771,7 +779,15 @@ function generateSelectLevel2(base,baseValue,size)
 
         // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
 
-        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+
+        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
+        {
+            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        }
+        else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
+        {
+            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        }
     }
 
     return html
@@ -876,99 +892,104 @@ function sortAndRemoveDuplicates(value) {
     return listValues.sort().join(",");
 }
 
+function onEachFeatureJurisd(feature,layer)
+{
+    var popupContent = "";
+    popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
+    popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
+    popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
+    popupContent += "parent_id: " + feature.properties.parent_id + "<br>";
+    popupContent += "admin_level: " + feature.properties.admin_level + "<br>";
+    popupContent += "name: " + feature.properties.name + "<br>";
+    popupContent += "parent_abbrev: " + feature.properties.parent_abbrev + "<br>";
+    popupContent += "abbrev: " + feature.properties.abbrev + "<br>";
+    popupContent += "wikidata_id: " + feature.properties.wikidata_id + "<br>";
+    popupContent += "lexlabel: " + feature.properties.lexlabel + "<br>";
+    popupContent += "isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
+    popupContent += "lex_urn: " + feature.properties.lex_urn + "<br>";
+    popupContent += "name_en: " + feature.properties.name_en + "<br>";
+    popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
+    popupContent += "area: " + feature.properties.area + "<br>";
+    popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
+
+    document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
+
+    layer.bindPopup(popupContent);
+}
+
+function onEachFeatureCoverAll(feature,layer)
+{
+    onEachFeature(feature,layer)
+
+    arrayOfSideCoverCell.push(feature.properties.side);
+}
+
 function onEachFeature(feature,layer)
 {
-    if (feature.properties.osm_id)
+    const reg = /(...)(?!$)/g
+    // console.log( "AB233CC".replace(reg, '$1.') )
+    sufix_area =(feature.properties.area<1000000)? 'm2': 'km2';
+    value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
+    sufix_side =(feature.properties.side<1000)? 'm': 'km';
+    value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
+
+    var popupContent = "";
+
+    if(feature.properties.scientic_code )
     {
-        var popupContent = "";
-        popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
-        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-        popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
-        popupContent += "parent_id: " + feature.properties.parent_id + "<br>";
-        popupContent += "admin_level: " + feature.properties.admin_level + "<br>";
-        popupContent += "name: " + feature.properties.name + "<br>";
-        popupContent += "parent_abbrev: " + feature.properties.parent_abbrev + "<br>";
-        popupContent += "abbrev: " + feature.properties.abbrev + "<br>";
-        popupContent += "wikidata_id: " + feature.properties.wikidata_id + "<br>";
-        popupContent += "lexlabel: " + feature.properties.lexlabel + "<br>";
-        popupContent += "isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
-        popupContent += "lex_urn: " + feature.properties.lex_urn + "<br>";
-        popupContent += "name_en: " + feature.properties.name_en + "<br>";
-        popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
-        popupContent += "area: " + feature.properties.area + "<br>";
-        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
+        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+    }
 
-        document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
+    if(feature.properties.short_code )
+    {
+        document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
 
-        layer.bindPopup(popupContent);
+        popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
+        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
+        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
+        popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
+        if(feature.properties.jurisd_local_id )
+        {
+            popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
+        }
     }
     else
     {
-        const reg = /(...)(?!$)/g
-        // console.log( "AB233CC".replace(reg, '$1.') )
-        sufix_area =(feature.properties.area<1000000)? 'm2': 'km2';
-        value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
-        sufix_side =(feature.properties.side<1000)? 'm': 'km';
-        value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
+        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
+        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
-        var popupContent = "";
-
-        if(feature.properties.scientic_code )
+        if(feature.properties.prefix )
         {
-            document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+            popupContent += "Prefix: " + feature.properties.prefix + "<br>";
         }
 
-        if(feature.properties.short_code )
+        if(feature.properties.code_subcell )
         {
-            document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
-
-            popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
-            popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
-            popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
-            popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
-            if(feature.properties.jurisd_local_id )
-            {
-                popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
-            }
+            popupContent += "Code_subcell: " + feature.properties.code_subcell + "<br>";
         }
-        else
-        {
-            popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
-            popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
-            popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
-
-            if(feature.properties.prefix )
-            {
-                popupContent += "Prefix: " + feature.properties.prefix + "<br>";
-            }
-
-            if(feature.properties.code_subcell )
-            {
-                popupContent += "Code_subcell: " + feature.properties.code_subcell + "<br>";
-            }
-        }
-
-        layer.bindPopup(popupContent);
-
-        if(feature.properties.code_subcell)
-        {
-            var layerTooltip = feature.properties.code_subcell;
-        }
-        else if(feature.properties.short_code)
-        {
-            var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
-        }
-        else if(feature.properties.index)
-        {
-            var layerTooltip = '.' + feature.properties.index
-        }
-        else
-        {
-            var layerTooltip = (feature.properties.code);
-        }
-        
-        layer.bindTooltip(layerTooltip,{permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
     }
+
+    layer.bindPopup(popupContent);
+
+    if(feature.properties.code_subcell)
+    {
+        var layerTooltip = feature.properties.code_subcell;
+    }
+    else if(feature.properties.short_code)
+    {
+        var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
+    }
+    else if(feature.properties.index)
+    {
+        var layerTooltip = '.' + feature.properties.index
+    }
+    else
+    {
+        var layerTooltip = (feature.properties.code);
+    }
+
+    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
 
     // if(!feature.properties.code_subcell && !feature.properties.osm_id)
     // {
@@ -1039,6 +1060,23 @@ function loadGeojsonFitCenterlayerCurrentJurisd(featureGroup)
     map.options.minZoom = map.getZoom();
     // map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
     // console.log(map.getZoom())
+}
+
+function loadGeojsonFitCenterlayerCoverAll(featureGroup)
+{
+    if(toggleCoverStatus)
+    {
+        loadGeojsonFitCenterlayerCurrentJurisd(featureGroup)
+    }
+    else
+    {
+        map.removeLayer(e);
+        toggleCoverStatus = true
+    }
+
+    // console.log(Math.ceil(Math.min(...arrayOfSideCoverCell)))
+
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
 }
 
 function loadGeojsonFitCenter(featureGroup)
@@ -1220,7 +1258,7 @@ if(pathname !== "/view/")
 
         // loadGeojson(uriApi + '/cover',[layerCoverAll],loadGeojsonFitCenter);
         // loadGeojson(uriApi,[layerJurisdAll],loadGeojsonFitCenter);
-        loadGeojson(uriApi + '/cover',[layerCoverAll], (toggleCoverStatus ? loadGeojsonFitCenterlayerCurrentJurisd : function(e){map.removeLayer(e); toggleCoverStatus = true} ));
+        loadGeojson(uriApi + '/cover',[layerCoverAll], loadGeojsonFitCenterlayerCoverAll);
         loadGeojson(uriApi,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
     }
     else
@@ -1269,6 +1307,7 @@ if(pathname !== "/view/")
         if(uriApiJurisd !== null && uriApiJurisd !== '')
         {
             loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
+            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){});
         }
         
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
