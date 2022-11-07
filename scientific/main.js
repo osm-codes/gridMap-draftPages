@@ -321,14 +321,14 @@ var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
 
 map.attributionControl.setPrefix(false);
-map.addControl(new L.Control.Fullscreen({position:'topright'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
+map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
 map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
 map.on('click', onMapClick);
 map.on('zoomend', showZoomLevel);
 showZoomLevel();
 
-var zoom   = L.control.zoom({position:'topright'});
-var layers = L.control.layers(baseLayers, overlays,{position:'topright'});
+var zoom   = L.control.zoom({position:'topleft'});
+var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
 var escala = L.control.scale({position:'bottomright',imperial: false});
 
 var searchJurisdiction = L.control({position: 'topleft'});
@@ -1206,4 +1206,3 @@ if(pathname !== "/view/")
     checkCountry(pathname);
     checkBase(pathname);
 }
-
