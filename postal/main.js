@@ -1,35 +1,44 @@
 
-// New adds
+function sel_jurL1(abbrev)
+{
+    if (abbrev>'')
+    {
+        let jL2dom = document.getElementById('sel_jurL2');
+        let s = '<option value="">-- States--</option>'
+        for ( var i of Object.keys(approved_jurisdictions[abbrev]) )
+        {
+            s += '<option>'+i
+        }
+        jL2dom.innerHTML=s
+        let jL3dom = document.getElementById('sel_jurL3');
+        jL3dom.innerHTML=""
+    }
+}
 
-  function sel_jurL1(abbrev) {
-    if (abbrev>'') {
-      let jL2dom = document.getElementById('sel_jurL2');
-      let s = '<select name="states" onchange="sel_jurL2(this.value)"><option value="">-- States--</option>'
-      for ( var i of Object.keys(jurisdictions[abbrev]) ){
-         s = s + '<option>'+i
-      }
-      jL2dom.innerHTML=s+"</select>"
-      let jL3dom = document.getElementById('sel_jurL3');
-      jL3dom.innerHTML=""
-    }
-  }
-  function sel_jurL2(abbrev) {
-    if (abbrev>'') {
-      let country = document.getElementById('sel_jurL1').value;
-      let state = document.querySelector('#sel_jurL2 select').value;
-      let jL3dom = document.getElementById('sel_jurL3');
-      let s = '<select name="cities" onchange="sel_jurL3(this.value)"><option value="">-- Cities --</option>'
-      for ( var i of jurisdictions[country][state] ){
-         s = s + '<option>'+i
-      }
-      jL3dom.innerHTML=s+"</select>"
-    }
-  }
-  function sel_jurL3(abbrev) {
-      let country = document.getElementById('sel_jurL1').value;
-      let state = document.querySelector('#sel_jurL2 select').value;
-      window.location.href = 'https://osm.codes/postal/' + country+'-'+state+'-'+abbrev
-  }
+function sel_jurL2(abbrev)
+{
+    // if (abbrev>'')
+    // {
+        // let country = document.getElementById('sel_jurL1').value;
+        let country = defaultMap.isocode;
+        let state = document.getElementById('sel_jurL2').value;
+        let jL3dom = document.getElementById('sel_jurL3');
+        let s = '<option value="">-- Cities --</option>'
+        for ( var i of approved_jurisdictions[country][state] )
+        {
+            s += '<option>'+i
+        }
+        jL3dom.innerHTML=s
+    // }
+}
+
+function sel_jurL3(abbrev)
+{
+    // let country = document.getElementById('sel_jurL1').value;
+    let country = defaultMap.isocode;
+    let state = document.querySelector('#sel_jurL2').value;
+    window.location.href = 'https://osm.codes/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
+}
 
 function latRound(x) {
   return Number.parseFloat(x).toFixed(6);
@@ -37,7 +46,28 @@ function latRound(x) {
 }
 
 
-///////////// Original
+function updateJurisd(jurisd)
+{
+    document.getElementById('sel_jurL1').innerHTML = jurisd.split("-",3)[0];
+
+    let s = '<option value="">-- States--</option>'
+
+    for ( var i of Object.keys(approved_jurisdictions[jurisd.split("-",3)[0]]) )
+    {
+        s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
+    }
+
+    document.getElementById('sel_jurL2').innerHTML=s
+
+    s = '<option value="">-- Cities --</option>'
+    for ( var i of approved_jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]] )
+    {
+        s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
+    }
+
+    document.getElementById('sel_jurL3').innerHTML=s
+}
+
 var uri_base = "https://osm.codes"
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -123,7 +153,7 @@ var countries = {
                 iniDigit: 1,
                 levelDefault: 35,
                 symbol: '~',
-                placeholderDecode: 'BR~42',
+                placeholderDecode: '42',
                 placeholderEncode: '-15.7,-47.8;u=10',
                 placeholderList: '3,5,7,A',
                 selectGrid: [32],
@@ -173,7 +203,7 @@ var countries = {
                 iniDigit: 1,
                 levelDefault: 39,
                 symbol: '~',
-                placeholderDecode: 'CO~3D5',
+                placeholderDecode: '3D5',
                 placeholderEncode: '3.5,-72.3;u=10',
                 placeholderList: '3D5,3D4,2',
                 selectGrid: [32],
@@ -212,7 +242,7 @@ var countries = {
                 iniDigit: 1,
                 levelDefault: 30,
                 symbol: '~',
-                placeholderDecode: 'EC~5P',
+                placeholderDecode: '5P',
                 placeholderEncode: '-1.1,-78.4;u=10',
                 placeholderList: '5P,FL,J9',
                 selectGrid: [32],
@@ -251,7 +281,7 @@ var countries = {
                 iniDigit: 1,
                 levelDefault: 36,
                 symbol: '~',
-                placeholderDecode: 'UY~3',
+                placeholderDecode: '3',
                 placeholderEncode: '-32.9,-55.9;u=10',
                 placeholderList: '3,2C,4F',
                 selectGrid: [32],
@@ -316,6 +346,7 @@ for(var key in countries)
 var map = L.map('map',{
     center: defaultMap.center,
     zoom:   defaultMap.zoom,
+    maxBoundsViscocity: 1,
     zoomControl: false,
     renderer: L.svg(),
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
@@ -367,11 +398,41 @@ decodeJurisdiction.onAdd = function (map) {
 
     return this.container; };
 
+var jurisdictionGgeohash = L.control({position: 'topleft'});
+jurisdictionGgeohash.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.label_country  = L.DomUtil.create('label', '', this.container);
+    this.label_state  = L.DomUtil.create('label', '', this.container);
+    this.select_state = L.DomUtil.create('select', '', this.container);
+    this.select_mun = L.DomUtil.create('select', '', this.container);
+
+    this.label_country.for = 'country';
+    this.label_country.innerHTML = 'Jurisdiction: <span id="sel_jurL1">' + defaultMap.isocode +'</span>';
+    this.label_state.for = 'state';
+    this.label_state.innerHTML = '-';
+
+    this.select_state.id = 'sel_jurL2';
+    this.select_state.name = 'state';
+
+    this.select_mun.id = 'sel_jurL3';
+    this.select_mun.name = 'mun';
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+    L.DomEvent.on(this.select_state, 'change', sel_jurL2, this.container);
+    L.DomEvent.on(this.select_mun, 'change', sel_jurL3, this.container);
+
+    return this.container; };
+
 var decodeGgeohash = L.control({position: 'topleft'});
 decodeGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
+    this.label_field  = L.DomUtil.create('label', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
+
+    this.label_field.for = 'fielddecode';
+    this.label_field.innerHTML = 'Grid code: ';
 
     this.field.type = 'text';
     this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
@@ -411,9 +472,12 @@ decodeGgeohashList.onAdd = function (map) {
 var encodeGgeohash = L.control({position: 'topleft'});
 encodeGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div','leaflet-control-encode');
+    this.label_field  = L.DomUtil.create('label', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
 
+    this.label_field.for = 'fieldencode';
+    this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
     this.field.type = 'text';
     this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
     this.field.id = 'fieldencode';
@@ -575,6 +639,40 @@ zoomAll.onAdd = function (map) {
 
     return this.container; };
 
+var zoomClick = L.control({position: 'topleft'});
+zoomClick.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.label     = L.DomUtil.create('label', '', this.container);
+    this.checkbox  = L.DomUtil.create('input', '', this.container);
+
+    this.label.for= 'zoomclick';
+    this.label.innerHTML= 'Disable zoom-click: ';
+    this.checkbox.id = 'zoomclick';
+    this.checkbox.type = 'checkbox';
+    this.checkbox.checked = true;
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
+var noTooltip = L.control({position: 'topleft'});
+noTooltip.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.label     = L.DomUtil.create('label', '', this.container);
+    this.checkbox  = L.DomUtil.create('input', '', this.container);
+
+    this.label.for= 'notooltip';
+    this.label.innerHTML= 'No tooltip: ';
+    this.checkbox.id = 'notooltip';
+    this.checkbox.type = 'checkbox';
+    this.checkbox.checked = false;
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
@@ -591,10 +689,16 @@ toggleTooltip.addTo(map);
 toggleCover.addTo(map);
 // decodeGgeohashList.addTo(map);
 // zoomAll.addTo(map);
+jurisdictionGgeohash.addTo(map);
+noTooltip.addTo(map);
+zoomClick.addTo(map);
+// sel_jurL1(defaultMap.isocode)
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
+
 // a.appendChild(country.getContainer());
+a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
@@ -604,6 +708,8 @@ b.appendChild(clear.getContainer());
 // a.appendChild(fitCenter.getContainer());
 b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
+b.appendChild(noTooltip.getContainer());
+b.appendChild(zoomClick.getContainer());
 // a.appendChild(decodeJurisdiction.getContainer());
 // a.appendChild(decodeGgeohashList.getContainer());
 // a.appendChild(zoomAll.getContainer());
@@ -667,9 +773,9 @@ function toggleLevelBase()
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[base],base);
     document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[base].selectGrid);
 
-    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[base].placeholderDecode;
+    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[base].placeholderDecode;
     // document.getElementById('fielddecodelist').placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[base].placeholderList;
-    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[base].placeholderEncode;
+    document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[base].placeholderEncode;
 }
 
 function toggleTooltipLayers()
@@ -699,7 +805,7 @@ function toggleCoverLayers()
 //     !this.checked ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll) ;
 //     fixZOrder(overlays);
 // }
-// 
+//
 // document.getElementById ("jcover").addEventListener ("click", toggleCoverLayer, false);
 
 function generateSelectGrid(grids)
@@ -795,7 +901,11 @@ function generateSelectLevel2(base,baseValue,size)
 
 function getDecode(data)
 {
-    let input = document.getElementById('fielddecode').value
+    // let input = document.getElementById('fielddecode').value
+
+    let inputCode = document.getElementById('fielddecode').value
+
+    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + inputCode
 
     if(input !== null && input !== '')
     {
@@ -805,7 +915,7 @@ function getDecode(data)
 
         if(!regex.test(input))
         {
-            uri += defaultMap.isocode + defaultMap.bases[defaultMap.defaultBase].symbol 
+            uri += defaultMap.isocode + defaultMap.bases[defaultMap.defaultBase].symbol
         }
 
         uri += input + ".json"
@@ -871,9 +981,11 @@ function getEncode(data)
         // let base = document.getElementById('base').value
 
         var base = defaultMapBase
-        var uri = uri_base + "/geo:" + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
 
         document.getElementById('fielddecode').value = '';
+
+        input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
 
         var popupContent = "latlng: " + input;
         layerPolygonCurrent.clearLayers();
@@ -894,6 +1006,8 @@ function sortAndRemoveDuplicates(value) {
 
 function onEachFeatureJurisd(feature,layer)
 {
+    updateJurisd(feature.properties.isolabel_ext);
+
     var popupContent = "";
     popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
     popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
@@ -942,6 +1056,8 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.short_code )
     {
+        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.short_code.split(/[~]/)[0])
+
         document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
 
         popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
@@ -989,16 +1105,45 @@ function onEachFeature(feature,layer)
         var layerTooltip = (feature.properties.code);
     }
 
-    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'center',className:'tooltip' + feature.properties.base});
+    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltip' + feature.properties.base});
 
     // if(!feature.properties.code_subcell && !feature.properties.osm_id)
     // {
     //     let listBar = document.getElementById('fielddecodelist');
-    // 
+    //
     //     listBar.value = sortAndRemoveDuplicates((listBar.value ? listBar.value + ',': '') + feature.properties.code)
     // }
 
-    layer.on({click: onFeatureClick});
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
+}
+
+function highlightFeature(e) {
+    const layer = e.target;
+
+    let noTooltip = document.getElementById('notooltip')
+
+    if(noTooltip.checked)
+    {
+        this.closeTooltip();
+        layer.setStyle({
+            color: 'deeppink'
+        });
+
+        layer.bringToFront();
+    }
+    else
+    {
+        this.openTooltip();
+    }
+}
+
+function resetHighlight(e,layer) {
+    layerPolygonCurrent.resetStyle(e.target);
+    layerPolygonAll.resetStyle(e.target);
 }
 
 function style(feature)
@@ -1041,6 +1186,9 @@ function pointToLayer(feature,latlng)
 
 function onFeatureClick(feature)
 {
+    let zoomclick = document.getElementById('zoomclick')
+    zoomclick.checked ?map.fitBounds(feature.target.getBounds()) : ''
+
     //console.log(feature);
     //var label = feature.sourceTarget.feature.properties.label;
 }
@@ -1084,7 +1232,7 @@ function loadGeojsonFitCenter(featureGroup)
 {
 //     let fitbd = document.getElementById('fitbounds') || true
 //     let fitce = document.getElementById('fitcenter') || true
-//     
+//
 //     fitbd.checked ? map.fitBounds(featureGroup.getBounds()) : (fitce.checked ? map.setView(featureGroup.getBounds().getCenter()) : '')
     // fitbd.checked ? map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4)))) : '';
     // map.fitBounds(featureGroup.getBounds())
@@ -1124,7 +1272,7 @@ function loadGeojson(uri,arrayLayer,afterLoad)
         }
 
         afterLoad(arrayLayer[0]);
-        
+
         if(data.features.length = 1)
         {
             // console.log(data.features[0])
@@ -1153,8 +1301,8 @@ function loadGeojson(uri,arrayLayer,afterLoad)
                     const nextState = { additionalInformation: 'to canonical.' };
 
                     window.history.pushState(nextState, nextTitle, nextURL);
-                    
-                    document.getElementById('fielddecode').value = data.features[0].properties.short_code;
+
+                    document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
                 }
                 else if(data.features[0].properties.code)
                 {
@@ -1182,7 +1330,7 @@ function onMapClick(e)
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
-    document.getElementById('fieldencode').value = latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+    document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
     // or e.latlng['lat'].toPrecision(8)
 
     layerMarkerCurrent.clearLayers();
@@ -1250,11 +1398,11 @@ if(pathname !== "/view/")
 {
     checkCountry(pathname);
     checkBase(pathname);
-    
+
     if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
     {
         var uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
-        
+
         // document.getElementById('jcover').checked=true
 
         // loadGeojson(uriApi + '/cover',[layerCoverAll],loadGeojsonFitCenter);
@@ -1310,7 +1458,7 @@ if(pathname !== "/view/")
             loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
             loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){});
         }
-        
+
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
     }
 }
