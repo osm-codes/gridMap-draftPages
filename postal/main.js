@@ -45,7 +45,6 @@ function latRound(x) {
   // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
 }
 
-
 function updateJurisd(jurisd)
 {
     document.getElementById('sel_jurL1').innerHTML = jurisd.split("-",3)[0];
@@ -142,6 +141,7 @@ var countries = {
         scientificBase: 'base16h1c',
         postalcodeBase: 'base32',
         isocode: 'BR',
+        isocoden: 76,
         jurisdictionPlaceholder: 'BR-SP-SaoPaulo',
         selectedBases: ['base32','base16h1c'],
         bases:
@@ -192,6 +192,7 @@ var countries = {
         scientificBase: 'base16h',
         postalcodeBase: 'base32',
         isocode: 'CO',
+        isocoden: 170,
         jurisdictionPlaceholder: 'CO-ANT-Itagui',
         selectedBases: ['base32','base16h'],
         bases:
@@ -231,6 +232,7 @@ var countries = {
         scientificBase: 'base16h',
         postalcodeBase: 'base32',
         isocode: 'EC',
+        isocoden: 218,
         jurisdictionPlaceholder: 'EC-L-Loja',
         selectedBases: ['base32','base16h'],
         bases:
@@ -270,6 +272,7 @@ var countries = {
         scientificBase: 'base16h1c',
         postalcodeBase: 'base32',
         isocode: 'UY',
+        isocoden: 868,
         jurisdictionPlaceholder: 'UY-CA-LasPiedras',
         selectedBases: ['base32','base16h1c'],
         bases:
@@ -325,21 +328,43 @@ var countries = {
 
 var defaultMap = countries['CO'];
 var defaultMapBase = defaultMap.postalcodeBase;
-let ptname = window.location.pathname;
-
 var arrayOfSideCoverCell = new Array();
+var getJurisdAfterLoad = false;
 
-for(var key in countries)
+function checkCountry(string,togglecountry=true)
 {
-    let regex = new RegExp("^/?" + key + ".*","i");
-
-    if(regex.test(ptname))
+    for(var key in countries)
     {
-        // document.getElementById('country').value = key;
-        defaultMap = countries[key];
-        defaultMapBase = defaultMap.postalcodeBase;
-        // console.log(defaultMap)
-        break;
+        let regex = new RegExp("^/?" + key + ".*","i");
+
+        if(regex.test(string))
+        {
+            defaultMap = countries[key];
+            defaultMapBase = defaultMap.postalcodeBase;
+            togglecountry ? toggleCountry() : '';
+            break;
+        }
+    }
+}
+
+let pttname = window.location.pathname;
+
+if (pttname.match(/^\/[A-Z]{2}.+$/i))
+{
+    checkCountry(pttname,false)
+}
+
+function checkCountryn(num,togglecountry=true)
+{
+    for(var key in countries)
+    {
+        if(countries[key].isocoden = num)
+        {
+            defaultMap = countries[key];
+            defaultMapBase = defaultMap.postalcodeBase;
+            togglecountry ? toggleCountry() : '';
+            break;
+        }
     }
 }
 
@@ -404,12 +429,15 @@ jurisdictionGgeohash.onAdd = function (map) {
     this.label_country  = L.DomUtil.create('label', '', this.container);
     this.label_state  = L.DomUtil.create('label', '', this.container);
     this.select_state = L.DomUtil.create('select', '', this.container);
+    this.label_mun  = L.DomUtil.create('label', '', this.container);
     this.select_mun = L.DomUtil.create('select', '', this.container);
 
     this.label_country.for = 'country';
     this.label_country.innerHTML = 'Jurisdiction: <span id="sel_jurL1">' + defaultMap.isocode +'</span>';
     this.label_state.for = 'state';
     this.label_state.innerHTML = '-';
+    this.label_mun.for = 'mun';
+    this.label_mun.innerHTML = '-';
 
     this.select_state.id = 'sel_jurL2';
     this.select_state.name = 'state';
@@ -721,6 +749,7 @@ function clearAllLayers()
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
+    // layerCoverAll.clearLayers();toggleCoverStatus = true
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
     // layerCoverAll.clearLayers();
@@ -800,13 +829,6 @@ function toggleCoverLayers()
     fixZOrder(overlays);
     toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
 }
-
-// function toggleCoverLayer() {
-//     !this.checked ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll) ;
-//     fixZOrder(overlays);
-// }
-//
-// document.getElementById ("jcover").addEventListener ("click", toggleCoverLayer, false);
 
 function generateSelectGrid(grids)
 {
@@ -901,11 +923,7 @@ function generateSelectLevel2(base,baseValue,size)
 
 function getDecode(data)
 {
-    // let input = document.getElementById('fielddecode').value
-
-    let inputCode = document.getElementById('fielddecode').value
-
-    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + inputCode
+    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + document.getElementById('fielddecode').value
 
     if(input !== null && input !== '')
     {
@@ -921,7 +939,7 @@ function getDecode(data)
         uri += input + ".json"
         document.getElementById('fieldencode').value = '';
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
     }
 }
 
@@ -929,7 +947,6 @@ function getDecodeList(data)
 {
     let input = document.getElementById('fielddecodelist').value;
     let countryValue = document.getElementById('country').value;
-    // let base = document.getElementById('base').value;
 
     var base = defaultMapBase;
 
@@ -938,7 +955,7 @@ function getDecodeList(data)
     {
         var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[base].symbol + sortAndRemoveDuplicates(input) + ".json"
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
         document.getElementById('fielddecodelist').value = '';
 
         checkCountry(input);
@@ -959,12 +976,12 @@ function getJurisdiction(data)
 
         // if(jcover.checked)
         // {
-            loadGeojson(uri,[layerCoverAll],loadGeojsonFitCenter);
+            loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
             document.getElementById('fieldjurisdiction').value = '';
         // }
 
         uri = uri_base + "/geo:iso_ext:" + input + ".json";
-        loadGeojson(uri,[layerJurisdAll],loadGeojsonFitCenter);
+        loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
 
         checkCountry(input);
     }
@@ -978,7 +995,6 @@ function getEncode(data)
     {
         let level = document.getElementById('level_size').value
         let grid = document.getElementById('grid').value
-        // let base = document.getElementById('base').value
 
         var base = defaultMapBase
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
@@ -992,8 +1008,7 @@ function getEncode(data)
         layerMarkerCurrent.clearLayers();
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter)
-//         document.getElementById('fieldencode').value = '';
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
     }
 }
 
@@ -1002,6 +1017,195 @@ function sortAndRemoveDuplicates(value) {
     let listValues = [...new Set(value.trim().split(/[\n,]+/).map(i => i.trim().substring(0,11)))];
 
     return listValues.sort().join(",");
+}
+
+// https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
+function fixZOrder(dataLayers) {
+
+    // only similar approach is to remove and re-add back to the map
+    // use the order in the dataLayers object to define the z-order
+    Object.keys(dataLayers).forEach(function (key) {
+
+        // check if the layer has been added to the map, if it hasn't then do nothing
+        // we only need to sort the layers that have visible data
+        // Note: this is similar but faster than trying to use map.hasLayer()
+        var layerGroup = dataLayers[key];
+        if (layerGroup._layers
+            && Object.keys(layerGroup._layers).length > 0
+            && layerGroup._layers[Object.keys(layerGroup._layers)[0]]._path
+            && layerGroup._layers[Object.keys(layerGroup._layers)[0]]._path.parentNode)
+            layerGroup.bringToFront();
+    });
+}
+
+function checkBase(string)
+{
+    for(var key in countries)
+    {
+        let regex = new RegExp("^/?" + key + ".*","i");
+
+        if(regex.test(string))
+        {
+            let regex2 = /\+/;
+
+            if(regex2.test(string))
+            {
+                defaultMapBase = countries[key].scientificBase;
+            }
+            else
+            {
+                defaultMapBase = countries[key].postalcodeBase;
+            }
+            toggleLevelBase();
+            break;
+        }
+    }
+}
+
+function showZoomLevel()
+{
+    document.getElementById('zoom').innerHTML = map.getZoom();
+}
+
+function onMapClick(e)
+{
+    let level = document.getElementById('level_size').value
+    let grid = document.getElementById('grid').value
+
+    var base = defaultMapBase
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+    var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
+
+    document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+    // or e.latlng['lat'].toPrecision(8)
+
+    layerMarkerCurrent.clearLayers();
+
+    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
+    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
+
+    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+}
+
+function popUpFeature(feature,layer)
+{
+    sufix_area =(feature.properties.area<1000000)? 'm2': 'km2';
+    value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
+    sufix_side =(feature.properties.side<1000)? 'm': 'km';
+    value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
+
+    var popupContent = "";
+
+    if(feature.properties.short_code )
+    {
+        popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
+        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
+        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
+        popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
+
+        if(feature.properties.jurisd_local_id )
+        {
+            popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
+        }
+    }
+    else
+    {
+        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
+        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
+
+        if(feature.properties.prefix )
+        {
+            popupContent += "Prefix: " + feature.properties.prefix + "<br>";
+        }
+
+        if(feature.properties.code_subcell )
+        {
+            popupContent += "Code_subcell: " + feature.properties.code_subcell + "<br>";
+        }
+    }
+
+    layer.bindPopup(popupContent);
+}
+
+function layerTooltipFeature(feature,layer)
+{
+    if(feature.properties.code_subcell)
+    {
+        var layerTooltip = feature.properties.code_subcell;
+    }
+    else if(feature.properties.short_code)
+    {
+        var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
+    }
+    else if(feature.properties.index)
+    {
+        var layerTooltip = '.' + feature.properties.index
+    }
+    else
+    {
+        var layerTooltip = (feature.properties.code);
+    }
+
+    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltip' + feature.properties.base});
+}
+
+function highlightFeature(e)
+{
+    const layer = e.target;
+
+    let noTooltip = document.getElementById('notooltip')
+
+    if(noTooltip.checked)
+    {
+        this.closeTooltip();
+        layer.setStyle({
+            color: 'deeppink'
+        });
+
+        layer.bringToFront();
+    }
+    else
+    {
+        this.openTooltip();
+    }
+}
+
+function resetHighlight(e,layer)
+{
+    layerPolygonCurrent.resetStyle(e.target);
+    layerPolygonAll.resetStyle(e.target);
+}
+
+function onFeatureClick(feature)
+{
+    let zoomclick = document.getElementById('zoomclick')
+    zoomclick.checked ?map.fitBounds(feature.target.getBounds()) : ''
+}
+
+function onEachFeature(feature,layer)
+{
+    const reg = /(...)(?!$)/g
+    // console.log( "AB233CC".replace(reg, '$1.') )
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    if(feature.properties.scientic_code )
+    {
+        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+    }
+
+    if(feature.properties.short_code )
+    {
+        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.short_code.split(/[~]/)[0])
+        document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
+    }
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
 }
 
 function onEachFeatureJurisd(feature,layer)
@@ -1033,117 +1237,9 @@ function onEachFeatureJurisd(feature,layer)
 
 function onEachFeatureCoverAll(feature,layer)
 {
-    onEachFeature(feature,layer)
+    onEachFeature(feature,layer);
 
     arrayOfSideCoverCell.push(feature.properties.side);
-}
-
-function onEachFeature(feature,layer)
-{
-    const reg = /(...)(?!$)/g
-    // console.log( "AB233CC".replace(reg, '$1.') )
-    sufix_area =(feature.properties.area<1000000)? 'm2': 'km2';
-    value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
-    sufix_side =(feature.properties.side<1000)? 'm': 'km';
-    value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
-
-    var popupContent = "";
-
-    if(feature.properties.scientic_code )
-    {
-        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
-    }
-
-    if(feature.properties.short_code )
-    {
-        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.short_code.split(/[~]/)[0])
-
-        document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
-
-        popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
-        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
-        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
-        popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
-        if(feature.properties.jurisd_local_id )
-        {
-            popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
-        }
-    }
-    else
-    {
-        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
-        popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
-        popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
-
-        if(feature.properties.prefix )
-        {
-            popupContent += "Prefix: " + feature.properties.prefix + "<br>";
-        }
-
-        if(feature.properties.code_subcell )
-        {
-            popupContent += "Code_subcell: " + feature.properties.code_subcell + "<br>";
-        }
-    }
-
-    layer.bindPopup(popupContent);
-
-    if(feature.properties.code_subcell)
-    {
-        var layerTooltip = feature.properties.code_subcell;
-    }
-    else if(feature.properties.short_code)
-    {
-        var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
-    }
-    else if(feature.properties.index)
-    {
-        var layerTooltip = '.' + feature.properties.index
-    }
-    else
-    {
-        var layerTooltip = (feature.properties.code);
-    }
-
-    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltip' + feature.properties.base});
-
-    // if(!feature.properties.code_subcell && !feature.properties.osm_id)
-    // {
-    //     let listBar = document.getElementById('fielddecodelist');
-    //
-    //     listBar.value = sortAndRemoveDuplicates((listBar.value ? listBar.value + ',': '') + feature.properties.code)
-    // }
-
-    layer.on({
-        click: onFeatureClick,
-        mouseover: highlightFeature,
-        mouseout: resetHighlight
-    });
-}
-
-function highlightFeature(e) {
-    const layer = e.target;
-
-    let noTooltip = document.getElementById('notooltip')
-
-    if(noTooltip.checked)
-    {
-        this.closeTooltip();
-        layer.setStyle({
-            color: 'deeppink'
-        });
-
-        layer.bringToFront();
-    }
-    else
-    {
-        this.openTooltip();
-    }
-}
-
-function resetHighlight(e,layer) {
-    layerPolygonCurrent.resetStyle(e.target);
-    layerPolygonAll.resetStyle(e.target);
 }
 
 function style(feature)
@@ -1184,38 +1280,34 @@ function pointToLayer(feature,latlng)
     });
 }
 
-function onFeatureClick(feature)
-{
-    let zoomclick = document.getElementById('zoomclick')
-    zoomclick.checked ?map.fitBounds(feature.target.getBounds()) : ''
-
-    //console.log(feature);
-    //var label = feature.sourceTarget.feature.properties.label;
-}
-
-function loadGeojsonFitCenterlayerCurrent(featureGroup)
+function afterLoadCurrent(featureGroup)
 {
     map.fitBounds(featureGroup.getBounds());
     let zoom = map.getZoom();
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
-    console.log(map.getZoom())
+    // console.log(map.getZoom())
 }
 
-function loadGeojsonFitCenterlayerCurrentJurisd(featureGroup)
+function afterLoadJurisdAll(featureGroup,fittobounds=true)
 {
-    map.fitBounds(featureGroup.getBounds(),{reset: true});
-    let zoom = map.getZoom();
-    map.options.minZoom = map.getZoom();
-    // map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
-    // console.log(map.getZoom())
+    if(fittobounds)
+    {
+        map.fitBounds(featureGroup.getBounds(),{reset: true});
+        map.options.minZoom = map.getZoom();
+    }
+    else
+    {
+        map.options.minZoom = map.getBoundsZoom(featureGroup.getBounds());
+    }
+
     map.setMaxBounds(featureGroup.getBounds())
 }
 
-function loadGeojsonFitCenterlayerCoverAll(featureGroup)
+function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
 {
     if(toggleCoverStatus)
     {
-        loadGeojsonFitCenterlayerCurrentJurisd(featureGroup)
+        afterLoadJurisdAll(featureGroup,fittobounds)
     }
     else
     {
@@ -1223,42 +1315,88 @@ function loadGeojsonFitCenterlayerCoverAll(featureGroup)
         toggleCoverStatus = true
     }
 
-    // console.log(Math.ceil(Math.min(...arrayOfSideCoverCell)))
-
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
 }
 
-function loadGeojsonFitCenter(featureGroup)
+function afterLoadLayer(featureGroup)
 {
-//     let fitbd = document.getElementById('fitbounds') || true
-//     let fitce = document.getElementById('fitcenter') || true
-//
-//     fitbd.checked ? map.fitBounds(featureGroup.getBounds()) : (fitce.checked ? map.setView(featureGroup.getBounds().getCenter()) : '')
-    // fitbd.checked ? map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4)))) : '';
-    // map.fitBounds(featureGroup.getBounds())
     map.setView(featureGroup.getBounds().getCenter(),map.getZoom())
 }
 
-// https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
-function fixZOrder(dataLayers) {
+function afterData(data)
+{
+    if(data.features.length = 1)
+    {
+            // console.log(data.features[0])
+            // console.log(data.features)
 
-    // only similar approach is to remove and re-add back to the map
-    // use the order in the dataLayers object to define the z-order
-    Object.keys(dataLayers).forEach(function (key) {
+        if(data.features[0].properties.jurisd_base_id)
+        {
+            checkCountryn(data.features[0].properties.jurisd_base_id,false)
+        }
 
-        // check if the layer has been added to the map, if it hasn't then do nothing
-        // we only need to sort the layers that have visible data
-        // Note: this is similar but faster than trying to use map.hasLayer()
-        var layerGroup = dataLayers[key];
-        if (layerGroup._layers
-            && Object.keys(layerGroup._layers).length > 0
-            && layerGroup._layers[Object.keys(layerGroup._layers)[0]]._path
-            && layerGroup._layers[Object.keys(layerGroup._layers)[0]]._path.parentNode)
-            layerGroup.bringToFront();
-    });
+        if(data.features[0].properties.isolabel_ext)
+        {
+            // console.log(data.features[0].properties.isolabel_ext)
+
+            //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
+            var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.isolabel_ext + window.location.search
+            const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
+            const nextState = { additionalInformation: 'to canonical.' };
+
+            window.history.pushState(nextState, nextTitle, nextURL);
+        }
+        else if (!data.features[0].properties.index)
+        {
+            if(data.features[0].properties.short_code)
+            {
+                // console.log(data.features[0].properties.short_code)
+
+                if(getJurisdAfterLoad)
+                {
+                    getJurisdAfterLoad = false;
+
+                    var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.short_code.split(/[~]/)[0] + ".json";
+
+                    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){afterDataGeo(e,data.features[0].properties.scientic_code); });
+                    loadGeojson(uri + '/cover',[layerCoverAll], function(e){map.removeLayer(e);},function(e){});
+                }
+
+                //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
+                var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
+                const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
+                const nextState = { additionalInformation: 'to canonical.' };
+
+                window.history.pushState(nextState, nextTitle, nextURL);
+
+                document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
+            }
+            else if(data.features[0].properties.code)
+            {
+                document.getElementById('fielddecode').value = data.features[0].properties.code;
+            }
+            if(data.features[0].properties.side)
+            {
+                document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
+            }
+        }
+    }
 }
 
-function loadGeojson(uri,arrayLayer,afterLoad)
+function afterDataGeo(data,scicode)
+{
+    if(data.features.length = 1)
+    {
+        if(data.features[0].properties.side)
+        {
+            document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
+        }
+
+        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + scicode + '">' + scicode +'</a>';
+    }
+}
+
+function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 {
     fetch(uri)
     .then(response => {return response.json()})
@@ -1273,123 +1411,13 @@ function loadGeojson(uri,arrayLayer,afterLoad)
 
         afterLoad(arrayLayer[0]);
 
-        if(data.features.length = 1)
-        {
-            // console.log(data.features[0])
-            // console.log(data.features)
-
-            if(data.features[0].properties.isolabel_ext)
-            {
-                // console.log(data.features[0].properties.isolabel_ext)
-
-                //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-                var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.isolabel_ext + window.location.search
-                const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
-                const nextState = { additionalInformation: 'to canonical.' };
-
-                window.history.pushState(nextState, nextTitle, nextURL);
-            }
-            else if (!data.features[0].properties.index)
-            {
-                if(data.features[0].properties.short_code)
-                {
-                    // console.log(data.features[0].properties.short_code)
-
-                    //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-                    var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
-                    const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
-                    const nextState = { additionalInformation: 'to canonical.' };
-
-                    window.history.pushState(nextState, nextTitle, nextURL);
-
-                    document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
-                }
-                else if(data.features[0].properties.code)
-                {
-                    document.getElementById('fielddecode').value = data.features[0].properties.code;
-                }
-                if(data.features[0].properties.side)
-                {
-                    document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
-                }
-            }
-        }
+        afterData(data);
 
         fixZOrder(overlays);
     })
     .catch(err => {})
 }
 
-function onMapClick(e)
-{
-    let level = document.getElementById('level_size').value
-    let grid = document.getElementById('grid').value
-    // let base = document.getElementById('base').value
-
-    var base = defaultMapBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
-    var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
-
-    document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    // or e.latlng['lat'].toPrecision(8)
-
-    layerMarkerCurrent.clearLayers();
-
-    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
-
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenter)
-    // loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent)
-}
-
-function showZoomLevel()
-{
-    document.getElementById('zoom').innerHTML = map.getZoom();
-}
-
-function checkCountry(string)
-{
-    for(var key in countries)
-    {
-        let regex = new RegExp("^/?" + key + ".*","i");
-
-        if(regex.test(string))
-        {
-            // document.getElementById('country').value = key;
-            defaultMap = countries[key];
-            // console.log(defaultMap)
-            toggleCountry();
-            break;
-        }
-    }
-}
-
-function checkBase(string)
-{
-    for(var key in countries)
-    {
-        let regex = new RegExp("^/?" + key + ".*","i");
-
-        if(regex.test(string))
-        {
-            let regex2 = /\+/;
-
-            if(regex2.test(string))
-            {
-                // document.getElementById('base').value = countries[key].scientificBase;
-                defaultMapBase = countries[key].scientificBase;
-            }
-            else
-            {
-                // document.getElementById('base').value = countries[key].postalcodeBase;
-                defaultMapBase = countries[key].postalcodeBase;
-            }
-            // console.log(defaultMapBase)
-            toggleLevelBase();
-            break;
-        }
-    }
-}
 
 var uri = window.location.href;
 let pathname = window.location.pathname;
@@ -1397,22 +1425,18 @@ let pathname = window.location.pathname;
 if(pathname !== "/view/")
 {
     checkCountry(pathname);
-    checkBase(pathname);
 
     if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
     {
         var uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
 
-        // document.getElementById('jcover').checked=true
-
-        // loadGeojson(uriApi + '/cover',[layerCoverAll],loadGeojsonFitCenter);
-        // loadGeojson(uriApi,[layerJurisdAll],loadGeojsonFitCenter);
-        loadGeojson(uriApi + '/cover',[layerCoverAll], loadGeojsonFitCenterlayerCoverAll);
-        loadGeojson(uriApi,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
+        loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAll,afterData);
     }
     else
     {
         var uriApiJurisd = ''
+
         if (pathname.match(/\/base16\/grid/))
         {
             var uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
@@ -1449,16 +1473,22 @@ if(pathname !== "/view/")
             var uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
             uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
         }
+        else if (pathname.match(/^\/geo:.+$/i))
+        {
+            var uriApi = uri + '.json';
+            getJurisdAfterLoad = true;
+        }
         else
         {
             var uriApi = uri + '.json';
         }
+
         if(uriApiJurisd !== null && uriApiJurisd !== '')
         {
-            loadGeojson(uriApiJurisd,[layerJurisdAll],loadGeojsonFitCenterlayerCurrentJurisd);
-            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){});
+            loadGeojson(uriApiJurisd,[layerJurisdAll],afterLoadJurisdAll,afterData);
+            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){},afterData);
         }
 
-        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],loadGeojsonFitCenterlayerCurrent);
+        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
     }
 }
