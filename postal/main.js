@@ -4,11 +4,9 @@ function sel_jurL1(abbrev)
     if (abbrev>'')
     {
         let jL2dom = document.getElementById('sel_jurL2');
-        let s = '<option value="">-- States--</option>'
+        let s = '<option value="">- opt -</option>'
         for ( var i of Object.keys(approved_jurisdictions[abbrev]) )
-        {
             s += '<option>'+i
-        }
         jL2dom.innerHTML=s
         let jL3dom = document.getElementById('sel_jurL3');
         jL3dom.innerHTML=""
@@ -23,11 +21,9 @@ function sel_jurL2(abbrev)
         let country = defaultMap.isocode;
         let state = document.getElementById('sel_jurL2').value;
         let jL3dom = document.getElementById('sel_jurL3');
-        let s = '<option value="">-- Cities --</option>'
+        let s = '<option value="">- City -</option>'
         for ( var i of approved_jurisdictions[country][state] )
-        {
             s += '<option>'+i
-        }
         jL3dom.innerHTML=s
     // }
 }
@@ -49,21 +45,15 @@ function updateJurisd(jurisd)
 {
     document.getElementById('sel_jurL1').innerHTML = jurisd.split("-",3)[0];
 
-    let s = '<option value="">-- States--</option>'
-
+    let s = '<option value="">- opt -</option>'
     for ( var i of Object.keys(approved_jurisdictions[jurisd.split("-",3)[0]]) )
-    {
         s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
-    }
 
     document.getElementById('sel_jurL2').innerHTML=s
 
-    s = '<option value="">-- Cities --</option>'
+    s = '<option value="">- City -</option>'
     for ( var i of approved_jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]] )
-    {
         s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
-    }
-
     document.getElementById('sel_jurL3').innerHTML=s
 }
 
@@ -503,6 +493,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field  = L.DomUtil.create('label', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
+    this.button2 = L.DomUtil.create('button','getGeo-button',this.container);
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -512,12 +503,16 @@ encodeGgeohash.onAdd = function (map) {
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
 
+    this.button2.type = 'button';
+    this.button2.innerHTML= "My Location";
+
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
+    L.DomEvent.on(this.button2, 'click', getMyLocation, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
-
-    return this.container; };
+    return this.container;
+  }; // \onAdd(map)
 
 var country = L.control({position: 'topleft'});
 country.onAdd = function (map) {
@@ -552,7 +547,7 @@ level.onAdd = function (map) {
     this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
 
     this.label_level.for = 'level';
-    this.label_level.innerHTML = 'Level: ';
+    this.label_level.innerHTML = 'Level:<br/>';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
     this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
@@ -577,7 +572,7 @@ baseLevel.onAdd = function (map) {
 
     return this.container; };
 
-var clear = L.control({position: 'topleft'});
+var clear = L.control(); // old {position: 'topleft'}
 clear.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
@@ -691,7 +686,7 @@ noTooltip.onAdd = function (map) {
     this.checkbox  = L.DomUtil.create('input', '', this.container);
 
     this.label.for= 'notooltip';
-    this.label.innerHTML= 'No tooltip: ';
+    this.label.innerHTML= '<br/>No tooltip: ';
     this.checkbox.id = 'notooltip';
     this.checkbox.type = 'checkbox';
     this.checkbox.checked = false;
@@ -724,16 +719,21 @@ zoomClick.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
-
+var c = document.getElementById('custom-map-controlsc');
 // a.appendChild(country.getContainer());
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
-a.appendChild(level.getContainer());
+//a.appendChild(level.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 // a.appendChild(baseLevel.getContainer());
+
+
+c.appendChild(level.getContainer());
+
 b.appendChild(clear.getContainer());
 // a.appendChild(fitBounds.getContainer());
 // a.appendChild(fitCenter.getContainer());
+
 b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
@@ -986,6 +986,8 @@ function getJurisdiction(data)
         checkCountry(input);
     }
 }
+
+function getMyLocation(x) {alert(x)}
 
 function getEncode(data)
 {

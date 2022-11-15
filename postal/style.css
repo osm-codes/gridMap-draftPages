@@ -15,12 +15,13 @@ h2, h3 {
 }
 
 #map {
-	position: absolute;
+	/* position: absolute; */
 	width: 70vw;
-	height: 100vh;
+	height: 70vh; /* old 100 */
 	float: left;
 	top: 0;
-	left: 0
+	left: 0;
+        /*padding-right: 12pt; */
 }
 
 #custom-map-controls {
@@ -36,13 +37,8 @@ h2, h3 {
 	box-sizing: border-box
 }
 
-#custom-map-controlsa {
-	float: left;
-	padding-top:2%;
-	padding-bottom:2%;
-}
-
-#custom-map-controlsb {
+#custom-map-controlsa, #custom-map-controlsb,
+#custom-map-controlsc {
 	float: left;
 	padding-top:2%;
 	padding-bottom:2%;
@@ -66,3 +62,9 @@ h2, h3 {
 	background-color: rgb(255, 250, 205, 1)
 }
 
+/* condition for screen size minimum of 500px
+and (min-width: 600px) and (max-width: 959px)
+*/
+@media (min-width:500px) {
+  .test { font-size: 20px; }
+}
