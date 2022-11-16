@@ -1206,3 +1206,5 @@ if(pathname !== "/view/")
     checkCountry(pathname);
     checkBase(pathname);
 }
+
+

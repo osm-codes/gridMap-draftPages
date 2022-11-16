@@ -987,9 +987,21 @@ function getJurisdiction(data)
     }
 }
 
-function getMyLocation(x) {alert(x)}
+function getMyLocation(noData) {
+  if (navigator.geolocation)
+    navigator.geolocation.getCurrentPosition(getMyLocation_write)
+  else
+    alert( "Geolocation is not supported by this browser." )
+}
 
-function getEncode(data)
+
+function getMyLocation_write(position) {
+  let geoURI = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+  document.getElementById('fieldencode').value = geoURI
+  getEncode()
+}
+
+function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
 
