@@ -84,6 +84,13 @@ var layerPolygonCurrent = new L.geoJSON(null, {
             pointToLayer: pointToLayer,
         });
 
+var layerPolygonCurrentGrid = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonCurrentGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
+        });
+
 var layerPolygonAll = new L.geoJSON(null,{
             style: style,
             onEachFeature: onEachFeature,
@@ -91,13 +98,13 @@ var layerPolygonAll = new L.geoJSON(null,{
         });
 
 var layerJurisdAll = new L.geoJSON(null,{
-            style: style,
+            style: styleJurisdAll,
             onEachFeature: onEachFeatureJurisd,
             pointToLayer: pointToLayer,
         });
 
 var layerCoverAll = new L.geoJSON(null,{
-            style: style,
+            style: styleCoverAll,
             onEachFeature: onEachFeatureCoverAll,
             pointToLayer: pointToLayer,
         });
@@ -112,6 +119,7 @@ var overlays = {
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
+    'Grid cells': layerPolygonCurrentGrid,
 };
 
 var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];
@@ -364,7 +372,7 @@ var map = L.map('map',{
     maxBoundsViscocity: 1,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerPolygonCurrent, layerPolygonCurrentGrid, layerPolygonAll, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -672,7 +680,7 @@ zoomClick.onAdd = function (map) {
     this.label.innerHTML= 'Disable zoom-click: ';
     this.checkbox.id = 'zoomclick';
     this.checkbox.type = 'checkbox';
-    this.checkbox.checked = true;
+    this.checkbox.checked = false;
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -699,61 +707,40 @@ noTooltip.onAdd = function (map) {
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
-// country.addTo(map);
-// decodeJurisdiction.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
-// baseLevel.addTo(map);
 level.addTo(map);
 clear.addTo(map);
-// fitBounds.addTo(map);
-// fitCenter.addTo(map);
 toggleTooltip.addTo(map);
 toggleCover.addTo(map);
-// decodeGgeohashList.addTo(map);
-// zoomAll.addTo(map);
 jurisdictionGgeohash.addTo(map);
 noTooltip.addTo(map);
 zoomClick.addTo(map);
-// sel_jurL1(defaultMap.isocode)
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
 var c = document.getElementById('custom-map-controlsc');
-// a.appendChild(country.getContainer());
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
-//a.appendChild(level.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
-// a.appendChild(baseLevel.getContainer());
-
-
 c.appendChild(level.getContainer());
-
 b.appendChild(clear.getContainer());
-// a.appendChild(fitBounds.getContainer());
-// a.appendChild(fitCenter.getContainer());
-
 b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
 b.appendChild(zoomClick.getContainer());
-// a.appendChild(decodeJurisdiction.getContainer());
-// a.appendChild(decodeGgeohashList.getContainer());
-// a.appendChild(zoomAll.getContainer());
+
 
 function clearAllLayers()
 {
     layerPolygonCurrent.clearLayers();
+    layerPolygonCurrentGrid.clearLayers();
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
-    // layerCoverAll.clearLayers();toggleCoverStatus = true
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
-    // layerCoverAll.clearLayers();
-    // layerJurisdAll.clearLayers();
 }
 
 function clearAll()
@@ -763,47 +750,23 @@ function clearAll()
     toggleCountry()
 
     map.fitBounds(layerJurisdAll.getBounds());
-//     map.setView(defaultMap.center, defaultMap.zoom);
-//     document.getElementById('fielddecodelist').value = '';
-//     document.querySelector('#base').value = defaultMapBase;
-//     document.querySelector('#country').value = defaultMap.isocode;
-//     document.querySelector('#grid').value = '';
-//     document.getElementById('fieldencode').value = '';
-//     document.getElementById('fielddecode').value = '';
-//     document.getElementById('base').innerHTML = generateSelectBase(defaultMap.selectedBases);
-//     toggleLevelBase()
 }
 
 function toggleCountry()
 {
-    // document.getElementById('fielddecodelist').value = '';
-
     clearAllLayers();
-
-    // let countryValue = document.getElementById('country').value;
-    // defaultMap = countries[countryValue];
-    // map.setView(defaultMap.center, defaultMap.zoom);
-    // document.getElementById('base').innerHTML = generateSelectBase(countries[countryValue].selectedBases);
-    // document.getElementById('base').value = countries[countryValue].defaultBase;
-
     defaultMapBase = defaultMap.defaultBase;
-
-    // document.getElementById('fieldjurisdiction').placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
 
     toggleLevelBase();
 }
 
 function toggleLevelBase()
 {
-    // let countryValue = document.getElementById('country').value;
-    // let base = document.getElementById('base').value;
     var base = defaultMapBase;
 
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[base],base);
     document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[base].selectGrid);
-
     document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[base].placeholderDecode;
-    // document.getElementById('fielddecodelist').placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[base].placeholderList;
     document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[base].placeholderEncode;
 }
 
@@ -1011,7 +974,9 @@ function getEncode(noData)
         let grid = document.getElementById('grid').value
 
         var base = defaultMapBase
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
+
+        var uriWithGrid = uri + (grid ? '/' + grid : '')
 
         document.getElementById('fielddecode').value = '';
 
@@ -1023,6 +988,7 @@ function getEncode(noData)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
     }
 }
 
@@ -1087,7 +1053,8 @@ function onMapClick(e)
     let grid = document.getElementById('grid').value
 
     var base = defaultMapBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '')
+    var uriWithGrid = uri + (grid ? '/' + grid : '')
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -1099,6 +1066,14 @@ function onMapClick(e)
     L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
     loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+    loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+}
+
+
+// Layer layerPolygonCurrent e layerPolygonAll
+function style(feature)
+{
+    return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:0};
 }
 
 function popUpFeature(feature,layer)
@@ -1174,7 +1149,8 @@ function highlightFeature(e)
     {
         this.closeTooltip();
         layer.setStyle({
-            color: 'deeppink'
+            color: 'deeppink',
+            weight:1
         });
 
         layer.bringToFront();
@@ -1194,22 +1170,24 @@ function resetHighlight(e,layer)
 function onFeatureClick(feature)
 {
     let zoomclick = document.getElementById('zoomclick')
-    zoomclick.checked ?map.fitBounds(feature.target.getBounds()) : ''
+    zoomclick.checked ? '' : map.fitBounds(feature.target.getBounds())
 }
 
 function onEachFeature(feature,layer)
 {
     const reg = /(...)(?!$)/g
-    // console.log( "AB233CC".replace(reg, '$1.') )
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
 
-    if(feature.properties.scientic_code )
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonAll);
+
+    if(feature.properties.scientic_code)
     {
         document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
     }
 
-    if(feature.properties.short_code )
+    if(feature.properties.short_code)
     {
         document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.short_code.split(/[~]/)[0])
         document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
@@ -1220,6 +1198,22 @@ function onEachFeature(feature,layer)
         mouseover: highlightFeature,
         mouseout: resetHighlight
     });
+}
+
+function pointToLayer(feature,latlng)
+{
+    return L.circleMarker(latlng,{
+        radius: 3,
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.6,
+    });
+}
+
+// Layer layerJurisdAll
+function styleJurisdAll(feature)
+{
+    return {color: 'red', fillColor: 'none', fillOpacity: 0.1};
 }
 
 function onEachFeatureJurisd(feature,layer)
@@ -1249,49 +1243,99 @@ function onEachFeatureJurisd(feature,layer)
     layer.bindPopup(popupContent);
 }
 
+// Layer layerCoverAll
+function resetHighlightCoverAll(e,layer)
+{
+    layerCoverAll.resetStyle(e.target);
+}
+
 function onEachFeatureCoverAll(feature,layer)
 {
-    onEachFeature(feature,layer);
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlightCoverAll
+    });
 
     arrayOfSideCoverCell.push(feature.properties.side);
 }
 
-function style(feature)
+function styleCoverAll(feature)
 {
-    let grid = document.getElementById('grid')
+    return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
+}
 
-    if(grid.value.match(/^grid(3|5|9|17|33)$/))
+//
+
+
+// Layer layerPolygonCurrentGrid
+function highlightFeaturePolygonCurrentGrid(e)
+{
+    const layer = e.target;
+
+    let noTooltip = document.getElementById('notooltip')
+
+    if(noTooltip.checked)
     {
-        if (feature.properties.code_subcell)
-        {
-            return {color: 'deeppink'};
-        }
-        else
-        {
-            return {color: 'deeppink', fillColor: 'none'};
-        }
+        this.closeTooltip();
+        layer.setStyle({
+            color: 'deeppink',
+            weight:2
+        });
+
+        layer.bringToFront();
     }
     else
     {
-        if (feature.properties.osm_id)
-        {
-            return {color: 'red', fillColor: 'none', fillOpacity: 0.1};
-        }
-        else
-        {
-            return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1};
-        }
+        this.openTooltip();
     }
 }
 
-function pointToLayer(feature,latlng)
+function filterLayer(feature, layer) {
+        return feature.properties.code_subcell;
+    }
+    
+function resetHighlightPolygonCurrentGrid(e,layer)
 {
-    return L.circleMarker(latlng,{
-        radius: 3,
-        weight: 1,
-        opacity: 0.8,
-        fillOpacity: 0.6,
+    layerPolygonCurrentGrid.resetStyle(e.target);
+}
+
+function stylePolygonCurrentGrid(feature)
+{
+    let grid = document.getElementById('grid').value
+
+    if(grid.match(/^grid(3|5|9|17|33)$/))
+    {
+        return {color: 'deeppink', weight:1};
+    }
+    else
+    {
+        return {color: 'deeppink', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
+    }
+}
+
+function onEachFeaturePolygonCurrentGrid(feature,layer)
+{
+    const reg = /(...)(?!$)/g
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeaturePolygonCurrentGrid,
+        mouseout: resetHighlightPolygonCurrentGrid
     });
+}
+
+//
+
+function afterLoadLayer(featureGroup)
+{
+    let zoomclick = document.getElementById('zoomclick')
+    zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.fitBounds(featureGroup.getBounds())
 }
 
 function afterLoadCurrent(featureGroup)
@@ -1299,7 +1343,6 @@ function afterLoadCurrent(featureGroup)
     map.fitBounds(featureGroup.getBounds());
     let zoom = map.getZoom();
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
-    // console.log(map.getZoom())
 }
 
 function afterLoadJurisdAll(featureGroup,fittobounds=true)
@@ -1332,18 +1375,10 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
 }
 
-function afterLoadLayer(featureGroup)
-{
-    map.setView(featureGroup.getBounds().getCenter(),map.getZoom())
-}
-
-function afterData(data)
+function afterData(data,layer)
 {
     if(data.features.length = 1)
     {
-            // console.log(data.features[0])
-            // console.log(data.features)
-
         if(data.features[0].properties.jurisd_base_id)
         {
             checkCountryn(data.features[0].properties.jurisd_base_id,false)
@@ -1351,8 +1386,6 @@ function afterData(data)
 
         if(data.features[0].properties.isolabel_ext)
         {
-            // console.log(data.features[0].properties.isolabel_ext)
-
             //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
             var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.isolabel_ext + window.location.search
             const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
@@ -1364,8 +1397,6 @@ function afterData(data)
         {
             if(data.features[0].properties.short_code)
             {
-                // console.log(data.features[0].properties.short_code)
-
                 if(getJurisdAfterLoad)
                 {
                     getJurisdAfterLoad = false;
@@ -1476,7 +1507,15 @@ if(pathname !== "/view/")
         else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
             var uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/((([A-Z]{2})-\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
+
+            if (pathname.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+            {
+                uriApiJurisd = uri.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+            }
+            else if (pathname.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+            {
+                uriApiJurisd = uri.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+            }
         }
         else if (pathname.match(/\/BR-\d+$/i))
         {
@@ -1500,7 +1539,7 @@ if(pathname !== "/view/")
         if(uriApiJurisd !== null && uriApiJurisd !== '')
         {
             loadGeojson(uriApiJurisd,[layerJurisdAll],afterLoadJurisdAll,afterData);
-            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){},afterData);
+            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],afterLoadLayerCoverAll,afterData);
         }
 
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
