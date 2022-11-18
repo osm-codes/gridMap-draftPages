@@ -93,7 +93,7 @@ var layerPolygonCurrentGrid = new L.geoJSON(null, {
 
 var layerPolygonAll = new L.geoJSON(null,{
             style: style,
-            onEachFeature: onEachFeature,
+            onEachFeature: onEachFeaturePolygonAll,
             pointToLayer: pointToLayer,
         });
 
@@ -328,6 +328,10 @@ var defaultMap = countries['CO'];
 var defaultMapBase = defaultMap.postalcodeBase;
 var arrayOfSideCoverCell = new Array();
 var getJurisdAfterLoad = false;
+
+var state = {
+    isolabel_ext: ''
+};
 
 function checkCountry(string,togglecountry=true)
 {
@@ -730,7 +734,6 @@ b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
 b.appendChild(zoomClick.getContainer());
 
-
 function clearAllLayers()
 {
     layerPolygonCurrent.clearLayers();
@@ -843,8 +846,6 @@ function generateSelectLevel(base,baseValue)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
-        // html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-
         if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
         {
             html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
@@ -867,9 +868,6 @@ function generateSelectLevel2(base,baseValue,size)
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-
 
         if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
         {
@@ -902,7 +900,7 @@ function getDecode(data)
         uri += input + ".json"
         document.getElementById('fieldencode').value = '';
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer);
     }
 }
 
@@ -918,7 +916,7 @@ function getDecodeList(data)
     {
         var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[base].symbol + sortAndRemoveDuplicates(input) + ".json"
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer);
         document.getElementById('fielddecodelist').value = '';
 
         checkCountry(input);
@@ -928,20 +926,15 @@ function getDecodeList(data)
 function getJurisdiction(data)
 {
     let input = document.getElementById('fieldjurisdiction').value
-    // let jcover = document.getElementById('jcover')
-    // let base = document.getElementById('base').value
 
     var base = defaultMapBase
 
     if(input !== null && input !== '')
     {
-        let uri = uri_base + "/geo:iso_ext:" + input + ".json" + /*(jcover.checked ?*/ '/cover' /*: '')*/ + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
+        let uri = uri_base + "/geo:iso_ext:" + input + '.json/cover' + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
 
-        // if(jcover.checked)
-        // {
-            loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
-            document.getElementById('fieldjurisdiction').value = '';
-        // }
+        loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
+        document.getElementById('fieldjurisdiction').value = '';
 
         uri = uri_base + "/geo:iso_ext:" + input + ".json";
         loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
@@ -950,15 +943,16 @@ function getJurisdiction(data)
     }
 }
 
-function getMyLocation(noData) {
+function getMyLocation(noData)
+{
   if (navigator.geolocation)
     navigator.geolocation.getCurrentPosition(getMyLocation_write)
   else
     alert( "Geolocation is not supported by this browser." )
 }
 
-
-function getMyLocation_write(position) {
+function getMyLocation_write(position)
+{
   let geoURI = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
   document.getElementById('fieldencode').value = geoURI
   getEncode()
@@ -987,7 +981,7 @@ function getEncode(noData)
         layerMarkerCurrent.clearLayers();
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
         loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
     }
 }
@@ -1065,12 +1059,11 @@ function onMapClick(e)
     L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
     L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
     loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
 }
 
-
-// Layer layerPolygonCurrent e layerPolygonAll
+// Layer layerPolygonCurrent
 function style(feature)
 {
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:0};
@@ -1180,7 +1173,6 @@ function onEachFeature(feature,layer)
     layerTooltipFeature(feature,layer);
 
     L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonAll);
 
     if(feature.properties.scientic_code)
     {
@@ -1207,6 +1199,21 @@ function pointToLayer(feature,latlng)
         weight: 1,
         opacity: 0.8,
         fillOpacity: 0.6,
+    });
+}
+
+// Layer layerPolygonAll
+function onEachFeaturePolygonAll(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonAll);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
     });
 }
 
@@ -1428,6 +1435,40 @@ function afterData(data,layer)
     }
 }
 
+function beforeAddDataLayer(data)
+{
+    if(data.features.length = 1)
+        if(!data.features[0].properties.isolabel_ext)
+            if(!data.features[0].properties.index)
+            {
+                if(data.features[0].properties.short_code)
+                {
+                    console.log (state.isolabel_ext)
+                    
+                    if(/*state.isolabel_ext !== '' && */state.isolabel_ext !== data.features[0].properties.short_code.split(/[~]/)[0])
+                    {
+                        console.log("mudar cidade");
+
+                        // var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
+                        // const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
+                        // const nextState = { additionalInformation: 'to canonical.' };
+                    
+                        // window.history.pushState(nextState, nextTitle, nextURL);
+                    }
+                    else
+                    {
+                        state.isolabel_ext = data.features[0].properties.short_code.split(/[~]/)[0];
+                        console.log("mesma cidade")
+                    }
+                }
+                else
+                {
+                    console.log("ERROR. Sem cobertura.");
+                    // alert("ERROR. Sem cobertura.");
+                }
+            }
+}
+
 function afterDataGeo(data,scicode)
 {
     if(data.features.length = 1)
@@ -1441,12 +1482,14 @@ function afterDataGeo(data,scicode)
     }
 }
 
-function loadGeojson(uri,arrayLayer,afterLoad,afterData)
+function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
 {
     fetch(uri)
     .then(response => {return response.json()})
-    .then(data =>
+    .then((data) =>
     {
+        before(data);
+
         arrayLayer[0].clearLayers();
 
         for (i=0; i < arrayLayer.length; i++)
@@ -1462,7 +1505,6 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
     })
     .catch(err => {})
 }
-
 
 var uri = window.location.href;
 let pathname = window.location.pathname;
@@ -1542,6 +1584,6 @@ if(pathname !== "/view/")
             loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],afterLoadLayerCoverAll,afterData);
         }
 
-        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
+        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData,beforeAddDataLayer);
     }
 }
