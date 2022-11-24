@@ -1498,7 +1498,6 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
             arrayLayer[i].addData(data.features);
         }
 
-        console.log(arrayLayer[0])
         afterLoad(arrayLayer[0]);
 
         afterData(data);
