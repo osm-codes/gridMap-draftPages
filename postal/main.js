@@ -1342,13 +1342,14 @@ function onEachFeaturePolygonCurrentGrid(feature,layer)
 function afterLoadLayer(featureGroup)
 {
     let zoomclick = document.getElementById('zoomclick')
-    zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.fitBounds(featureGroup.getBounds())
+    let zoom = map.getBoundsZoom(featureGroup.getBounds());
+    zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
 }
 
 function afterLoadCurrent(featureGroup)
 {
-    map.fitBounds(featureGroup.getBounds());
-    let zoom = map.getZoom();
+    // map.fitBounds(featureGroup.getBounds());
+    let zoom = map.getBoundsZoom(featureGroup.getBounds());
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
 }
 
@@ -1497,6 +1498,7 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
             arrayLayer[i].addData(data.features);
         }
 
+        console.log(arrayLayer[0])
         afterLoad(arrayLayer[0]);
 
         afterData(data);
