@@ -1083,7 +1083,11 @@ function onMapClick(e)
     L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
     loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-    loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+
+    if(grid)
+    {
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+    }
 }
 
 // Layer layerPolygonCurrent
