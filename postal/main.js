@@ -387,6 +387,21 @@ map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
 map.on('click', onMapClick);
 // map.on('zoomend', showZoomLevel);
 // showZoomLevel();
+map.on('baselayerchange', function (e) {
+    console.log(e.name);
+
+    // if(e.name == "satellite" || e.name == "satellitestreet")
+    // {
+    //     layerPolygonCurrent.setStyle({
+    //         color: '#F00',
+    //         weight:1
+    //     });
+    // }
+    // else
+    // {
+    //     layerPolygonCurrent.resetStyle(e.target);
+    // }
+});
 
 var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
@@ -966,11 +981,14 @@ function getEncode(noData)
     {
         let level = document.getElementById('level_size').value
         let grid = document.getElementById('grid').value
+        let country = defaultMap.isocode;
+        let state = document.getElementById('sel_jurL2').value;
+        let jL3dom = document.getElementById('sel_jurL3').value;
+        let context = country + '-' + state + '-'+ jL3dom
 
         var base = defaultMapBase
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
-
-        var uriWithGrid = uri + (grid ? '/' + grid : '')
+        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
+        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
 
         document.getElementById('fielddecode').value = '';
 
@@ -1046,9 +1064,14 @@ function onMapClick(e)
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
 
+    let country = defaultMap.isocode;
+    let state = document.getElementById('sel_jurL2').value;
+    let jL3dom = document.getElementById('sel_jurL3').value;
+    let context = country + '-' + state + '-'+ jL3dom
+
     var base = defaultMapBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '')
-    var uriWithGrid = uri + (grid ? '/' + grid : '')
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
