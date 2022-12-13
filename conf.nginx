@@ -79,19 +79,19 @@ server { ## OSM.CODES
 
         # (urn|geo):lex
         location ~* "^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)\.json$" {
-          rewrite "^/(urn|geo):lex:([a-z]{2})\.json$"
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2})\.json$"
                   /rpc/jurisdiction_geojson_from_isolabel?p_code=$2  break;
 
-          rewrite "^/(urn|geo):lex:([a-z]{2});([a-z]{2})\.json$"
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2});([a-z]{2})\.json$"
                   /rpc/jurisdiction_geojson_from_isolabel?p_code=$2%3B$3  break;
 
-          rewrite "^/(urn|geo):lex:([a-z]{2});([a-z]{2});([a-z]+)\.json$"
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2});([a-z]{2});([a-z]+)\.json$"
                   /rpc/jurisdiction_geojson_from_isolabel?p_code=$2%3B$3%3B$4  break;
 
-          rewrite "^/(urn|geo):lex:([a-z]{2});([a-z\.]{3,})\.json$"
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2});([a-z\.]{3,})\.json$"
                   /rpc/jurisdiction_geojson_from_isolabel?p_code=$2%3B$3  break;
 
-          rewrite "^/(urn|geo):lex:([a-z]{2});([a-z\.]{3,});([a-z]+)?\.json$"
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2});([a-z\.]{3,});([a-z]+)?\.json$"
                   /rpc/jurisdiction_geojson_from_isolabel?p_code=$2%3B$3%3B$4  break;
 
           proxy_pass http://127.0.0.1:3103;
@@ -274,7 +274,7 @@ server { ## OSM.CODES
 
         ### (urn|geo):lex
         location ~* "^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" {
-          rewrite "^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" /postal/ break;
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" /postal/ break;
         }
 
         location /_doc {
