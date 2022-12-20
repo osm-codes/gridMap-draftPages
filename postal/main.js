@@ -1608,8 +1608,8 @@ if(pathname !== "/view/")
 
         if(uriApiJurisd !== null && uriApiJurisd !== '')
         {
-            loadGeojson(uriApiJurisd,[layerJurisdAll],afterLoadJurisdAll,afterData);
-            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],afterLoadLayerCoverAll,afterData);
+            loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
+            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},afterData);
         }
 
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData,beforeAddDataLayer);
