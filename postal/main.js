@@ -360,7 +360,7 @@ function checkCountryn(num,togglecountry=true)
 {
     for(var key in countries)
     {
-        if(countries[key].isocoden = num)
+        if(countries[key].isocoden == num)
         {
             defaultMap = countries[key];
             defaultMapBase = defaultMap.postalcodeBase;
