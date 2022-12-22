@@ -958,21 +958,6 @@ function getJurisdiction(data)
     }
 }
 
-function getMyLocation(noData)
-{
-  if (navigator.geolocation)
-    navigator.geolocation.getCurrentPosition(getMyLocation_write)
-  else
-    alert( "Geolocation is not supported by this browser." )
-}
-
-function getMyLocation_write(position)
-{
-  let geoURI = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
-  document.getElementById('fieldencode').value = geoURI
-  getEncode()
-}
-
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
@@ -1002,6 +987,95 @@ function getEncode(noData)
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
         loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
     }
+}
+
+function getEncodeWithoutContext(noData)
+{
+    let input = document.getElementById('fieldencode').value
+
+    if(input !== null && input !== '')
+    {
+        let level = document.getElementById('level_size').value
+        let grid = document.getElementById('grid').value
+
+        var base = defaultMapBase
+        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
+        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+
+        document.getElementById('fielddecode').value = '';
+
+        input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
+
+        var popupContent = "latlng: " + input;
+        layerPolygonCurrent.clearLayers();
+        layerMarkerCurrent.clearLayers();
+        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
+        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+    }
+}
+
+// https://stackoverflow.com/questions/31790344/determine-if-a-point-reside-inside-a-leaflet-polygon
+function isMarkerInsidePolygon(latitude, longitude, poly) {
+    var inside = false;
+    var x = latitude, y = longitude;
+    for (var ii=0;ii<poly.getLatLngs().length;ii++){
+        var polyPoints = poly.getLatLngs()[ii];
+        for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+            var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
+            var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
+
+            var intersect = ((yi > y) != (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+    }
+
+    return inside;
+};
+
+function getMyLocation(noData)
+{
+    if (navigator.geolocation)
+    {
+        navigator.geolocation.getCurrentPosition(getMyLocation_write)
+    }
+    else
+    {
+        alert( "Geolocation is not supported by this browser." )
+    }
+}
+
+function getMyLocation_write(position)
+{
+    let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+
+    layerJurisdAll.eachLayer(
+        function(memberLayer)
+        {
+            if (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer))
+            {
+                // console.log(memberLayer.feature.properties);
+                // console.log("DENTRO");
+                if (confirm("My location in " + context + ". Go to location?"))
+                {
+                    document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                    getEncode();
+                }
+            }
+            else
+            {
+                alert("Error: location out of " + context + ".");
+                // console.log("FORA");
+                // if (confirm("Error: my location out of " + context + ". Go to location? It may take a few seconds."))
+                // {
+                //     document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                //     getEncodeWithoutContext();
+                // }
+            }
+        }
+    );
 }
 
 function sortAndRemoveDuplicates(value) {
@@ -1074,20 +1148,32 @@ function onMapClick(e)
     var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
-    document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    // or e.latlng['lat'].toPrecision(8)
+    layerJurisdAll.eachLayer(
+        function(memberLayer)
+        {
+            if (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer))
+            {
+                document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+                // or e.latlng['lat'].toPrecision(8)
 
-    layerMarkerCurrent.clearLayers();
+                layerMarkerCurrent.clearLayers();
 
-    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
+                L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
+                L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
+                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
 
-    if(grid)
-    {
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
-    }
+                if(grid)
+                {
+                    loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+                }
+            }
+            else
+            {
+                alert("Error: click out of " + context + ".");
+            }
+        }
+    );
 }
 
 // Layer layerPolygonCurrent
