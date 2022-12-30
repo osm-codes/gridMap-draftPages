@@ -1058,11 +1058,11 @@ function getMyLocation_write(position)
             {
                 // console.log(memberLayer.feature.properties);
                 // console.log("DENTRO");
-                if (confirm("My location in " + context + ". Go to location?"))
-                {
+                // if (confirm("My location in " + context + ". Go to location?"))
+                // {
                     document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
                     getEncode();
-                }
+                // }
             }
             else
             {
