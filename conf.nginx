@@ -274,7 +274,7 @@ server { ## OSM.CODES
 
         ### (urn|geo):lex
         location ~* "^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" {
-          rewrite "(?i)^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" /postal/ break;
+          rewrite "(?i)^/(urn|geo):lex:([a-z]{2}(;[a-z\.]+)?(;[a-z\.]+)?)$" /view_lex/ break;
         }
 
         location /_doc {
