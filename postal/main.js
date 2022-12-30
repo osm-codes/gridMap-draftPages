@@ -1078,6 +1078,33 @@ function getMyLocation_write(position)
     );
 }
 
+function getMyLocation2(noData)
+{
+    if (navigator.geolocation)
+    {
+        navigator.geolocation.getCurrentPosition(getMyLocation_write2)
+    }
+}
+
+function getMyLocation_write2(position)
+{
+    let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+
+    layerJurisdAll.eachLayer(
+        function(memberLayer)
+        {
+            if (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer))
+            {
+                if (confirm("My location in " + context + ". Go to location?"))
+                {
+                    document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                    getEncode();
+                }
+            }
+        }
+    );
+}
+
 function sortAndRemoveDuplicates(value) {
 
     let listValues = [...new Set(value.trim().split(/[\n,]+/).map(i => i.trim().substring(0,11)))];
@@ -1481,6 +1508,13 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true)
     map.setMaxBounds(featureGroup.getBounds())
 }
 
+function afterLoadJurisdAll2(featureGroup,fittobounds=true)
+{
+    afterLoadJurisdAll(featureGroup,fittobounds)
+
+    getMyLocation2(noData)
+}
+
 function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
 {
     if(toggleCoverStatus)
@@ -1632,7 +1666,7 @@ if(pathname !== "/view/")
         var uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
 
         loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
-        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAll,afterData);
+        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAll2,afterData);
     }
     else
     {
