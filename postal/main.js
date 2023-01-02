@@ -970,8 +970,25 @@ function getEncode(noData)
         let context = country + '-' + state + '-'+ jL3dom
 
         var base = defaultMapBase
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
-        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
+
+        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
+
+        if(input.match(/.*;u=.*/))
+        {
+            let u_value = Number(input.split(';u=')[1])
+
+            uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
+        }
+        else
+        {
+            uri += input + ";u=" + level
+        }
+
+        uri += ".json" + (base != 'base32' ? '/' + base : '')
+
+        var uri_ = uri + '/' + context
+
+        var uriGrid = uri + (grid ? '/' + grid : '') + '/' + context
 
         document.getElementById('fielddecode').value = '';
 
@@ -982,8 +999,12 @@ function getEncode(noData)
         layerMarkerCurrent.clearLayers();
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
+
+        if(grid !== '')
+        {
+            loadGeojson(uriGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+        }
     }
 }
 
@@ -1010,7 +1031,11 @@ function getEncodeWithoutContext(noData)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+
+        if(grid !== '')
+        {
+            loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+        }
     }
 }
 
