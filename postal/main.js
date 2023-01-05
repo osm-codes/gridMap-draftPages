@@ -145,6 +145,7 @@ var countries = {
             base32:
             {
                 iniLevel: 0,
+                endLevel: 40,
                 modLevel: 5,
                 iniDigit: 1,
                 levelDefault: 35,
@@ -157,6 +158,7 @@ var countries = {
             base16h:
             {
                 iniLevel: 0,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 2,
                 symbol: '+',
@@ -168,6 +170,7 @@ var countries = {
             base16h1c:
             {
                 iniLevel: 0,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 1,
                 symbol: '+',
@@ -196,6 +199,7 @@ var countries = {
             base32:
             {
                 iniLevel: 4,
+                endLevel: 39,
                 modLevel: 5,
                 iniDigit: 1,
                 levelDefault: 39,
@@ -208,6 +212,7 @@ var countries = {
             base16h:
             {
                 iniLevel: 4,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 2,
                 symbol: '+',
@@ -236,6 +241,7 @@ var countries = {
             base32:
             {
                 iniLevel: 5,
+                endLevel: 40,
                 modLevel: 5,
                 iniDigit: 1,
                 levelDefault: 30,
@@ -248,6 +254,7 @@ var countries = {
             base16h:
             {
                 iniLevel: 5,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 2,
                 symbol: '+',
@@ -276,6 +283,7 @@ var countries = {
             base32:
             {
                 iniLevel: 6,
+                endLevel: 36,
                 modLevel: 5,
                 iniDigit: 1,
                 levelDefault: 36,
@@ -288,6 +296,7 @@ var countries = {
             base16h:
             {
                 iniLevel: 6,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 2,
                 symbol: '+',
@@ -299,6 +308,7 @@ var countries = {
             base16:
             {
                 iniLevel: 6,
+                endLevel: 38,
                 modLevel: 4,
                 iniDigit: 2,
                 symbol: '+',
@@ -310,6 +320,7 @@ var countries = {
             base16h1c:
             {
                 iniLevel: 6,
+                endLevel: 38,
                 modLevel: 1,
                 iniDigit: 1,
                 symbol: '+',
@@ -976,6 +987,11 @@ function getEncode(noData)
         if(input.match(/.*;u=.*/))
         {
             let u_value = Number(input.split(';u=')[1])
+
+            if(u_value == 0)
+            {
+                u_value = levelValues[defaultMapBase.endLevel]
+            }
 
             uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
         }
