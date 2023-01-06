@@ -65,7 +65,7 @@ var mapboxUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_
 var mapboxAttr = 'Tiles from <a href="https://www.mapbox.com">Mapbox</a>';
 var osmAndMapboxAttr = osmAttrib + '. ' + mapboxAttr;
 
-var openstreetmap = L.tileLayer(osmUrl,   {attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
+var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
     grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     streets = L.tileLayer(mapboxUrl,{id:'mapbox/streets-v11',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     satellite = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-v9',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
@@ -358,11 +358,12 @@ function checkCountry(string,togglecountry=true)
     }
 }
 
-let pttname = window.location.pathname;
+var uri = window.location.href;
+let pathname = window.location.pathname;
 
-if (pttname.match(/^\/[A-Z]{2}.+$/i))
+if (pathname.match(/^\/[A-Z]{2}.+$/i))
 {
-    checkCountry(pttname,false)
+    checkCountry(pathname,false)
 }
 
 function checkCountryn(num,togglecountry=true)
@@ -789,12 +790,10 @@ function toggleCountry()
 
 function toggleLevelBase()
 {
-    var base = defaultMapBase;
-
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[base],base);
-    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[base].selectGrid);
-    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[base].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[base].placeholderEncode;
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
+    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[defaultMapBase].placeholderEncode;
 }
 
 function toggleTooltipLayers()
@@ -990,7 +989,7 @@ function getEncode(noData)
 
             if(u_value == 0)
             {
-                u_value = levelValues[defaultMapBase.endLevel]
+                u_value = levelValues[defaultMap.bases[defaultMapBase].endLevel]
             }
 
             uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
@@ -1556,17 +1555,15 @@ function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true)
 
 function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
 {
-    if(toggleCoverStatus)
+    if(!toggleCoverStatus)
     {
-        afterLoadJurisdAll(featureGroup,fittobounds)
-    }
-    else
-    {
-        map.removeLayer(e);
+        map.removeLayer(featureGroup);
         toggleCoverStatus = true
     }
-
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
+    if(fittobounds)
+    {
+        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
+    }
 }
 
 function afterData(data,layer)
@@ -1609,6 +1606,11 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
+
+                if(data.features[0].properties.truncated_code)
+                {
+                    alert("Geocódigo truncado. Número de dígitos excedeu o limite de níveis da grade.");
+                }
             }
             else if(data.features[0].properties.code)
             {
@@ -1693,84 +1695,67 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
     .catch(err => {})
 }
 
-var uri = window.location.href;
-let pathname = window.location.pathname;
+var uriApi = ''
+var uriApiJurisd = ''
 
-if(pathname !== "/view/")
+if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
 {
-    checkCountry(pathname);
+    uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
 
-    if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
+    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
+else
+{
+    if (pathname.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
     {
-        var uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
+        uriApi = uri.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
+        uriApiJurisd = uri.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
+    }
+    else if (pathname.match(/\/CO-\d+$/i))
+    {
+        uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
+    }
+    else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+    {
+        uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
 
-        loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
-        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+        if (pathname.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+        {
+            uriApiJurisd = uri.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+        }
+        else if (pathname.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+        {
+            uriApiJurisd = uri.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+        }
+    }
+    else if (pathname.match(/\/BR-\d+$/i))
+    {
+        uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
+    }
+    else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
+    {
+        uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
+        uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
+    }
+    else if (pathname.match(/^\/geo:.+$/i))
+    {
+        uriApi = uri + '.json';
+        getJurisdAfterLoad = true;
     }
     else
     {
-        var uriApiJurisd = ''
+        uriApi = uri + '.json';
+    }
 
-        if (pathname.match(/\/base16\/grid/))
-        {
-            var uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
-        }
-        else if (pathname.match(/(\/base16h)?\/grid/))
-        {
-            var uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
-        }
-        else if (pathname.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
-        {
-            var uriApi = uri.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
-        }
-        else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*$/i))
-        {
-            var uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:iso_ext:$2.json");
-        }
-        else if (pathname.match(/\/CO-\d+$/i))
-        {
-            var uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
-        }
-        else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-        {
-            var uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-
-            if (pathname.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-            {
-                uriApiJurisd = uri.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
-            }
-            else if (pathname.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-            {
-                uriApiJurisd = uri.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
-            }
-        }
-        else if (pathname.match(/\/BR-\d+$/i))
-        {
-            var uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
-        }
-        else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-        {
-            var uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-            uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
-        }
-        else if (pathname.match(/^\/geo:.+$/i))
-        {
-            var uriApi = uri + '.json';
-            getJurisdAfterLoad = true;
-        }
-        else
-        {
-            var uriApi = uri + '.json';
-        }
-
-        if(uriApiJurisd !== null && uriApiJurisd !== '')
-        {
-            loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
-            loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},afterData);
-        }
-
+    if(uriApi !== null && uriApi !== '')
+    {
         loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData,beforeAddDataLayer);
+    }
+
+    if(uriApiJurisd !== null && uriApiJurisd !== '')
+    {
+        loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
+        loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
     }
 }
