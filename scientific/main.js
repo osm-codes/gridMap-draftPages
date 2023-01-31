@@ -670,8 +670,7 @@ function getEncode(noData)
     {
         let level = document.getElementById('level_size').value
         let grid = document.getElementById('grid').value
-        let country = defaultMap.isocode;
-        let context = country
+        let context = defaultMap.isocode;
 
         var base = defaultMapBase
 
@@ -695,9 +694,9 @@ function getEncode(noData)
 
         uri += ".json" + (base != 'base32' ? '/' + base : '')
 
-        var uri_ = uri
+        var uri_ = uri + '/' + context
 
-        var uriGrid = uri + (grid ? '/' + grid : '')
+        var uriGrid = uri + (grid ? '/' + grid : '') + '/' + context
 
         document.getElementById('fielddecode').value = '';
 
@@ -758,10 +757,11 @@ function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
+    let context = defaultMap.isocode;
 
     var base = defaultMapBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '')
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;

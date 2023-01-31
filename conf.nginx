@@ -147,52 +147,82 @@ server { ## OSM.CODES
         }
 
         ## base16h1c
-        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16h1c(/grid(2|4|8|16|3|5|9|17))?$" {
+        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16h1c(/grid(2|4|8|16|3|5|9|17))?(/[A-Z]{2})?$" {
           ### com grid
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h1c/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=18" break;
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h1c/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=18" break;
 
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h1c/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=18&p_isolabel_ext=$4" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h1c/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=18&p_isolabel_ext=$3" break;
+
           ### sem grid
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h1c"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h1c$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=18" break;
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h1c"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h1c$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=18" break;
+
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h1c/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=18&p_isolabel_ext=$3" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h1c/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=18&p_isolabel_ext=$2" break;
 
           proxy_pass http://127.0.0.1:3103;
         }
 
         ## base16h
-        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16h(/grid(2|4|8|16|3|5|9|17))?$" {
+        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16h(/grid(2|4|8|16|3|5|9|17))?(/[A-Z]{2})?$" {
           ### com grid
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=16" break;
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=16" break;
 
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=16&p_isolabel_ext=$4" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=16&p_isolabel_ext=$3" break;
+
           ### sem grid
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=16" break;
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=16" break;
+
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16h/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=16&p_isolabel_ext=$3" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16h/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=16&p_isolabel_ext=$2" break;
 
           proxy_pass http://127.0.0.1:3103;
         }
 
         ## base16
-        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16(/grid(2|4|8|16|3|5|9|17))?$" {
+        location ~* "^/geo:\-?\d+\.?\d*,\-?\d+\.?\d*(;u=\d+\.?\d*)?\.json/base16(/grid(2|4|8|16|3|5|9|17))?(/[A-Z]{2})?$" {
           ### com grid
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=17" break;
           rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16/grid(\d+)$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=17" break;
 
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=$3&p_base=17&p_isolabel_ext=$4" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16/grid(\d+)/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=$2&p_base=17&p_isolabel_ext=$3" break;
+
           ### sem grid
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16$"
                   "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=17" break;
-          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16"
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16$"
                   "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=17" break;
+
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*);(u=\d+\.?\d*)\.json/base16/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1%3B$2&grid=0&p_base=17&p_isolabel_ext=$3" break;
+          rewrite "^/(geo:\-?\d+\.?\d*,\-?\d+\.?\d*)\.json/base16/(.+)$"
+                  "/rpc/osmcode_encode_scientific?uri=$1&grid=0&p_base=17&p_isolabel_ext=$2" break;
 
           proxy_pass http://127.0.0.1:3103;
         }
