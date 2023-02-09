@@ -6,7 +6,7 @@ function sel_jurL1(abbrev)
         let jL2dom = document.getElementById('sel_jurL2');
         let s = '<option value="">- opt -</option>'
         for ( var i of Object.keys(approved_jurisdictions[abbrev]) )
-            s += '<option>'+i
+            s += '<option value="' + i + '">' + (abbrev != 'CO' ? i : approved_jurisdictions[abbrev][i]['name'])
         jL2dom.innerHTML=s
         let jL3dom = document.getElementById('sel_jurL3');
         jL3dom.innerHTML=""
@@ -15,17 +15,13 @@ function sel_jurL1(abbrev)
 
 function sel_jurL2(abbrev)
 {
-    // if (abbrev>'')
-    // {
-        // let country = document.getElementById('sel_jurL1').value;
-        let country = defaultMap.isocode;
-        let state = document.getElementById('sel_jurL2').value;
-        let jL3dom = document.getElementById('sel_jurL3');
-        let s = '<option value="">- City -</option>'
-        for ( var i of approved_jurisdictions[country][state] )
-            s += '<option>'+i
-        jL3dom.innerHTML=s
-    // }
+    let country = defaultMap.isocode;
+    let state = document.getElementById('sel_jurL2').value;
+    let jL3dom = document.getElementById('sel_jurL3');
+    let s = '<option value="">- City -</option>'
+    for ( var i of approved_jurisdictions[country][state]['mun'] )
+        s += '<option>'+i
+    jL3dom.innerHTML=s
 }
 
 function sel_jurL3(abbrev)
@@ -47,12 +43,14 @@ function updateJurisd(jurisd)
 
     let s = '<option value="">- opt -</option>'
     for ( var i of Object.keys(approved_jurisdictions[jurisd.split("-",3)[0]]) )
-        s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
+        // s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
+
+        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   approved_jurisdictions[jurisd.split("-",3)[0]][i]['name'])
 
     document.getElementById('sel_jurL2').innerHTML=s
 
     s = '<option value="">- City -</option>'
-    for ( var i of approved_jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]] )
+    for ( var i of approved_jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['mun'] )
         s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
     document.getElementById('sel_jurL3').innerHTML=s
 }
@@ -515,7 +513,7 @@ decodeGgeohashList.onAdd = function (map) {
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
 
-    L.DomEvent.disableScrollPropagation(this.button);
+    // L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
     L.DomEvent.disableScrollPropagation(this.field);
     L.DomEvent.disableClickPropagation(this.field);
@@ -1221,6 +1219,8 @@ function onMapClick(e)
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 // or e.latlng['lat'].toPrecision(8)
 
+                // document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+
                 layerMarkerCurrent.clearLayers();
 
                 L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
@@ -1701,6 +1701,7 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
 
 var uriApi = ''
 var uriApiJurisd = ''
+const reg_esp_caracter = /\./
 
 if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
 {
@@ -1709,48 +1710,56 @@ if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
     loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
+else if (pathname.match(/\/CO-\d+$/i))
+{
+    uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
+
+    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
 else
 {
+    pathname = pathname.replace(reg_esp_caracter,"");
+
     if (pathname.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
     {
-        uriApi = uri.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
-        uriApiJurisd = uri.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
-    }
-    else if (pathname.match(/\/CO-\d+$/i))
-    {
-        uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
+        uriApi = pathname.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
+        uriApiJurisd = pathname.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
     }
     else if (pathname.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
     {
-        uriApi = uri.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
+        uriApi = pathname.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
 
         if (pathname.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
-            uriApiJurisd = uri.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+            uriApiJurisd = pathname.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
         }
         else if (pathname.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
-            uriApiJurisd = uri.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+            uriApiJurisd = pathname.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
         }
     }
     else if (pathname.match(/\/BR-\d+$/i))
     {
-        uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
+        uriApi = pathname.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
     }
     else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
     {
-        uriApi = uri.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-        uriApiJurisd = uri.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
+        uriApi = pathname.replace(/\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
+        uriApiJurisd = pathname.replace(/\/(([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
     }
     else if (pathname.match(/^\/geo:.+$/i))
     {
-        uriApi = uri + '.json';
+        uriApi = pathname + '.json';
         getJurisdAfterLoad = true;
     }
     else
     {
-        uriApi = uri + '.json';
+        uriApi = pathname + '.json';
     }
+
+    uriApi = uri_base + uriApi;
+    uriApiJurisd = uri_base + uriApiJurisd;
 
     if(uriApi !== null && uriApi !== '')
     {

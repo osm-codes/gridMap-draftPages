@@ -4,7 +4,7 @@
 }
 
 h2, h3 {color: #666;}
-hr {clear:both;width: 100%;}
+/* hr {clear:both;width: 100%;box-sizing: border-box;} */
 
 .font_small{font-size: small;}
 
@@ -26,14 +26,14 @@ hr {clear:both;width: 100%;}
 	width: 14vw;
 	float: right;
 	box-sizing: border-box;
-/* 	padding-left:0.5%; */
+	padding-left:1%;
 }
 
-#custom-map-controls2 {
+/*#custom-map-controls2 {
  	width: 99vw;
 	float: left;
 	box-sizing: border-box;
-}
+}*/
 
 #custom-map-controlsa, #custom-map-controlsb,
 #custom-map-controlsc {
