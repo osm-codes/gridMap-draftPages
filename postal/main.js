@@ -1261,7 +1261,11 @@ function popUpFeature(feature,layer)
         popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
-        popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
+
+        if(defaultMap.isocode != 'CO')
+        {
+            popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
+        }
 
         if(feature.properties.jurisd_local_id )
         {
