@@ -1,40 +1,38 @@
 @font-face {
-  font-family: 'FE-Schrift';
-  src: URL('EuroPlate.woff2') format('woff2');
+	font-family: 'FE-Schrift';
+	src: URL('EuroPlate.woff2') format('woff2');
 }
 
-h2, h3 {
-   color: #666;
-}
+h2, h3 {color: #666;}
+hr {clear:both;width: 100%;}
+
+.font_small{font-size: small;}
 
 #postalCode {
-    color: #000;
-    font-family: "FE-Schrift";
-    font-size: 150%;
-    letter-spacing: 1.5pt;
+	color: #000;
+	font-family: "FE-Schrift";
+	font-size: 150%;
+	letter-spacing: 1.5pt;
 }
 
 #map {
-	/* position: absolute; */
-	width: 70vw;
-	height: 70vh; /* old 100 */
+	width: 85vw;
+	height: 85vh;
 	float: left;
-	top: 0;
-	left: 0;
-        /*padding-right: 12pt; */
+	box-sizing: border-box;
 }
 
 #custom-map-controls {
-	position: absolute;
-	width: 30vw;
-	height: 90vh;
+	width: 14vw;
 	float: right;
-	top: 0;
-	right: 0;
-	padding-top:1%;
-	padding-left:1%;
-	padding-right:1%;
-	box-sizing: border-box
+	box-sizing: border-box;
+/* 	padding-left:0.5%; */
+}
+
+#custom-map-controls2 {
+ 	width: 99vw;
+	float: left;
+	box-sizing: border-box;
 }
 
 #custom-map-controlsa, #custom-map-controlsb,
@@ -66,5 +64,5 @@ h2, h3 {
 and (min-width: 600px) and (max-width: 959px)
 */
 @media (min-width:500px) {
-  .test { font-size: 20px; }
+	.test { font-size: 20px; }
 }

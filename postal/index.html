@@ -11,26 +11,28 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
 </head><body>
-
+<header>
 <h3>OSMcode: <code id="postalCode"></code> <span id="nameJurisd"></span></h3>
+<span id="geoUri" class="font_small"></span>
+</header>
 
+<main>
 <section id="map"></section>
 
-<aside id="custom-map-controls">
- <!-- old h3 here -->
- <br/>&nbsp;<p><small>Select a level and click into the map!</small></p>
+<section id="custom-map-controls">
+ <p class="font_small">Select a level and click into the map!</p>
  <div class="leaflet-control-container" id="custom-map-controlsc"></div>
- <hr style="clear:both" />
+ <hr/>
  <div class="leaflet-control-container" id="custom-map-controlsb"></div>
-</aside>
+</section>
 
-<hr style="clear:both" />
-
+<section id="custom-map-controls2">
+<hr/>
 <div class="leaflet-control-container" id="custom-map-controlsa"></div>
-<hr style="clear:both" />
+<hr/>
 
 <p>Equivalent cell:</p>
-<p>&nbsp; as official geocode: </p>
+<!-- <p>&nbsp; as official geocode: </p> -->
 <!-- <p>&nbsp; for QRcode: </p> -->
 <p>&nbsp; in the Scientic grid: <code id="sciCode"></code></p>
 <!-- <br/>&nbsp; as official geocode: $nominalCountryStandard~$grade -->
@@ -39,6 +41,8 @@
 
 <p>Back to <a href="https://osm.codes">OSMcodes and other countries</a></p>
 <!-- <p>Zoom level: <span id="zoom"></span></p> -->
+</section>
+</main>
 
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
