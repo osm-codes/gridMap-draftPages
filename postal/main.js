@@ -1717,6 +1717,21 @@ else if (pathname.match(/\/CO-\d+$/i))
     loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
+else if (pathname.match(/\/BR-\d+$/i))
+{
+    uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
+
+    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
+
+else if (pathname.match(/\/(BR-[A-Z]+)$/i))
+{
+    uriApi = uri.replace(/\/(BR-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
+
+    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
 else
 {
     pathname = pathname.replace(reg_esp_caracter,"");
@@ -1738,10 +1753,6 @@ else
         {
             uriApiJurisd = pathname.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
         }
-    }
-    else if (pathname.match(/\/BR-\d+$/i))
-    {
-        uriApi = pathname.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
     }
     else if (pathname.match(/^\/[A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
     {
