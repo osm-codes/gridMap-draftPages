@@ -1223,7 +1223,7 @@ function onMapClick(e)
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 // or e.latlng['lat'].toPrecision(8)
 
-                // document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
 
                 layerMarkerCurrent.clearLayers();
 
@@ -1358,7 +1358,9 @@ function onEachFeature(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
 
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
+    const center = layer.getBounds().getCenter();
+
+    L.circleMarker(center,{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
 
     if(feature.properties.scientic_code)
     {
@@ -1627,6 +1629,13 @@ function afterData(data,layer)
             if(data.features[0].properties.side)
             {
                 document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
+
+                const center = layer.getBounds().getCenter();
+                const { lat, lng } = center;
+                const stringgeo = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
+
+                document.getElementById('geoUri').innerHTML = stringgeo;
+                document.getElementById('fieldencode').value = stringgeo;
             }
         }
     }
@@ -1696,7 +1705,7 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
 
         afterLoad(arrayLayer[0]);
 
-        afterData(data);
+        afterData(data,arrayLayer[0]);
 
         fixZOrder(overlays);
     })
