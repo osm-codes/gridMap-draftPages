@@ -336,6 +336,39 @@ var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
 var escala = L.control.scale({position:'bottomright',imperial: false});
 
+var decodeJurisdiction = L.control({position: 'topleft'});
+decodeJurisdiction.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.label     = L.DomUtil.create('label', '', this.container);
+    this.field     = L.DomUtil.create('input', '', this.container);
+    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
+
+    this.label     = L.DomUtil.create('label', '', this.container);
+    // this.checkbox  = L.DomUtil.create('input', '', this.container);
+
+    // this.label.for = 'jcover';
+    // this.label.innerHTML = 'Cover: ';
+    // this.checkbox.id = 'jcover';
+    // this.checkbox.type = 'checkbox';
+    // this.checkbox.checked = false;
+
+    this.field.type = 'text';
+    this.field.placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
+    this.field.id = 'fieldjurisdiction';
+    this.button.type = 'button';
+    this.button.innerHTML= "Jurisdiction";
+
+    L.DomEvent.disableScrollPropagation(this.button);
+    L.DomEvent.disableClickPropagation(this.button);
+    L.DomEvent.disableScrollPropagation(this.field);
+    L.DomEvent.disableClickPropagation(this.field);
+    // L.DomEvent.disableScrollPropagation(this.checkbox);
+    // L.DomEvent.disableClickPropagation(this.checkbox);
+    L.DomEvent.on(this.button, 'click', getJurisdiction, this.container);
+    L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getJurisdiction(data);}}, this.container);
+
+    return this.container; };
+
 var decodeGgeohash = L.control({position: 'topleft'});
 decodeGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -507,6 +540,7 @@ noTooltip.onAdd = function (map) {
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
+// decodeJurisdiction.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
@@ -519,6 +553,7 @@ zoomClick.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
+// a.appendChild(decodeJurisdiction.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
@@ -662,6 +697,29 @@ function getDecodeList(data)
     }
 }
 
+function getJurisdiction(data)
+{
+    let input = document.getElementById('fieldjurisdiction').value
+
+    var base = defaultMapBase
+
+    if(input !== null && input !== '')
+    {
+        // let uri = uri_base + "/geo:iso_ext:" + input + '.json/cover' + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
+
+        // loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
+        document.getElementById('fieldjurisdiction').value = '';
+
+        uri = uri_base + "/geo:iso_ext:" + input + ".json";
+        // loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
+
+    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
+    loadGeojson(uri + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+
+        // checkCountry(input);
+    }
+}
+
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
@@ -767,6 +825,8 @@ function onMapClick(e)
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
     // or e.latlng['lat'].toPrecision(8)
 
+    document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+
     layerMarkerCurrent.clearLayers();
 
     L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
@@ -774,7 +834,7 @@ function onMapClick(e)
 
     loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
 
-    if(grid)
+    if(grid !== '')
     {
         loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
     }
@@ -1101,6 +1161,13 @@ function afterData(data,layer)
             if(data.features[0].properties.side)
             {
                 document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
+
+                const center = layer.getBounds().getCenter();
+                const { lat, lng } = center;
+                const stringgeo = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
+
+                document.getElementById('geoUri').innerHTML = stringgeo;
+                document.getElementById('fieldencode').value = stringgeo;
             }
         }
     }
@@ -1121,7 +1188,7 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 
         afterLoad(arrayLayer[0]);
 
-        afterData(data);
+        afterData(data,arrayLayer[0]);
 
         fixZOrder(overlays);
     })
