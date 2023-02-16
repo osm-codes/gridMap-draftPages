@@ -82,12 +82,12 @@ var layerPolygonCurrent = new L.geoJSON(null, {
             pointToLayer: pointToLayer,
         });
 
-var layerPolygonCurrentGrid = new L.geoJSON(null, {
-            style: stylePolygonCurrentGrid,
-            onEachFeature: onEachFeaturePolygonCurrentGrid,
-            pointToLayer: pointToLayer,
-            filter: filterLayer,
-        });
+// var layerPolygonCurrentGrid = new L.geoJSON(null, {
+//             style: stylePolygonCurrentGrid,
+//             onEachFeature: onEachFeaturePolygonCurrentGrid,
+//             pointToLayer: pointToLayer,
+//             filter: filterLayer,
+//         });
 
 var layerPolygonAll = new L.geoJSON(null,{
             style: style,
@@ -117,7 +117,7 @@ var overlays = {
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
-    'Grid cells': layerPolygonCurrentGrid,
+    // 'Grid cells': layerPolygonCurrentGrid,
 };
 
 var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];
@@ -384,7 +384,8 @@ var map = L.map('map',{
     maxBoundsViscocity: 1,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonCurrentGrid, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    // layers: [grayscale, layerPolygonCurrent, layerPolygonCurrentGrid, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -572,14 +573,14 @@ level.onAdd = function (map) {
     this.container     = L.DomUtil.create('div');
     this.label_level   = L.DomUtil.create('label', '', this.container);
     this.select_level  = L.DomUtil.create('select', '', this.container);
-    this.label_grid    = L.DomUtil.create('label', '', this.container);
-    this.select_grid   = L.DomUtil.create('select', '', this.container);
-
-    this.label_grid.for = 'grid';
-    this.label_grid.innerHTML = ' ';
-    this.select_grid.id = 'grid';
-    this.select_grid.name = 'grid';
-    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
+    // this.label_grid    = L.DomUtil.create('label', '', this.container);
+    // this.select_grid   = L.DomUtil.create('select', '', this.container);
+    //
+    // this.label_grid.for = 'grid';
+    // this.label_grid.innerHTML = ' ';
+    // this.select_grid.id = 'grid';
+    // this.select_grid.name = 'grid';
+    // this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level:<br/>';
@@ -789,7 +790,7 @@ function toggleCountry()
 function toggleLevelBase()
 {
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
-    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
+    // document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
     document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
     document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[defaultMapBase].placeholderEncode;
 }
@@ -971,7 +972,8 @@ function getEncode(noData)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
-        let grid = document.getElementById('grid').value
+        // let grid = document.getElementById('grid').value
+        let grid = ""
         let country = defaultMap.isocode;
         let state = document.getElementById('sel_jurL2').value;
         let jL3dom = document.getElementById('sel_jurL3').value;
@@ -1028,7 +1030,8 @@ function getEncodeWithoutContext(noData)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
-        let grid = document.getElementById('grid').value
+        // let grid = document.getElementById('grid').value
+        let grid = ""
 
         var base = defaultMapBase
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
@@ -1199,7 +1202,8 @@ function showZoomLevel()
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
-    let grid = document.getElementById('grid').value
+    // let grid = document.getElementById('grid').value
+    let grid = ""
 
     let country = defaultMap.isocode;
     let state = document.getElementById('sel_jurL2').value;
@@ -1228,7 +1232,7 @@ function onMapClick(e)
 
                 loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
 
-                if(grid)
+                if(grid !== '')
                 {
                     loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
                 }
