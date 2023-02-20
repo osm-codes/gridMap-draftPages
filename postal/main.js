@@ -32,8 +32,8 @@ function sel_jurL3(abbrev)
     window.location.href = 'https://osm.codes/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
 }
 
-function latRound(x) {
-  return Number.parseFloat(x).toFixed(6);
+function latRound(x,maxDigits=6) {
+  return Number.parseFloat(x).toFixed(maxDigits);
   // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
 }
 
@@ -861,43 +861,42 @@ function generateSelectCountries(dict)
 function generateSelectLevel(base,baseValue)
 {
     let html = '';
-
     let m=0;
-
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
         if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
         {
-            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            //html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
         else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
         {
-            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            // html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
-
     return html
 }
 
 function generateSelectLevel2(base,baseValue,size)
 {
     let html = '';
-
     let m=0;
-
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
         if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
         {
-            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
         else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
         {
-            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
 
@@ -1223,7 +1222,7 @@ function onMapClick(e)
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 // or e.latlng['lat'].toPrecision(8)
 
-                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],4) + "," + latRound(e.latlng['lng'],4) //+ ";u=" + level;
 
                 layerMarkerCurrent.clearLayers();
 
@@ -1634,7 +1633,9 @@ function afterData(data,layer)
                 const { lat, lng } = center;
                 const stringgeo = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
 
-                document.getElementById('geoUri').innerHTML = stringgeo;
+                const strgeo2   = 'geo:' + latRound(e.latlng['lat'],4) + "," + latRound(e.latlng['lng'],4) //+ ";u=" + level;
+
+                document.getElementById('geoUri').innerHTML = strgeo2; //stringgeo;
                 document.getElementById('fieldencode').value = stringgeo;
             }
         }
@@ -1796,3 +1797,4 @@ else
         loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
     }
 }
+

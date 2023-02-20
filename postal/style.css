@@ -4,7 +4,7 @@
 }
 
 h2, h3 {color: #666;}
-/* hr {clear:both;width: 100%;box-sizing: border-box;} */
+hr {clear:both;width: 100%;box-sizing: border-box;}
 
 .font_small{font-size: small;}
 
@@ -17,29 +17,40 @@ h2, h3 {color: #666;}
 
 #map {
 	width: 85vw;
-	height: 85vh;
+	height: 70vh;
 	float: left;
 	box-sizing: border-box;
 }
 
+
+a#hasGeoUri, a#hasGeoUri:link, a#hasGeoUri:visited, a#hasGeoUri:active {
+  color: #666;
+  text-decoration: none;
+}
+a#hasGeoUri:hover { color: hotpink; }
+
+
 #custom-map-controls {
-	width: 14vw;
+	width: 60pt;
 	float: right;
 	box-sizing: border-box;
-	padding-left:1%;
+ 	/* padding-left:10pt; */
 }
 
-/*#custom-map-controls2 {
+#custom-map-controls2 {
  	width: 99vw;
 	float: left;
 	box-sizing: border-box;
-}*/
+}
 
 #custom-map-controlsa, #custom-map-controlsb,
 #custom-map-controlsc {
 	float: left;
 	padding-top:2%;
 	padding-bottom:2%;
+}
+#custom-map-controlsc, #custom-map-controlsc option, #custom-map-controlsc select {  /* level size */
+     font-size: 9pt;
 }
 
 #custom-map-controlsb .leaflet-control {
@@ -66,3 +77,4 @@ and (min-width: 600px) and (max-width: 959px)
 @media (min-width:500px) {
 	.test { font-size: 20px; }
 }
+
