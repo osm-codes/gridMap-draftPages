@@ -1636,7 +1636,7 @@ function afterData(data,layer)
                     var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.short_code.split(/[~]/)[0] + ".json";
 
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){afterDataGeo(e,data.features[0].properties.scientic_code); });
-                    loadGeojson(uri + '/cover',[layerCoverAll], function(e){map.removeLayer(e);},function(e){});
+                    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll], function(e){map.removeLayer(e);},function(e){});
                 }
 
                 //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
@@ -1753,21 +1753,21 @@ if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
 {
     uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
 
-    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else if (pathname.match(/\/CO-\d+$/i))
 {
     uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
 
-    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else if (pathname.match(/\/BR-\d+$/i))
 {
     uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
 
-    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 
@@ -1775,7 +1775,7 @@ else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 {
     uriApi = uri.replace(/\/(BR-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
 
-    loadGeojson(uriApi + '/cover',[layerCoverAll], afterLoadLayerCoverAll,afterData);
+    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else
@@ -1826,7 +1826,7 @@ else
     if(uriApiJurisd !== null && uriApiJurisd !== '')
     {
         loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
-        loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+        loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
     }
 }
 
