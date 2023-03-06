@@ -1,15 +1,16 @@
 
 function changeLevel_byDigits(x) {
   const max=8;
-  const thisURL = window.location.href.replace('#',''); // use regex for #.+?
+  const thisURL = window.location.href.replace(/#.*$/,'');
   const code = document.getElementById('postalCode').textContent.replace('.','');
   let len = (code == null || code == '(click the map)')? 0: code.length;
-  if (x>0 && len<max) {
-     window.location.replace(thisURL+'7');
-  } else if (x<0 && len>1) {
-     window.location.replace( thisURL.substring(0,thisURL.length-1) );
-  }
-  else alert('check code or level limits');
+  if (thisURL.indexOf('~')>0) {
+   if (x>0 && len<max) {
+      window.location.replace(thisURL+'7');
+   } else if (x<0 && len>1) {
+      window.location.replace( thisURL.substring(0,thisURL.length-1) );
+   } else alert('check code or level limits');
+ } else alert('Click a point first');
 }
 
 //////////////
