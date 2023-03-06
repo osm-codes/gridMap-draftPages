@@ -748,6 +748,19 @@ noTooltip.onAdd = function (map) {
 
     return this.container; };
 
+var geoUriDiv = L.control({position: 'topright'});
+geoUriDiv.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+
+    this.container.innerHTML= '<a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a>';
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
+
+
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
@@ -760,6 +773,7 @@ toggleCover.addTo(map);
 jurisdictionGgeohash.addTo(map);
 noTooltip.addTo(map);
 zoomClick.addTo(map);
+geoUriDiv.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
@@ -1230,6 +1244,8 @@ function onMapClick(e)
     var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
+    let decimals = (level <= 64 ? 5 : 4)
+
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
@@ -1238,7 +1254,7 @@ function onMapClick(e)
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 // or e.latlng['lat'].toPrecision(8)
 
-                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],4) + "," + latRound(e.latlng['lng'],4) //+ ";u=" + level;
+                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
 
                 layerMarkerCurrent.clearLayers();
 
@@ -1645,14 +1661,14 @@ function afterData(data,layer)
             {
                 document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
 
+                let level = document.getElementById('level_size').value
+                let decimals = (level <= 64 ? 5 : 4)
+
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
-                const stringgeo = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
 
-                const strgeo2   = 'geo:' + latRound(e.latlng['lat'],4) + "," + latRound(e.latlng['lng'],4) //+ ";u=" + level;
-
-                document.getElementById('geoUri').innerHTML = strgeo2; //stringgeo;
-                document.getElementById('fieldencode').value = stringgeo;
+                document.getElementById('geoUri').innerHTML  = 'geo:' + latRound(lat,decimals) + "," + latRound(lng,decimals) //+ ";u=" + level;
+                document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
             }
         }
     }
@@ -1660,36 +1676,36 @@ function afterData(data,layer)
 
 function beforeAddDataLayer(data)
 {
-    if(data.features.length = 1)
-        if(!data.features[0].properties.isolabel_ext)
-            if(!data.features[0].properties.index)
-            {
-                if(data.features[0].properties.short_code)
-                {
-                    console.log (state.isolabel_ext)
-                    
-                    if(/*state.isolabel_ext !== '' && */state.isolabel_ext !== data.features[0].properties.short_code.split(/[~]/)[0])
-                    {
-                        console.log("mudar cidade");
-
-                        // var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
-                        // const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
-                        // const nextState = { additionalInformation: 'to canonical.' };
-                    
-                        // window.history.pushState(nextState, nextTitle, nextURL);
-                    }
-                    else
-                    {
-                        state.isolabel_ext = data.features[0].properties.short_code.split(/[~]/)[0];
-                        console.log("mesma cidade")
-                    }
-                }
-                else
-                {
-                    console.log("ERROR. Sem cobertura.");
-                    // alert("ERROR. Sem cobertura.");
-                }
-            }
+//     if(data.features.length = 1)
+//         if(!data.features[0].properties.isolabel_ext)
+//             if(!data.features[0].properties.index)
+//             {
+//                 if(data.features[0].properties.short_code)
+//                 {
+//                     console.log (state.isolabel_ext)
+//
+//                     if(/*state.isolabel_ext !== '' && */state.isolabel_ext !== data.features[0].properties.short_code.split(/[~]/)[0])
+//                     {
+//                         console.log("mudar cidade");
+//
+//                         // var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
+//                         // const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
+//                         // const nextState = { additionalInformation: 'to canonical.' };
+//
+//                         // window.history.pushState(nextState, nextTitle, nextURL);
+//                     }
+//                     else
+//                     {
+//                         state.isolabel_ext = data.features[0].properties.short_code.split(/[~]/)[0];
+//                         console.log("mesma cidade")
+//                     }
+//                 }
+//                 else
+//                 {
+//                     console.log("ERROR. Sem cobertura.");
+//                     // alert("ERROR. Sem cobertura.");
+//                 }
+//             }
 }
 
 function afterDataGeo(data,scicode)
