@@ -763,6 +763,7 @@ geoUriDiv.onAdd = function (map) {
 
 zoom.addTo(map);
 layers.addTo(map);
+geoUriDiv.addTo(map);
 escala.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
@@ -773,7 +774,6 @@ toggleCover.addTo(map);
 jurisdictionGgeohash.addTo(map);
 noTooltip.addTo(map);
 zoomClick.addTo(map);
-geoUriDiv.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
