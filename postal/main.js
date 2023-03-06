@@ -1,4 +1,19 @@
 
+function changeLevel_byDigits(x) {
+  const max=8;
+  const thisURL = window.location.href.replace('#',''); // use regex for #.+?
+  const code = document.getElementById('postalCode').textContent.replace('.','');
+  let len = (code == null || code == '(click the map)')? 0: code.length;
+  if (x>0 && len<max) {
+     window.location.replace(thisURL+'7');
+  } else if (x<0 && len>1) {
+     window.location.replace( thisURL.substring(0,thisURL.length-1) );
+  }
+  else alert('check code or level limits');
+}
+
+//////////////
+
 function sel_jurL1(abbrev)
 {
     if (abbrev>'')
@@ -583,7 +598,7 @@ level.onAdd = function (map) {
     // this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
 
     this.label_level.for = 'level';
-    this.label_level.innerHTML = 'Level:<br/>';
+    this.label_level.innerHTML = 'Level: '; //no BR
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
     this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
