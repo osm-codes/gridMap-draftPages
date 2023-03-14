@@ -714,7 +714,7 @@ function getJurisdiction(data)
         // loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
 
     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
-    loadGeojson(uri + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
 
         // checkCountry(input);
     }
@@ -853,6 +853,7 @@ function popUpFeature(feature,layer)
     sufix_side =(feature.properties.side<1000)? 'm': 'km';
     value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
 
+    console.log(feature.properties.code)
     var popupContent = "";
 
     popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
@@ -1234,5 +1235,5 @@ if(uriApi !== null && uriApi !== '')
 if(uriApiJurisd !== null && uriApiJurisd !== '')
 {
     loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
-    loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+    loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
 }

@@ -37,7 +37,7 @@
                     {
                         "data" : null,
                         "render" : function(data, type, row) {
-                                        return '<div align="center">' + data["ctype"] + '&nbsp;' + '<a class="btn" style="text-decoration: none" href="http://preserv.addressforall.org/download/' + data["fhash"] + "." + data["fmeta"].ext + '" target_blank>' + data["fhash"].substring(0, 7) + ' ↓ </a>' + '&nbsp;v' + data["fversion"] + '</div>'
+                                        return '<div align="center">' + data["ctype"] + '&nbsp;' + '<a class="btn" style="text-decoration: none" href="http://dl.digital-guard.org/' + data["fhash"] + "." + data["fmeta"].ext + '" target_blank>' + data["fhash"].substring(0, 7) + ' ↓ </a>' + '&nbsp;v' + data["fversion"] + '</div>'
                                     }
                     },
                     {

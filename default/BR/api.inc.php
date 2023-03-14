@@ -24,13 +24,13 @@
 </ul>
 </li>
 <li>
-<p><code>preserv.addressforall.org</code> esta funcionando no modo download, ou seja, permite fazer download a partir do nome completo do arquivo. Exemplos:</p>
+<p><code>dl.digital-guar.org</code> esta funcionando no modo download, ou seja, permite fazer download a partir do nome completo do arquivo. Exemplos:</p>
 <ul>
-<li><a href="http://preserv.addressforall.org/download/058a6022054e8b3f9ba81f25f7511b58cbd4ad616b0510033b917f3f7f9f23d5.rar" rel="nofollow">preserv.addressforall.org/download/058a602*.rar</a></li>
-<li><a href="http://preserv.addressforall.org/download/076312ec9decde9d854e0cd6913e3706703373500e129e39cd80c1b25dbead45.zip" rel="nofollow">preserv.addressforall.org/download/076312e*.zip</a></li>
-<li><a href="http://preserv.addressforall.org/download/079c4057762797ae4e046e330e1053e1dcf3cbb411c617772be44049764b60f0.geojson" rel="nofollow">preserv.addressforall.org/download/079c405*.geojson</a></li>
-<li><a href="http://preserv.addressforall.org/download/08074d0c4cf032ffbaf8f6c0596afd637ea5be38280d0b943d00eddec4451a88.kmz" rel="nofollow">preserv.addressforall.org/download/08074d0*.kmz</a></li>
-<li><a href="http://preserv.addressforall.org/download/f0fd316ff8482ded50be8c537c48c17c6114c6844a6b76a0e99335a0288a60e7.pdf" rel="nofollow">preserv.addressforall.org/download/f0fd316*.pdf</a></li>
+<li><a href="http://dl.digital-guar.org/058a6022054e8b3f9ba81f25f7511b58cbd4ad616b0510033b917f3f7f9f23d5.rar" rel="nofollow">dl.digital-guar.org/058a602*.rar</a></li>
+<li><a href="http://dl.digital-guar.org/076312ec9decde9d854e0cd6913e3706703373500e129e39cd80c1b25dbead45.zip" rel="nofollow">dl.digital-guar.org/076312e*.zip</a></li>
+<li><a href="http://dl.digital-guar.org/079c4057762797ae4e046e330e1053e1dcf3cbb411c617772be44049764b60f0.geojson" rel="nofollow">dl.digital-guar.org/079c405*.geojson</a></li>
+<li><a href="http://dl.digital-guar.org/08074d0c4cf032ffbaf8f6c0596afd637ea5be38280d0b943d00eddec4451a88.kmz" rel="nofollow">dl.digital-guar.org/08074d0*.kmz</a></li>
+<li><a href="http://dl.digital-guar.org/f0fd316ff8482ded50be8c537c48c17c6114c6844a6b76a0e99335a0288a60e7.pdf" rel="nofollow">dl.digital-guar.org/f0fd316*.pdf</a></li>
 </ul>
 </li>
 <li>
