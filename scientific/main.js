@@ -1,4 +1,5 @@
-var uri_base = "https://osm.codes"
+//var uri_base = "https://osm.codes"
+var uri_base = "."
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap contributors</a>';
