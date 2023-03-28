@@ -37,7 +37,7 @@ function sel_jurL3(abbrev,optc) {
     let country = document.getElementById(optc+'_jurL1').value;
     let state = document.querySelector('#'+optc+'_jurL2 select').value;
     if (optc=='wrk' || (approved_jurisdictions[country] && approved_jurisdictions[country][state] && approved_jurisdictions[country][state]['mun'].includes(abbrev)) || confirm("It is not working,\nit is only to see city at the map ok?")) {
-      window.location.href = 'https://osm.codes/' + country+'-'+state+'-'+abbrev
+      window.location.href = './' + country+'-'+state+'-'+abbrev
     }
 }
 </script>
@@ -45,7 +45,7 @@ function sel_jurL3(abbrev,optc) {
 
 <body style="padding:1em">
 <p>The OSMcodes infrastructure <b>is under testing and construction</b>.</p> 
-<p><a href="https://OSM.codes/">OSM.codes</a> is the "OpenStreetMap Codes", and a project maintained by <a target="_blanck" href="https://AddressForAll.org/">AddressForAll Institute</a>.
+<p><a href="./">OSM.codes</a> is the "OpenStreetMap Codes", and a project maintained by <a target="_blanck" href="https://AddressForAll.org/">AddressForAll Institute</a>.
 </p>
 
 <h2>Options</h2>
@@ -77,15 +77,15 @@ function sel_jurL3(abbrev,optc) {
 
 <p>(draft) <b><i>Scientific OSMcodes</i></b> and <i>scientific grid</i>, by country:
 <ul>
- <li><a href="https://OSM.codes/BR+D">Brazil</a> 
- <li><a href="https://OSM.codes/CO+08">Colombia</a>
- <li><a href="https://OSM.codes/EC+08">Ecuador</a>
- <li><a href="https://OSM.codes/UY+B">Uruguay</a>
+ <li><a href="./BR+D">Brazil</a>
+ <li><a href="./CO+08">Colombia</a>
+ <li><a href="./EC+08">Ecuador</a>
+ <li><a href="./UY+B">Uruguay</a>
 </ul>
 </p>
 
 <hr/>
-<p align="right"><a href="https://osm.codes/_talk/">Contact us</a></p>
+<p align="right"><a href="./_talk/">Contact us</a></p>
 
 <!--
 <hr/>
