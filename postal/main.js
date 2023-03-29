@@ -141,6 +141,9 @@ var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9
 
 var levelValues =  [600000,400000,300000,200000,150000,100000,75000,50000,30000,25000,19000,13000,9000,6000,4000,3000,2000,1500,1200,700,600,400,300,200,150,100,70,50,30,20,15,12,8,6,4,3,2,1.5,1,0.7,0.5];
 
+var countries_common = {
+    softwareVersions: ['gridMap-draftPages/v0.1.0'],
+}
 var countries = {
     BR:
     {
@@ -155,6 +158,7 @@ var countries = {
         isocoden: 76,
         jurisdictionPlaceholder: 'BR-SP-SaoPaulo',
         selectedBases: ['base32','base16h1c'],
+        softwareVersions: ['BR_new/v0.1.0'],
         bases:
         {
             base32:
@@ -209,6 +213,7 @@ var countries = {
         isocoden: 170,
         jurisdictionPlaceholder: 'CO-ANT-Itagui',
         selectedBases: ['base32','base16h'],
+        softwareVersions: ['CO_new/v0.1.0'],
         bases:
         {
             base32:
@@ -251,6 +256,7 @@ var countries = {
         isocoden: 218,
         jurisdictionPlaceholder: 'EC-L-Loja',
         selectedBases: ['base32','base16h'],
+        softwareVersions: ['EC_new/v0.1.0'],
         bases:
         {
             base32:
@@ -293,6 +299,7 @@ var countries = {
         isocoden: 868,
         jurisdictionPlaceholder: 'UY-CA-LasPiedras',
         selectedBases: ['base32','base16h1c'],
+        softwareVersions: ['UY_new/v0.1.0'],
         bases:
         {
             base32:
@@ -357,6 +364,26 @@ var state = {
     isolabel_ext: ''
 };
 
+function generateSoftwareVersions()
+{
+    let html = '';
+
+    for (let i = 0; i < (countries_common['softwareVersions']).length; i++)
+    {
+        html += '<a href="https://git.osm.codes/' + ((countries_common['softwareVersions'])[i]).replace(/(\/)/i, "/releases/tag/" ) +'">' + (countries_common['softwareVersions'])[i] + '</a> '
+    }
+
+    for (let i = 0; i < defaultMap.softwareVersions.length; i++)
+    {
+        html += '<a href="https://git.osm.codes/' + (defaultMap.softwareVersions[i]).replace(/(\/)/i, "/releases/tag/" ) +'">' + defaultMap.softwareVersions[i] + '</a> '
+    }
+
+    if (document.getElementById('swVersions'))
+    {
+        document.getElementById('swVersions').innerHTML = html
+    }
+}
+
 function checkCountry(string,togglecountry=true)
 {
     for(var key in countries)
@@ -368,6 +395,7 @@ function checkCountry(string,togglecountry=true)
             defaultMap = countries[key];
             defaultMapBase = defaultMap.postalcodeBase;
             togglecountry ? toggleCountry() : '';
+            generateSoftwareVersions();
             break;
         }
     }
@@ -390,6 +418,7 @@ function checkCountryn(num,togglecountry=true)
             defaultMap = countries[key];
             defaultMapBase = defaultMap.postalcodeBase;
             togglecountry ? toggleCountry() : '';
+            generateSoftwareVersions();
             break;
         }
     }
