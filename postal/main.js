@@ -222,11 +222,11 @@ var countries = {
         {
             base32:
             {
-                iniLevel: 4,
-                endLevel: 39,
+                iniLevel: 2,
+                endLevel: 37,
                 modLevel: 5,
                 iniDigit: 1,
-                levelDefault: 39,
+                levelDefault: 37,
                 symbol: '~',
                 placeholderDecode: '3D5',
                 placeholderEncode: '3.5,-72.3;u=10',
@@ -235,10 +235,10 @@ var countries = {
             },
             base16h:
             {
-                iniLevel: 4,
+                iniLevel: 2,
                 endLevel: 40,
                 modLevel: 1,
-                iniDigit: 2,
+                iniDigit: 1,
                 symbol: '+',
                 placeholderDecode: 'CO+0A2',
                 placeholderEncode: '3.5,-72.3;u=10',
