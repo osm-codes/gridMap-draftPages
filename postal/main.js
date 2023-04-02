@@ -1,3 +1,5 @@
+//var uri_base = "https://osm.codes"
+var uri_base = "."
 
 function changeLevel_byDigits(x) {
   const max=8;
@@ -45,7 +47,7 @@ function sel_jurL3(abbrev)
     // let country = document.getElementById('sel_jurL1').value;
     let country = defaultMap.isocode;
     let state = document.querySelector('#sel_jurL2').value;
-    window.location.href = 'https://osm.codes/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
+    window.location.href = uri_base + '/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
 }
 
 function latRound(x,maxDigits=6) {
@@ -70,9 +72,6 @@ function updateJurisd(jurisd)
         s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
     document.getElementById('sel_jurL3').innerHTML=s
 }
-
-//var uri_base = "https://osm.codes"
-var uri_base = "."
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
@@ -1429,7 +1428,7 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.scientic_code)
     {
-        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
     }
 
     if(feature.properties.short_code)
@@ -1751,7 +1750,7 @@ function afterDataGeo(data,scicode)
             document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
         }
 
-        document.getElementById('sciCode').innerHTML = '<a href="https://osm.codes/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + scicode + '">' + scicode +'</a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + scicode + '">' + scicode +'</a>';
     }
 }
 

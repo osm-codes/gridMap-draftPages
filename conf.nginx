@@ -243,15 +243,15 @@ server {
     }
 
     ## absoluto 16h1c (cientifica)
-    location ~ "^/geo:osmcodes:(([Bb][Rr])|([Uu][Yy]))\+([0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]{0,}([GHJKLMNPQRSTVZ])?)?)(,[0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)?){0,}\.json" {
-        rewrite  "^/geo:osmcodes:(([Bb][Rr])|([Uu][Yy]))\+(([0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]{0,}([GHJKLMNPQRSTVZ])?)?)(,[0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)?){0,})\.json$"
+    location ~ "^/geo:osmcodes:(([Bb][Rr])|([Uu][Yy]))\+([0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]{0,}([GQHMRVJKNPSTZY])?)?)(,[0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]+([GQHMRVJKNPSTZY])?)?){0,}\.json" {
+        rewrite  "^/geo:osmcodes:(([Bb][Rr])|([Uu][Yy]))\+(([0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]{0,}([GQHMRVJKNPSTZY])?)?)(,[0123456789ABCDEFghjklmnpqrstvz]([0123456789ABCDEF]+([GQHMRVJKNPSTZY])?)?){0,})\.json$"
             /rpc/osmcode_decode_scientific_absolute?p_code=$4&p_iso=$1&p_base=18 break;
         proxy_pass http://127.0.0.1:3105;
     }
 
     ## absoluto 16h (cientifica)
-        location ~* "^/geo:osmcodes:([A-Z]{2})\+([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)(,[0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?){0,}\.json" {
-        rewrite "(?i)^/geo:osmcodes:([A-Z]{2})\+(([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)(,[0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?){0,})\.json$"
+        location ~* "^/geo:osmcodes:([A-Z]{2})\+([0123456789ABCDEF]+([GQHMRVJKNPSTZY])?)(,[0123456789ABCDEF]+([GQHMRVJKNPSTZY])?){0,}\.json" {
+        rewrite "(?i)^/geo:osmcodes:([A-Z]{2})\+(([0123456789ABCDEF]+([GQHMRVJKNPSTZY])?)(,[0123456789ABCDEF]+([GQHMRVJKNPSTZY])?){0,})\.json$"
             /rpc/osmcode_decode_scientific_absolute?p_code=$2&p_iso=$1&p_base=16 break;
         proxy_pass http://127.0.0.1:3105;
     }
