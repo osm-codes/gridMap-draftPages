@@ -83,31 +83,24 @@ var osmAndMapboxAttr = osmAttrib + '. ' + mapboxAttr;
 var osmAndCartoAttr = osmAttrib + '. ' + cartoAttr;
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    // grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })/*,
+    grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     streets = L.tileLayer(mapboxUrl,{id:'mapbox/streets-v11',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     satellite = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-v9',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })*/;
 
 var baseLayers = {
     'Grayscale': grayscale,
-    'OpenStreetMap': openstreetmap,
+    'OpenStreetMap': openstreetmap/*,
     'Streets': streets,
     'Satellite': satellite,
-    'Satellite and street': satellitestreet };
+    'Satellite and street': satellitestreet*/ };
 
 var layerPolygonCurrent = new L.geoJSON(null, {
             style: style,
             onEachFeature: onEachFeature,
             pointToLayer: pointToLayer,
         });
-
-// var layerPolygonCurrentGrid = new L.geoJSON(null, {
-//             style: stylePolygonCurrentGrid,
-//             onEachFeature: onEachFeaturePolygonCurrentGrid,
-//             pointToLayer: pointToLayer,
-//             filter: filterLayer,
-//         });
 
 var layerPolygonAll = new L.geoJSON(null,{
             style: style,
@@ -137,7 +130,6 @@ var overlays = {
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
-    // 'Grid cells': layerPolygonCurrentGrid,
 };
 
 var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];

@@ -11,18 +11,18 @@ var osmAndMapboxAttr = osmAttrib + '. ' + mapboxAttr;
 var osmAndCartoAttr = osmAttrib + '. ' + cartoAttr;
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    // grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })/*,
+    grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     streets = L.tileLayer(mapboxUrl,{id:'mapbox/streets-v11',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
     satellite = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-v9',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })*/;
 
 var baseLayers = {
     'Grayscale': grayscale,
-    'OpenStreetMap': openstreetmap,
+    'OpenStreetMap': openstreetmap/*,
     'Streets': streets,
     'Satellite': satellite,
-    'Satellite and street': satellitestreet };
+    'Satellite and street': satellitestreet*/ };
 
 var layerPolygonCurrent = new L.geoJSON(null, {
             style: style,
@@ -1251,10 +1251,10 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 {
     uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
 }
-else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*$/i))
+else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
 {
-    uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:osmcodes:$1.json");
-    uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GHJKLMNPQRSTVZ])?)?)*)$/i, "/geo:iso_ext:$2.json");
+    uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
+    uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
 }
 else if (pathname.match(/^\/geo:.+$/i))
 {
