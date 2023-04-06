@@ -896,7 +896,7 @@ server { ## OSM.CODES
     }
 
     ## absoluto 16h1c (cientifica)
-    location ~* "^/geo:osmcodes:((BRr)|(UY))\+([0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]{0,}([GHJKLMNPQRSTVZ])?)?)(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)?){0,}\.json" {
+    location ~* "^/geo:osmcodes:((BR)|(UY))\+([0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]{0,}([GHJKLMNPQRSTVZ])?)?)(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)?){0,}\.json" {
         rewrite  "(?i)^/geo:osmcodes:((BR)|(UY))\+(([0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]{0,}([GHJKLMNPQRSTVZ])?)?)(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]+([GHJKLMNPQRSTVZ])?)?){0,})\.json$"
             /rpc/osmcode_decode_scientific_absolute?p_code=$4&p_iso=$1&p_base=18 break;
         proxy_pass http://127.0.0.1:3103;
