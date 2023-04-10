@@ -1,21 +1,17 @@
+var uri_base = "."
+
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap contributors</a>';
-var mapboxUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-var mapboxAttr = 'Tiles from <a href="https://www.mapbox.com">Mapbox</a>';
-var osmAndMapboxAttr = osmAttrib + '. ' + mapboxAttr;
+var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
+var cartoUrl = 'https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}{r}.png';
+var cartoAttr = '<a href="https://carto.com/attributions">CARTO</a>';
+var osmAndCartoAttr = osmAttrib + '. ' + cartoAttr;
 
 var openstreetmap = L.tileLayer(osmUrl,   {attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    streets = L.tileLayer(mapboxUrl,{id:'mapbox/streets-v11',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellite = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-v9',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
 var baseLayers = {
     'Grayscale': grayscale,
-    'OpenStreetMap': openstreetmap,
-    'Streets': streets,
-    'Satellite': satellite,
-    'Satellite and street': satellitestreet };
+    'OpenStreetMap': openstreetmap };
 
 var layerJurisd = new L.geoJSON(null,{
             style: style,
@@ -46,6 +42,29 @@ escala.addTo(map);
 
 function onEachFeature(feature,layer)
 {
+    if (feature.properties.osm_id)
+    {
+        var popupContent = "";
+        popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
+        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
+        popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
+        popupContent += "parent_id: " + feature.properties.parent_id + "<br>";
+        popupContent += "admin_level: " + feature.properties.admin_level + "<br>";
+        popupContent += "name: " + feature.properties.name + "<br>";
+        popupContent += "parent_abbrev: " + feature.properties.parent_abbrev + "<br>";
+        popupContent += "abbrev: " + feature.properties.abbrev + "<br>";
+        popupContent += "wikidata_id: " + feature.properties.wikidata_id + "<br>";
+        popupContent += "lexlabel: " + feature.properties.lexlabel + "<br>";
+        popupContent += "isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
+        popupContent += "lex_urn: " + feature.properties.lex_urn + "<br>";
+        popupContent += "name_en: " + feature.properties.name_en + "<br>";
+        popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
+        popupContent += "area: " + feature.properties.area + "<br>";
+        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
+
+        layer.bindPopup(popupContent);
+    }
+
     if (feature.properties.osm_id)
     {
         var popupContent = "";
