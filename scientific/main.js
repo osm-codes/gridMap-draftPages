@@ -363,25 +363,26 @@ function clearAllLayers()
     document.getElementById('fielddecodelist').value= '';
 }
 
+function resetDef()
+{
+    map.setView(defaultMap.center, defaultMap.zoom);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
+    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+}
+
 function clearAll()
 {
     clearAllLayers();
-
-    toggleCountry()
-    map.setView(defaultMap.center, defaultMap.zoom);
+    resetDef();
 }
 
 function toggleCountry()
 {
     clearAllLayers();
-
     defaultMapBase = defaultMap.defaultBase;
-
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
-    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
-
-    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+    resetDef();
 }
 
 function toggleTooltipLayers()
