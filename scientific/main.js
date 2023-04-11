@@ -12,12 +12,19 @@ var layerPolygonCurrent = new L.geoJSON(null, {
             pointToLayer: pointToLayer,
         });
 
+var layerCenterCurrent = new L.geoJSON(null, {
+            style: style,
+            onEachFeature: onEachFeature,
+            pointToLayer: pointToLayer,
+        });
+
 var layerPolygonCurrentGrid = new L.geoJSON(null, {
             style: stylePolygonCurrentGrid,
             onEachFeature: onEachFeaturePolygonCurrentGrid,
             pointToLayer: pointToLayer,
             filter: filterLayer,
         });
+
 var layerGridAll = new L.geoJSON(null, {
             style: stylePolygonCurrentGrid,
             onEachFeature: onEachFeaturePolygonCurrentGrid,
@@ -25,7 +32,27 @@ var layerGridAll = new L.geoJSON(null, {
             filter: filterLayer,
         });
 
+var layerPolygonCurrentGrid2 = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonAllGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
+        });
+
+var layerGridAll2 = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonAllGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
+        });
+
 var layerPolygonAll = new L.geoJSON(null,{
+            style: style,
+            onEachFeature: onEachFeaturePolygonAll,
+            pointToLayer: pointToLayer,
+        });
+
+var layerCenterAll = new L.geoJSON(null,{
             style: style,
             onEachFeature: onEachFeaturePolygonAll,
             pointToLayer: pointToLayer,
@@ -49,12 +76,16 @@ var layerMarkerAll = new L.featureGroup();
 var overlays = {
     'Current polygon': layerPolygonCurrent,
     'All polygon': layerPolygonAll,
+    'Current center': layerCenterCurrent,
+    'All center': layerCenterAll,
     'Current marker': layerMarkerCurrent,
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
     'Current grid': layerPolygonCurrentGrid,
     'All grid': layerGridAll,
+    'Current grid2': layerPolygonCurrentGrid2,
+    'All grid2': layerGridAll2,
 };
 
 var defaultMap = countries['CO'];
@@ -105,7 +136,7 @@ var map = L.map('map',{
     zoom:   defaultMap.zoom,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerGridAll, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerGridAll, layerPolygonAll, layerCenterAll, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -295,7 +326,7 @@ zoomClick.onAdd = function (map) {
     this.checkbox  = L.DomUtil.create('input', '', this.container);
 
     this.label.for= 'zoomclick';
-    this.label.innerHTML= 'Disable zoom-click: ';
+    this.label.innerHTML= '<br/>Disable zoom-click: ';
     this.checkbox.id = 'zoomclick';
     this.checkbox.type = 'checkbox';
     this.checkbox.checked = false;
@@ -349,11 +380,16 @@ b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
 b.appendChild(zoomClick.getContainer());
 
+
 function clearAllLayers()
 {
     layerPolygonCurrent.clearLayers();
     layerPolygonCurrentGrid.clearLayers();
+    layerPolygonCurrentGrid2.clearLayers();
+    layerCenterCurrent.clearLayers();
     layerGridAll.clearLayers();
+    layerGridAll2.clearLayers();
+    layerCenterAll.clearLayers();
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
@@ -389,13 +425,14 @@ function toggleTooltipLayers()
 {
     map.eachLayer(function(l)
     {
-        if (l.getTooltip())
-        {
-            var tooltip = l.getTooltip();
-            l.unbindTooltip();
-            toggleTooltipStatus ? tooltip.options.permanent = false : tooltip.options.permanent = true
-            l.bindTooltip(tooltip)
-        }
+        if(map.hasLayer(l))
+            if (l.getTooltip())
+            {
+                var tooltip = l.getTooltip();
+                l.unbindTooltip();
+                toggleTooltipStatus ? tooltip.options.permanent = false : tooltip.options.permanent = true
+                l.bindTooltip(tooltip)
+            }
     })
 
     toggleTooltipStatus ? toggleTooltipStatus = false : toggleTooltipStatus = true;
@@ -556,7 +593,7 @@ function getEncode(noData)
 
         if(grid !== '')
         {
-            loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
+            loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
         }
     }
 }
@@ -623,7 +660,7 @@ function onMapClick(e)
 
     if(grid !== '')
     {
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
     }
 }
 
@@ -674,7 +711,17 @@ function layerTooltipFeature(feature,layer)
         var layerTooltip = (feature.properties.code);
     }
 
-    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltip' + feature.properties.base});
+    layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1c'});
+}
+
+function layerTooltipFeature2(feature,layer)
+{
+    layer.bindTooltip(feature.properties.code,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+}
+
+function layerTooltipFeature3(feature,layer)
+{
+    layer.bindTooltip(feature.properties.code_subcell,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
 function highlightFeature(e)
@@ -716,7 +763,7 @@ function onEachFeature(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
 
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterCurrent);
 
     if(feature.properties.code)
     {
@@ -750,7 +797,7 @@ function onEachFeaturePolygonAll(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
 
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonAll);
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterAll);
 
     layer.on({
         click: onFeatureClick,
@@ -865,14 +912,23 @@ function stylePolygonCurrentGrid(feature)
 
 function onEachFeaturePolygonCurrentGrid(feature,layer)
 {
-    const reg = /(...)(?!$)/g
     popUpFeature(feature,layer);
-    layerTooltipFeature(feature,layer);
+    layerTooltipFeature3(feature,layer);
 
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeaturePolygonCurrentGrid,
         mouseout: resetHighlightPolygonCurrentGrid
+    });
+}
+
+function onEachFeaturePolygonAllGrid(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature2(feature,layer);
+
+    layer.on({
+        click: onFeatureClick
     });
 }
 

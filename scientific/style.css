@@ -58,13 +58,19 @@ h2, h3 {
 	padding-top:2%;
 }
 
-.leaflet-tooltip.tooltipbase16h {
-	border-left-color: rgb(255, 250, 205, 1);
-	background-color: rgb(255, 250, 205, 1)
-}
-
 .leaflet-tooltip.tooltipbase16h1c {
-	border-left-color: rgb(255, 250, 205, 1);
-	background-color: rgb(255, 250, 205, 1)
+	border: #ff0;
+	background: #ff0
 }
 
+.leaflet-tooltip.tooltipbase16h1ca {
+	border: #fff;
+	background: #fff
+}
+
+.leaflet-tooltip-left.tooltipbase16h1c::before {
+  border-left-color: #ff0;
+}
+.leaflet-tooltip-right.tooltipbase16h1c::before {
+  border-right-color: #ff0;
+}
