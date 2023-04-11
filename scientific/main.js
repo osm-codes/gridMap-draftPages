@@ -1,28 +1,17 @@
-//var uri_base = "https://osm.codes"
 var uri_base = "."
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
-var mapboxUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-var mapboxAttr = '<a href="https://www.mapbox.com">Mapbox</a>';
 var cartoUrl = 'https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}{r}.png';
 var cartoAttr = '<a href="https://carto.com/attributions">CARTO</a>';
-var osmAndMapboxAttr = osmAttrib + '. ' + mapboxAttr;
 var osmAndCartoAttr = osmAttrib + '. ' + cartoAttr;
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })/*,
-    grayscale = L.tileLayer(mapboxUrl,{id:'mapbox/light-v10',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    streets = L.tileLayer(mapboxUrl,{id:'mapbox/streets-v11',attribution: osmAndMapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellite = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-v9',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 }),
-    satellitestreet = L.tileLayer(mapboxUrl,{id:'mapbox/satellite-streets-v11',attribution: mapboxAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 })*/;
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
 var baseLayers = {
     'Grayscale': grayscale,
-    'OpenStreetMap': openstreetmap/*,
-    'Streets': streets,
-    'Satellite': satellite,
-    'Satellite and street': satellitestreet*/ };
+    'OpenStreetMap': openstreetmap };
 
 var layerPolygonCurrent = new L.geoJSON(null, {
             style: style,
@@ -31,6 +20,12 @@ var layerPolygonCurrent = new L.geoJSON(null, {
         });
 
 var layerPolygonCurrentGrid = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonCurrentGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
+        });
+var layerGridAll = new L.geoJSON(null, {
             style: stylePolygonCurrentGrid,
             onEachFeature: onEachFeaturePolygonCurrentGrid,
             pointToLayer: pointToLayer,
@@ -65,7 +60,8 @@ var overlays = {
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
-    'Grid cells': layerPolygonCurrentGrid,
+    'Current grid': layerPolygonCurrentGrid,
+    'All grid': layerGridAll,
 };
 
 var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];
@@ -355,7 +351,7 @@ var map = L.map('map',{
     zoom:   defaultMap.zoom,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonCurrentGrid, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerGridAll, layerPolygonAll, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -603,6 +599,7 @@ function clearAllLayers()
 {
     layerPolygonCurrent.clearLayers();
     layerPolygonCurrentGrid.clearLayers();
+    layerGridAll.clearLayers();
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
@@ -804,7 +801,7 @@ function getEncode(noData)
 
         if(grid !== '')
         {
-            loadGeojson(uriGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+            loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
         }
     }
 }
@@ -871,7 +868,7 @@ function onMapClick(e)
 
     if(grid !== '')
     {
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
     }
 }
 
@@ -888,7 +885,6 @@ function popUpFeature(feature,layer)
     sufix_side =(feature.properties.side<1000)? 'm': 'km';
     value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
 
-    console.log(feature.properties.code)
     var popupContent = "";
 
     popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
@@ -1095,6 +1091,7 @@ function filterLayer(feature, layer) {
 function resetHighlightPolygonCurrentGrid(e,layer)
 {
     layerPolygonCurrentGrid.resetStyle(e.target);
+    layerGridAll.resetStyle(e.target);
 }
 
 function stylePolygonCurrentGrid(feature)
