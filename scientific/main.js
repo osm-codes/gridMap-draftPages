@@ -500,8 +500,8 @@ function getJurisdiction(data)
         uri = uri_base + "/geo:iso_ext:" + input + ".json";
         // loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
 
-    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
-    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
+    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
 
         // checkCountry(input);
     }
@@ -891,7 +891,7 @@ function afterLoadCurrent(featureGroup)
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
 }
 
-function afterLoadJurisdAll(featureGroup,fittobounds=true)
+function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true)
 {
     if(fittobounds)
     {
@@ -903,14 +903,17 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true)
         map.options.minZoom = map.getBoundsZoom(featureGroup.getBounds());
     }
 
-    map.setMaxBounds(featureGroup.getBounds())
+    if(setmaxbounds)
+    {
+        map.setMaxBounds(featureGroup.getBounds())
+    }
 }
 
-function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
+function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true)
 {
     if(toggleCoverStatus)
     {
-        afterLoadJurisdAll(featureGroup,fittobounds)
+        afterLoadJurisdAll(featureGroup,fittobounds,setmaxbounds)
     }
     else
     {
@@ -1021,6 +1024,6 @@ if(uriApi !== null && uriApi !== '')
 
 if(uriApiJurisd !== null && uriApiJurisd !== '')
 {
-    loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},afterData);
-    loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+    loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
+    loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
 }
