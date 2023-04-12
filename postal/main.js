@@ -114,15 +114,13 @@ var overlays = {
     'Jurisdictions': layerJurisdAll,
 };
 
-
 var defaultMap = countries['CO'];
 var defaultMapBase = defaultMap.postalcodeBase;
 var arrayOfSideCoverCell = new Array();
+var arrayOfLevelCoverCell = new Array();
+var sizeCurrentCell = 0;
+var centerCurrentCell;
 var getJurisdAfterLoad = false;
-
-var state = {
-    isolabel_ext: ''
-};
 
 function checkCountry(string,togglecountry=true)
 {
@@ -134,7 +132,7 @@ function checkCountry(string,togglecountry=true)
         {
             defaultMap = countries[key];
             defaultMapBase = defaultMap.postalcodeBase;
-            togglecountry ? toggleCountry() : '';
+            togglecountry ? clearAllLayers() : '';
             generateSoftwareVersions();
             break;
         }
@@ -157,7 +155,7 @@ function checkCountryn(num,togglecountry=true)
         {
             defaultMap = countries[key];
             defaultMapBase = defaultMap.postalcodeBase;
-            togglecountry ? toggleCountry() : '';
+            togglecountry ? clearAllLayers() : '';
             generateSoftwareVersions();
             break;
         }
@@ -170,7 +168,6 @@ var map = L.map('map',{
     maxBoundsViscocity: 1,
     zoomControl: false,
     renderer: L.svg(),
-    // layers: [grayscale, layerPolygonCurrent, layerPolygonCurrentGrid, layerPolygonAll, layerCoverAll, layerJurisdAll] });
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
@@ -180,23 +177,6 @@ map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
 map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
 map.on('click', onMapClick);
-// map.on('zoomend', showZoomLevel);
-// showZoomLevel();
-map.on('baselayerchange', function (e) {
-    console.log(e.name);
-
-    // if(e.name == "satellite" || e.name == "satellitestreet")
-    // {
-    //     layerPolygonCurrent.setStyle({
-    //         color: '#F00',
-    //         weight:1
-    //     });
-    // }
-    // else
-    // {
-    //     layerPolygonCurrent.resetStyle(e.target);
-    // }
-});
 
 var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
@@ -300,12 +280,10 @@ decodeGgeohashList.onAdd = function (map) {
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
 
-    // L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
     L.DomEvent.disableScrollPropagation(this.field);
     L.DomEvent.disableClickPropagation(this.field);
     L.DomEvent.on(this.button, 'click', getDecodeList, this.container);
-    //L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getDecodeList(data);}}, this.container);
 
     return this.container; };
 
@@ -336,61 +314,19 @@ encodeGgeohash.onAdd = function (map) {
     return this.container;
   }; // \onAdd(map)
 
-var country = L.control({position: 'topleft'});
-country.onAdd = function (map) {
-    this.container      = L.DomUtil.create('div');
-    this.label_country  = L.DomUtil.create('label', '', this.container);
-    this.select_country = L.DomUtil.create('select', '', this.container);
-
-    this.label_country.for = 'country';
-    this.label_country.innerHTML = 'Country: ';
-    this.select_country.id = 'country';
-    this.select_country.name = 'country';
-    this.select_country.innerHTML = generateSelectCountries(countries);
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.select_country, 'change', toggleCountry, this.container);
-
-    return this.container; };
-
 var level = L.control({position: 'topleft'});
 level.onAdd = function (map) {
     this.container     = L.DomUtil.create('div');
     this.label_level   = L.DomUtil.create('label', '', this.container);
     this.select_level  = L.DomUtil.create('select', '', this.container);
-    // this.label_grid    = L.DomUtil.create('label', '', this.container);
-    // this.select_grid   = L.DomUtil.create('select', '', this.container);
-    //
-    // this.label_grid.for = 'grid';
-    // this.label_grid.innerHTML = ' ';
-    // this.select_grid.id = 'grid';
-    // this.select_grid.name = 'grid';
-    // this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: '; //no BR
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
-    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
-
-    return this.container; };
-
-var baseLevel = L.control({position: 'topleft'});
-baseLevel.onAdd = function (map) {
-    this.container     = L.DomUtil.create('div');
-    this.select_base   = L.DomUtil.create('select', '', this.container);
-
-    this.select_base.id = 'base';
-    this.select_base.name = 'base';
-    this.select_base.innerHTML = generateSelectBase(defaultMap.selectedBases);
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.select_base, 'change', toggleLevelBase, this.container);
 
     return this.container; };
 
@@ -425,23 +361,6 @@ fitBounds.onAdd = function (map) {
 
     return this.container; };
 
-var fitCenter = L.control({position: 'topleft'});
-fitCenter.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    this.label.for= 'fitcenter';
-    this.label.innerHTML= 'Fit center: ';
-    this.checkbox.id = 'fitcenter';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = true;
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-
-    return this.container; };
-
 var toggleTooltip = L.control({position: 'topleft'});
 toggleTooltip.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -456,7 +375,7 @@ toggleTooltip.onAdd = function (map) {
 
     return this.container; };
 
-var toggleCover = L.control({position: 'topleft'});toggleCoverLayers
+var toggleCover = L.control({position: 'topleft'});
 toggleCover.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
@@ -467,20 +386,6 @@ toggleCover.onAdd = function (map) {
     L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
     L.DomEvent.on(this.button, 'click', toggleCoverLayers, this.container);
-
-    return this.container; };
-
-var zoomAll = L.control({position: 'topleft'});
-zoomAll.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.button.type = 'button';
-    this.button.innerHTML= "Zoom all";
-
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', function(e){map.fitBounds(layerPolygonAll.getBounds())}, this.container);
 
     return this.container; };
 
@@ -529,8 +434,6 @@ geoUriDiv.onAdd = function (map) {
 
     return this.container; };
 
-
-
 zoom.addTo(map);
 layers.addTo(map);
 geoUriDiv.addTo(map);
@@ -568,31 +471,15 @@ function clearAllLayers()
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
+    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMapBase].placeholderEncode;
 }
 
 function clearAll()
 {
-    clearAllLayers();
-
-    toggleCountry()
+    clearAllLayers()
 
     map.fitBounds(layerJurisdAll.getBounds());
-}
-
-function toggleCountry()
-{
-    clearAllLayers();
-    defaultMapBase = defaultMap.defaultBase;
-
-    toggleLevelBase();
-}
-
-function toggleLevelBase()
-{
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
-    // document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
-    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo:' + defaultMap.bases[defaultMapBase].placeholderEncode;
 }
 
 function toggleTooltipLayers()
@@ -618,63 +505,16 @@ function toggleCoverLayers()
     toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
 }
 
-function generateSelectGrid(grids)
-{
-    let htmlA = '';
-    let htmlB = '';
-
-    for (let i = 0; i < grids.length; i++)
-    {
-        htmlA += '<option value="grid' +  grids[i]    + '">Grid</option>'
-        htmlB += '<option value="grid' + (grids[i]+1) + '">Points</option>'
-    }
-
-    return '<option value="">Cell</option>' + htmlB + htmlA
-}
-
-function generateSelectBase(bases)
-{
-    let html = '';
-
-    for (let i = 0; i < bases.length; i++)
-    {
-        html += '<option value="' + bases[i] + '">' + bases[i] + '</option>'
-    }
-
-    return html
-}
-
-function generateSelectCountries(dict)
-{
-    let html = '';
-
-    for(var key in dict)
-    {
-        html += '<option value="' + key + (defaultMap.isocode == key ? '" selected>' : '">') + countries[key].name + '</option>'
-    }
-
-    defaultMap.isocode
-
-    return html
-}
-
 function generateSelectLevel(base,baseValue)
 {
     let html = '';
-    let m=0;
+    let a = Math.min(...arrayOfLevelCoverCell);
+
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
+        if (arrayOfLevelCoverCell.length > 0 && j >= a-1)
         {
             html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-            //html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-        }
-        else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
-        {
-            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-            // html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
     return html
@@ -683,20 +523,13 @@ function generateSelectLevel(base,baseValue)
 function generateSelectLevel2(base,baseValue,size)
 {
     let html = '';
-    let m=0;
+    let a = Math.min(...arrayOfLevelCoverCell);
+
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && levelSize[i] <= Math.ceil(Math.min(...arrayOfSideCoverCell)))
+        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && j >= a-1)
         {
             html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-            // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-        }
-        else if (arrayOfSideCoverCell && arrayOfSideCoverCell.length == 0)
-        {
-            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-            // html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
 
@@ -771,8 +604,6 @@ function getEncode(noData)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
-        // let grid = document.getElementById('grid').value
-        let grid = ""
         let country = defaultMap.isocode;
         let state = document.getElementById('sel_jurL2').value;
         let jL3dom = document.getElementById('sel_jurL3').value;
@@ -802,7 +633,7 @@ function getEncode(noData)
 
         var uri_ = uri + '/' + context
 
-        var uriGrid = uri + (grid ? '/' + grid : '') + '/' + context
+        var uriGrid = uri + '/' + context
 
         document.getElementById('fielddecode').value = '';
 
@@ -814,11 +645,6 @@ function getEncode(noData)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
         loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-
-        if(grid !== '')
-        {
-            loadGeojson(uriGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
-        }
     }
 }
 
@@ -829,12 +655,9 @@ function getEncodeWithoutContext(noData)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
-        // let grid = document.getElementById('grid').value
-        let grid = ""
-
         var base = defaultMapBase
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
-        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '')
+        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
 
         document.getElementById('fielddecode').value = '';
 
@@ -846,11 +669,6 @@ function getEncodeWithoutContext(noData)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-
-        if(grid !== '')
-        {
-            loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
-        }
     }
 }
 
@@ -894,23 +712,13 @@ function getMyLocation_write(position)
         {
             if (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer))
             {
-                // console.log(memberLayer.feature.properties);
                 // console.log("DENTRO");
-                // if (confirm("My location in " + context + ". Go to location?"))
-                // {
-                    document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
-                    getEncode();
-                // }
+                document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                getEncode();
             }
             else
             {
                 alert("Error: location out of " + context + ".");
-                // console.log("FORA");
-                // if (confirm("Error: my location out of " + context + ". Go to location? It may take a few seconds."))
-                // {
-                //     document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
-                //     getEncodeWithoutContext();
-                // }
             }
         }
     );
@@ -943,8 +751,8 @@ function getMyLocationJurisdTest(position)
     );
 }
 
-function sortAndRemoveDuplicates(value) {
-
+function sortAndRemoveDuplicates(value)
+{
     let listValues = [...new Set(value.trim().split(/[\n,]+/).map(i => i.trim().substring(0,11)))];
 
     return listValues.sort().join(",");
@@ -969,41 +777,9 @@ function fixZOrder(dataLayers) {
     });
 }
 
-function checkBase(string)
-{
-    for(var key in countries)
-    {
-        let regex = new RegExp("^/?" + key + ".*","i");
-
-        if(regex.test(string))
-        {
-            let regex2 = /\+/;
-
-            if(regex2.test(string))
-            {
-                defaultMapBase = countries[key].scientificBase;
-            }
-            else
-            {
-                defaultMapBase = countries[key].postalcodeBase;
-            }
-            toggleLevelBase();
-            break;
-        }
-    }
-}
-
-function showZoomLevel()
-{
-    document.getElementById('zoom').innerHTML = map.getZoom();
-}
-
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
-    // let grid = document.getElementById('grid').value
-    let grid = ""
-
     let country = defaultMap.isocode;
     let state = document.getElementById('sel_jurL2').value;
     let jL3dom = document.getElementById('sel_jurL3').value;
@@ -1011,7 +787,7 @@ function onMapClick(e)
 
     var base = defaultMapBase
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     let decimals = (level <= 64 ? 5 : 4)
@@ -1022,8 +798,6 @@ function onMapClick(e)
             if (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer))
             {
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-                // or e.latlng['lat'].toPrecision(8)
-
                 document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
 
                 layerMarkerCurrent.clearLayers();
@@ -1032,11 +806,6 @@ function onMapClick(e)
                 L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
                 loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-
-                if(grid !== '')
-                {
-                    loadGeojson(uriWithGrid,[layerPolygonCurrentGrid],afterLoadLayer,afterData)
-                }
             }
             else
             {
@@ -1257,14 +1026,13 @@ function onEachFeatureCoverAll(feature,layer)
     });
 
     arrayOfSideCoverCell.push(feature.properties.side);
+    arrayOfLevelCoverCell.push(feature.properties.level);
 }
 
 function styleCoverAll(feature)
 {
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
 }
-
-//
 
 
 // Layer layerPolygonCurrentGrid
@@ -1290,9 +1058,10 @@ function highlightFeaturePolygonCurrentGrid(e)
     }
 }
 
-function filterLayer(feature, layer) {
-        return feature.properties.code_subcell;
-    }
+function filterLayer(feature, layer)
+{
+    return feature.properties.code_subcell;
+}
     
 function resetHighlightPolygonCurrentGrid(e,layer)
 {
@@ -1327,7 +1096,6 @@ function onEachFeaturePolygonCurrentGrid(feature,layer)
 }
 
 //
-
 function afterLoadLayer(featureGroup)
 {
     let zoomclick = document.getElementById('zoomclick')
@@ -1373,7 +1141,16 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
     }
     if(fittobounds)
     {
-        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
+        if(sizeCurrentCell > 0)
+        {
+            document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+            const { lat, lng } = centerCurrentCell;
+            document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+        }
+        else
+        {
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
+        }
     }
 }
 
@@ -1405,8 +1182,8 @@ function afterData(data,layer)
 
                     var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.short_code.split(/[~]/)[0] + ".json";
 
-                    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){afterDataGeo(e,data.features[0].properties.scientic_code); });
-                    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll], function(e){map.removeLayer(e);},function(e){});
+                    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
+                    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){map.removeLayer(e);},function(e){});
                 }
 
                 //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
@@ -1422,23 +1199,26 @@ function afterData(data,layer)
                 {
                     alert("Geocódigo truncado. Número de dígitos excedeu o limite de níveis da grade.");
                 }
+
+                if(data.features[0].properties.side)
+                {
+                    sizeCurrentCell = data.features[0].properties.side;
+
+                    document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+
+                    let level = document.getElementById('level_size').value
+                    let decimals = (level <= 64 ? 5 : 4)
+
+                    centerCurrentCell = layer.getBounds().getCenter();
+                    const { lat, lng } = centerCurrentCell;
+
+                    document.getElementById('geoUri').innerHTML  = 'geo:' + latRound(lat,decimals) + "," + latRound(lng,decimals);
+                    document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+                }
             }
             else if(data.features[0].properties.code)
             {
                 document.getElementById('fielddecode').value = data.features[0].properties.code;
-            }
-            if(data.features[0].properties.side)
-            {
-                document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
-
-                let level = document.getElementById('level_size').value
-                let decimals = (level <= 64 ? 5 : 4)
-
-                const center = layer.getBounds().getCenter();
-                const { lat, lng } = center;
-
-                document.getElementById('geoUri').innerHTML  = 'geo:' + latRound(lat,decimals) + "," + latRound(lng,decimals) //+ ";u=" + level;
-                document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
             }
         }
     }
@@ -1446,49 +1226,6 @@ function afterData(data,layer)
 
 function beforeAddDataLayer(data)
 {
-//     if(data.features.length = 1)
-//         if(!data.features[0].properties.isolabel_ext)
-//             if(!data.features[0].properties.index)
-//             {
-//                 if(data.features[0].properties.short_code)
-//                 {
-//                     console.log (state.isolabel_ext)
-//
-//                     if(/*state.isolabel_ext !== '' && */state.isolabel_ext !== data.features[0].properties.short_code.split(/[~]/)[0])
-//                     {
-//                         console.log("mudar cidade");
-//
-//                         // var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
-//                         // const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
-//                         // const nextState = { additionalInformation: 'to canonical.' };
-//
-//                         // window.history.pushState(nextState, nextTitle, nextURL);
-//                     }
-//                     else
-//                     {
-//                         state.isolabel_ext = data.features[0].properties.short_code.split(/[~]/)[0];
-//                         console.log("mesma cidade")
-//                     }
-//                 }
-//                 else
-//                 {
-//                     console.log("ERROR. Sem cobertura.");
-//                     // alert("ERROR. Sem cobertura.");
-//                 }
-//             }
-}
-
-function afterDataGeo(data,scicode)
-{
-    if(data.features.length = 1)
-    {
-        if(data.features[0].properties.side)
-        {
-            document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
-        }
-
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + scicode + '">' + scicode +'</a>';
-    }
 }
 
 function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
@@ -1540,7 +1277,6 @@ else if (pathname.match(/\/BR-\d+$/i))
     loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
-
 else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 {
     uriApi = uri.replace(/\/(BR-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
@@ -1596,6 +1332,6 @@ else
     if(uriApiJurisd !== null && uriApiJurisd !== '')
     {
         loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
-        loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false)},function(e){});
+        loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],afterLoadLayerCoverAll,function(e){});
     }
 }
