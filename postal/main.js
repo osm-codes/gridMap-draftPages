@@ -697,7 +697,7 @@ function getMyLocation_write(position)
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
-            if (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer))
+            if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
             {
                 // console.log("DENTRO");
                 document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
@@ -726,7 +726,7 @@ function getMyLocationJurisdTest(position)
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
-            if (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer))
+            if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
             {
                 if (confirm("Go to my location in " + context + "?"))
                 {
@@ -782,7 +782,7 @@ function onMapClick(e)
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
-            if (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer))
+            if ( (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) || jurisdIsMultipolygon )
             {
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
