@@ -211,39 +211,6 @@ var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
 var escala = L.control.scale({position:'bottomright',imperial: false});
 
-var decodeJurisdiction = L.control({position: 'topleft'});
-decodeJurisdiction.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.field     = L.DomUtil.create('input', '', this.container);
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    this.label.for = 'jcover';
-    this.label.innerHTML = 'Cover: ';
-    this.checkbox.id = 'jcover';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = false;
-
-    this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
-    this.field.id = 'fieldjurisdiction';
-    this.button.type = 'button';
-    this.button.innerHTML= "Jurisdiction";
-
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.disableScrollPropagation(this.field);
-    L.DomEvent.disableClickPropagation(this.field);
-    L.DomEvent.disableScrollPropagation(this.checkbox);
-    L.DomEvent.disableClickPropagation(this.checkbox);
-    L.DomEvent.on(this.button, 'click', getJurisdiction, this.container);
-    L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getJurisdiction(data);}}, this.container);
-
-    return this.container; };
-
 var jurisdictionGgeohash = L.control({position: 'topleft'});
 jurisdictionGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -569,7 +536,7 @@ function getDecode(data)
         uri += input + ".json"
         document.getElementById('fieldencode').value = '';
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
     }
 }
 
@@ -585,28 +552,8 @@ function getDecodeList(data)
     {
         var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[base].symbol + sortAndRemoveDuplicates(input) + ".json"
 
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer);
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
         document.getElementById('fielddecodelist').value = '';
-
-        checkCountry(input);
-    }
-}
-
-function getJurisdiction(data)
-{
-    let input = document.getElementById('fieldjurisdiction').value
-
-    var base = defaultMapBase
-
-    if(input !== null && input !== '')
-    {
-        let uri = uri_base + "/geo:iso_ext:" + input + '.json/cover' + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
-
-        loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
-        document.getElementById('fieldjurisdiction').value = '';
-
-        uri = uri_base + "/geo:iso_ext:" + input + ".json";
-        loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
 
         checkCountry(input);
     }
@@ -616,7 +563,14 @@ function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
 
-    if(input !== null && input !== '')
+    if (input.match(/^(urn|geo):(lex):.+$/i))
+    {
+        var uriApi = uri_base + "/" + input + ".json";
+
+        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
+        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+    }
+    else if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
         let country = defaultMap.isocode;
@@ -659,31 +613,7 @@ function getEncode(noData)
         layerMarkerCurrent.clearLayers();
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
-    }
-}
-
-function getEncodeWithoutContext(noData)
-{
-    let input = document.getElementById('fieldencode').value
-
-    if(input !== null && input !== '')
-    {
-        let level = document.getElementById('level_size').value
-        var base = defaultMapBase
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
-        var uriWithGrid = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' ) + (input.match(/.*;u=.*/) ? input : input + ";u=" + level ) + ".json" + (base != 'base32' ? '/' + base : '')
-
-        document.getElementById('fielddecode').value = '';
-
-        input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
-
-        var popupContent = "latlng: " + input;
-        layerPolygonCurrent.clearLayers();
-        layerMarkerCurrent.clearLayers();
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
+        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
     }
 }
 
@@ -802,7 +732,6 @@ function onMapClick(e)
 
     var base = defaultMapBase
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     let decimals = (level <= 64 ? 5 : 4)
@@ -820,7 +749,7 @@ function onMapClick(e)
                 L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
                 L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
-                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData,beforeAddDataLayer)
+                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
             }
             else
             {
@@ -1051,7 +980,6 @@ function styleCoverAll(feature)
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
 }
 
-
 // Layer layerPolygonCurrentGrid
 function highlightFeaturePolygonCurrentGrid(e)
 {
@@ -1122,7 +1050,6 @@ function afterLoadLayer(featureGroup)
 
 function afterLoadCurrent(featureGroup)
 {
-    // map.fitBounds(featureGroup.getBounds());
     let zoom = map.getBoundsZoom(featureGroup.getBounds());
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
 }
@@ -1162,7 +1089,7 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
         {
             document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
             const { lat, lng } = centerCurrentCell;
-            document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+            document.getElementById('fieldencode').value = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
         }
         else
         {
@@ -1239,10 +1166,6 @@ function afterData(data,layer)
             }
         }
     }
-}
-
-function beforeAddDataLayer(data)
-{
 }
 
 function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
@@ -1343,7 +1266,7 @@ else
 
     if(uriApi !== null && uriApi !== '')
     {
-        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData,beforeAddDataLayer);
+        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
     }
 
     if(uriApiJurisd !== null && uriApiJurisd !== '')
