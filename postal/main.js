@@ -121,6 +121,7 @@ var arrayOfLevelCoverCell = new Array();
 var sizeCurrentCell = 0;
 var centerCurrentCell;
 var getJurisdAfterLoad = false;
+var jurisdIsMultipolygon = false;
 
 function checkCountry(string,togglecountry=true)
 {
@@ -505,7 +506,7 @@ function toggleCoverLayers()
     toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
 }
 
-function generateSelectLevel(base,baseValue)
+function generateSelectLevel(base,baseValue,size=0)
 {
     let html = '';
     let a = Math.min(...arrayOfLevelCoverCell);
@@ -514,26 +515,12 @@ function generateSelectLevel(base,baseValue)
     {
         if (arrayOfLevelCoverCell.length > 0 && j >= a-1)
         {
-            html += '<option value="' + levelValues[i] + (i == base.levelDefault ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
     return html
-}
 
-function generateSelectLevel2(base,baseValue,size)
-{
-    let html = '';
-    let a = Math.min(...arrayOfLevelCoverCell);
 
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
-    {
-        if (arrayOfSideCoverCell && arrayOfSideCoverCell.length > 0 && j >= a-1)
-        {
-            html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-        }
-    }
-
-    return html
 }
 
 function getDecode(data)
@@ -1006,6 +993,8 @@ function onEachFeatureJurisd(feature,layer)
     document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
 
     layer.bindPopup(popupContent);
+
+    jurisdIsMultipolygon = feature.properties.is_multipolygon;
 }
 
 // Layer layerCoverAll
@@ -1143,7 +1132,7 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
     {
         if(sizeCurrentCell > 0)
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
             const { lat, lng } = centerCurrentCell;
             document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
         }
@@ -1204,7 +1193,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)
