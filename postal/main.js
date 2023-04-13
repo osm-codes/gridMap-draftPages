@@ -1,4 +1,4 @@
-
+/*
 function changeLevel_byDigits(x) {
   const max=8;
   const thisURL = window.location.href.replace(/#.*$/,'');
@@ -11,6 +11,34 @@ function changeLevel_byDigits(x) {
       window.location.replace( thisURL.substring(0,thisURL.length-1) );
    } else alert('check code or level limits');
  } else alert('Click a point first');
+}
+*/
+
+function changeLevel_byDigits(x)
+{
+    let input = document.getElementById('fielddecode').value
+
+    if (input.length > 0)
+    {
+        if (x>0)
+        {
+            document.getElementById('fielddecode').value = input + '7';
+            getDecode();
+        }
+        else if (x < 0 && input.length > 1)
+        {
+            document.getElementById('fielddecode').value = input.substring(0,input.length-1);
+            getDecode();
+        }
+        else
+        {
+            alert('Check code or level limits');
+        }
+    }
+    else
+    {
+        alert('Click a point first.');
+    }
 }
 
 //////////////

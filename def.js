@@ -263,26 +263,13 @@ var countries = {
                 placeholderList: '2G,3A,01',
                 selectGrid: [2,4,8,16],
             },
-            base16:
-            {
-                iniLevel: 6,
-                endLevel: 38,
-                modLevel: 4,
-                iniDigit: 2,
-                maxLength: 10,
-                symbol: '+',
-                placeholderDecode: 'UY~2',
-                placeholderEncode: '-32.9,-55.9;u=10',
-                placeholderList: '3B,3A,01',
-                selectGrid: [16],
-            },
             base16h1c:
             {
                 iniLevel: 6,
                 endLevel: 38,
                 modLevel: 1,
                 iniDigit: 1,
-                maxLength: ,
+                maxLength: 10,
                 symbol: '+',
                 placeholderDecode: 'UY+gB',
                 placeholderEncode: '-32.9,-55.9;u=10',
