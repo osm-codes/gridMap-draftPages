@@ -170,6 +170,7 @@ function checkCountry(string,togglecountry=true)
 
 var uri = window.location.href;
 let pathname = window.location.pathname;
+pathname = pathname.split(/[#]/)[0]
 
 if (pathname.match(/^\/[A-Z]{2}.+$/i))
 {
@@ -377,7 +378,7 @@ toggleCover.onAdd = function (map) {
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.button.type = 'button';
-    this.button.innerHTML= "Cover";
+    this.button.innerHTML= "Coverage";
 
     L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
@@ -460,7 +461,6 @@ b.appendChild(zoomClick.getContainer());
 function clearAllLayers()
 {
     layerPolygonCurrent.clearLayers();
-    layerPolygonCurrentGrid.clearLayers();
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
@@ -564,6 +564,13 @@ function getEncode(noData)
     let input = document.getElementById('fieldencode').value
 
     if (input.match(/^(urn|geo):(lex):.+$/i))
+    {
+        var uriApi = uri_base + "/" + input + ".json";
+
+        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
+        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+    }
+    if (input.match(/^geo:olc:.+$/i))
     {
         var uriApi = uri_base + "/" + input + ".json";
 
