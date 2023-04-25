@@ -49,8 +49,8 @@ function sel_jurL1(abbrev)
     {
         let jL2dom = document.getElementById('sel_jurL2');
         let s = '<option value="">- opt -</option>'
-        for ( var i of Object.keys(approved_jurisdictions[abbrev]) )
-            s += '<option value="' + i + '">' + (abbrev != 'CO' ? i : approved_jurisdictions[abbrev][i]['name'])
+        for ( var i of Object.keys(jurisdictions[abbrev]) )
+            s += '<option value="' + i + '">' + (abbrev != 'CO' ? i : jurisdictions[abbrev][i]['name'])
         jL2dom.innerHTML=s
         let jL3dom = document.getElementById('sel_jurL3');
         jL3dom.innerHTML=""
@@ -63,7 +63,7 @@ function sel_jurL2(abbrev)
     let state = document.getElementById('sel_jurL2').value;
     let jL3dom = document.getElementById('sel_jurL3');
     let s = '<option value="">- City -</option>'
-    for ( var i of approved_jurisdictions[country][state]['mun'] )
+    for ( var i of jurisdictions[country][state]['mun'] )
         s += '<option>'+i
     jL3dom.innerHTML=s
 }
@@ -86,15 +86,15 @@ function updateJurisd(jurisd)
     document.getElementById('sel_jurL1').innerHTML = jurisd.split("-",3)[0];
 
     let s = '<option value="">- opt -</option>'
-    for ( var i of Object.keys(approved_jurisdictions[jurisd.split("-",3)[0]]) )
+    for ( var i of Object.keys(jurisdictions[jurisd.split("-",3)[0]]) )
         // s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
 
-        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   approved_jurisdictions[jurisd.split("-",3)[0]][i]['name'])
+        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   jurisdictions[jurisd.split("-",3)[0]][i]['name'])
 
     document.getElementById('sel_jurL2').innerHTML=s
 
     s = '<option value="">- City -</option>'
-    for ( var i of approved_jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['mun'] )
+    for ( var i of jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['mun'] )
         s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
     document.getElementById('sel_jurL3').innerHTML=s
 }
