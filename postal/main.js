@@ -1,19 +1,3 @@
-/*
-function changeLevel_byDigits(x) {
-  const max=8;
-  const thisURL = window.location.href.replace(/#.*$/,'');
-  const code = document.getElementById('postalCode').textContent.replace('.','');
-  let len = (code == null || code == '(click the map)')? 0: code.length;
-  if (thisURL.indexOf('~')>0) {
-   if (x>0 && len<max) {
-      window.location.replace(thisURL+'7');
-   } else if (x<0 && len>1) {
-      window.location.replace( thisURL.substring(0,thisURL.length-1) );
-   } else alert('check code or level limits');
- } else alert('Click a point first');
-}
-*/
-
 function changeLevel_byDigits(x)
 {
     let input = document.getElementById('fielddecode').value
@@ -985,66 +969,6 @@ function onEachFeatureCoverAll(feature,layer)
 function styleCoverAll(feature)
 {
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
-}
-
-// Layer layerPolygonCurrentGrid
-function highlightFeaturePolygonCurrentGrid(e)
-{
-    const layer = e.target;
-
-    let noTooltip = document.getElementById('notooltip')
-
-    if(noTooltip.checked)
-    {
-        this.closeTooltip();
-        layer.setStyle({
-            color: 'deeppink',
-            weight:2
-        });
-
-        layer.bringToFront();
-    }
-    else
-    {
-        this.openTooltip();
-    }
-}
-
-function filterLayer(feature, layer)
-{
-    return feature.properties.code_subcell;
-}
-    
-function resetHighlightPolygonCurrentGrid(e,layer)
-{
-    layerPolygonCurrentGrid.resetStyle(e.target);
-}
-
-function stylePolygonCurrentGrid(feature)
-{
-    let grid = document.getElementById('grid').value
-
-    if(grid.match(/^grid(3|5|9|17|33)$/))
-    {
-        return {color: 'deeppink', weight:1};
-    }
-    else
-    {
-        return {color: 'deeppink', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
-    }
-}
-
-function onEachFeaturePolygonCurrentGrid(feature,layer)
-{
-    const reg = /(...)(?!$)/g
-    popUpFeature(feature,layer);
-    layerTooltipFeature(feature,layer);
-
-    layer.on({
-        click: onFeatureClick,
-        mouseover: highlightFeaturePolygonCurrentGrid,
-        mouseout: resetHighlightPolygonCurrentGrid
-    });
 }
 
 //

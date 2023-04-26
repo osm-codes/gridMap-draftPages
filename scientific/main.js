@@ -311,7 +311,7 @@ toggleCover.onAdd = function (map) {
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.button.type = 'button';
-    this.button.innerHTML= "Cover";
+    this.button.innerHTML= "Coverage";
 
     L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
@@ -589,11 +589,14 @@ function getEncode(noData)
         layerMarkerCurrent.clearLayers();
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
 
         if(grid !== '')
         {
             loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
+        }
+        else
+        {
+            loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
         }
     }
 }
@@ -656,11 +659,13 @@ function onMapClick(e)
     L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
     L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
-
     if(grid !== '')
     {
         loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
+    }
+    else
+    {
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
     }
 }
 
@@ -860,9 +865,6 @@ function styleCoverAll(feature)
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
 }
 
-//
-
-
 // Layer layerPolygonCurrentGrid
 function highlightFeaturePolygonCurrentGrid(e)
 {
@@ -900,7 +902,7 @@ function stylePolygonCurrentGrid(feature)
 {
     let grid = document.getElementById('grid').value
 
-    if(grid.match(/^grid(3|5|9|17|33)$/))
+    if(feature.geometry.type === 'Point')
     {
         return {color: 'deeppink', weight:1};
     }
