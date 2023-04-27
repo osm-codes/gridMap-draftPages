@@ -126,8 +126,7 @@ var overlays = {
     'Jurisdictions': layerJurisdAll,
 };
 
-var defaultMap = countries['CO'];
-var defaultMapBase = defaultMap.postalcodeBase;
+var defaultMap;
 var arrayOfSideCoverCell = new Array();
 var arrayOfLevelCoverCell = new Array();
 var sizeCurrentCell = 0;
@@ -135,17 +134,16 @@ var centerCurrentCell;
 var getJurisdAfterLoad = false;
 var jurisdIsMultipolygon = false;
 
-function checkCountry(string,togglecountry=true)
+function checkCountry(string,reset=true)
 {
     for(var key in countries)
     {
         let regex = new RegExp("^/?" + key + ".*","i");
 
-        if(regex.test(string))
+        if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
-            defaultMapBase = defaultMap.postalcodeBase;
-            togglecountry ? clearAllLayers() : '';
+            reset ? resetDef() : '';
             generateSoftwareVersions();
             break;
         }
@@ -161,21 +159,6 @@ if (pathname.match(/^\/[A-Z]{2}.+$/i))
     checkCountry(pathname,false)
 }
 
-function checkCountryn(num,togglecountry=true)
-{
-    for(var key in countries)
-    {
-        if(countries[key].isocoden == num)
-        {
-            defaultMap = countries[key];
-            defaultMapBase = defaultMap.postalcodeBase;
-            togglecountry ? clearAllLayers() : '';
-            generateSoftwareVersions();
-            break;
-        }
-    }
-}
-
 var map = L.map('map',{
     center: defaultMap.center,
     zoom:   defaultMap.zoom,
@@ -189,7 +172,6 @@ var toggleCoverStatus = false;
 
 map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
-map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
 map.on('click', onMapClick);
 
 var zoom   = L.control.zoom({position:'topleft'});
@@ -236,7 +218,7 @@ decodeGgeohash.onAdd = function (map) {
     this.label_field.innerHTML = 'Grid code: ';
 
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
     this.field.id = 'fielddecode';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
@@ -247,24 +229,6 @@ decodeGgeohash.onAdd = function (map) {
     L.DomEvent.disableClickPropagation(this.field);
     L.DomEvent.on(this.button, 'click', getDecode, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getDecode(data);}}, this.container);
-
-    return this.container; };
-
-var decodeGgeohashList = L.control({position: 'topleft'});
-decodeGgeohashList.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.field = L.DomUtil.create('textarea', '', this.container);
-    this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.field.placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderList;
-    this.field.id = 'fielddecodelist';
-    this.button.type = 'button';
-    this.button.innerHTML= "Decode";
-
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.disableScrollPropagation(this.field);
-    L.DomEvent.disableClickPropagation(this.field);
-    L.DomEvent.on(this.button, 'click', getDecodeList, this.container);
 
     return this.container; };
 
@@ -279,7 +243,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
     this.field.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
@@ -293,7 +257,7 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.on(this.button2, 'click', getMyLocation, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
     return this.container;
-  }; // \onAdd(map)
+  };
 
 var level = L.control({position: 'topleft'});
 level.onAdd = function (map) {
@@ -302,7 +266,7 @@ level.onAdd = function (map) {
     this.select_level  = L.DomUtil.create('select', '', this.container);
 
     this.label_level.for = 'level';
-    this.label_level.innerHTML = 'Level: '; //no BR
+    this.label_level.innerHTML = 'Level: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
 
@@ -311,7 +275,7 @@ level.onAdd = function (map) {
 
     return this.container; };
 
-var clear = L.control(); // old {position: 'topleft'}
+var clear = L.control();
 clear.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
@@ -321,24 +285,7 @@ clear.onAdd = function (map) {
 
     L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', clearAll, this.container);
-
-    return this.container; };
-
-var fitBounds = L.control({position: 'topleft'});
-fitBounds.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    this.label.for= 'fitbounds';
-    this.label.innerHTML= 'Fit bounds: ';
-    this.checkbox.id = 'fitbounds';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = false;
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
+    L.DomEvent.on(this.button, 'click', resetDef, this.container);
 
     return this.container; };
 
@@ -442,7 +389,7 @@ b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
 b.appendChild(zoomClick.getContainer());
 
-function clearAllLayers()
+function resetDef()
 {
     layerPolygonCurrent.clearLayers();
     layerPolygonAll.clearLayers();
@@ -451,13 +398,8 @@ function clearAllLayers()
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
-    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMapBase].placeholderEncode;
-}
-
-function clearAll()
-{
-    clearAllLayers()
+    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
 
     map.fitBounds(layerJurisdAll.getBounds());
 }
@@ -498,8 +440,6 @@ function generateSelectLevel(base,baseValue,size=0)
         }
     }
     return html
-
-
 }
 
 function getDecode(data)
@@ -521,25 +461,6 @@ function getDecode(data)
         document.getElementById('fieldencode').value = '';
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
-    }
-}
-
-function getDecodeList(data)
-{
-    let input = document.getElementById('fielddecodelist').value;
-    let countryValue = document.getElementById('country').value;
-
-    var base = defaultMapBase;
-
-    console.log(input);
-    if(input !== null && input !== '')
-    {
-        var uri = uri_base + "/geo:osmcodes:" + countryValue.toUpperCase() + countries[countryValue].bases[base].symbol + sortAndRemoveDuplicates(input) + ".json"
-
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
-        document.getElementById('fielddecodelist').value = '';
-
-        checkCountry(input);
     }
 }
 
@@ -569,8 +490,6 @@ function getEncode(noData)
         let jL3dom = document.getElementById('sel_jurL3').value;
         let context = country + '-' + state + '-'+ jL3dom
 
-        var base = defaultMapBase
-
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
 
         if(input.match(/.*;u=.*/))
@@ -579,7 +498,7 @@ function getEncode(noData)
 
             if(u_value == 0)
             {
-                u_value = levelValues[defaultMap.bases[defaultMapBase].endLevel]
+                u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
             }
 
             uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
@@ -589,7 +508,7 @@ function getEncode(noData)
             uri += input + ";u=" + level
         }
 
-        uri += ".json" + (base != 'base32' ? '/' + base : '')
+        uri += ".json" + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '')
 
         var uri_ = uri + '/' + context
 
@@ -721,8 +640,7 @@ function onMapClick(e)
     let jL3dom = document.getElementById('sel_jurL3').value;
     let context = country + '-' + state + '-'+ jL3dom
 
-    var base = defaultMapBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     let decimals = (level <= 64 ? 5 : 4)
@@ -1018,13 +936,13 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
     {
         if(sizeCurrentCell > 0)
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,sizeCurrentCell);
             const { lat, lng } = centerCurrentCell;
             document.getElementById('fieldencode').value = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
         }
         else
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase)
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase)
         }
     }
 }
@@ -1035,13 +953,12 @@ function afterData(data,layer)
     {
         if(data.features[0].properties.jurisd_base_id)
         {
-            checkCountryn(data.features[0].properties.jurisd_base_id,false)
+            checkCountry(data.features[0].properties.jurisd_base_id,false)
         }
 
         if(data.features[0].properties.isolabel_ext)
         {
-            //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-            var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.isolabel_ext + window.location.search
+            var nextURL = uri_base + "/" + data.features[0].properties.isolabel_ext
             const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
             const nextState = { additionalInformation: 'to canonical.' };
 
@@ -1061,8 +978,7 @@ function afterData(data,layer)
                     loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){map.removeLayer(e);},function(e){});
                 }
 
-                //var nextURL = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname + window.location.search
-                var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.short_code + window.location.search
+                var nextURL = uri_base + "/" + data.features[0].properties.short_code
                 const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
                 const nextState = { additionalInformation: 'to canonical.' };
 
@@ -1079,7 +995,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)

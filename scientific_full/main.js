@@ -1,4 +1,3 @@
-
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
     grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
@@ -88,20 +87,18 @@ var overlays = {
     'All grid2': layerGridAll2,
 };
 
-var defaultMap = countries['CO'];
-var defaultMapBase = defaultMap.scientificBase;
+var defaultMap;
 
-function checkCountry(string,togglecountry=true)
+function checkCountry(string,reset=true)
 {
     for(var key in countries)
     {
         let regex = new RegExp("^/?" + key + ".*","i");
 
-        if(regex.test(string))
+        if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
-            defaultMapBase = defaultMap.scientificBase;
-            togglecountry ? toggleCountry() : '';
+            reset ? resetDef() : '';
             generateSoftwareVersions();
             break;
         }
@@ -111,24 +108,14 @@ function checkCountry(string,togglecountry=true)
 var uri = window.location.href;
 let pathname = window.location.pathname;
 
+pathname = pathname.replace(/(\/scientific_full)/, "");
+uri = uri.replace(/(\/scientific_full)/, "");
+uri_base  = window.location.protocol + "//" + window.location.host;
+uri_base2 = window.location.protocol + "//" + window.location.host + "/scientific_full";
+
 if (pathname.match(/^\/[A-Z]{2}.+$/i))
 {
     checkCountry(pathname,false)
-}
-
-function checkCountryn(num,togglecountry=true)
-{
-    for(var key in countries)
-    {
-        if(countries[key].isocoden == num)
-        {
-            defaultMap = countries[key];
-            defaultMapBase = defaultMap.scientificBase;
-            togglecountry ? toggleCountry() : '';
-            generateSoftwareVersions();
-            break;
-        }
-    }
 }
 
 var map = L.map('map',{
@@ -143,7 +130,7 @@ var toggleCoverStatus = false;
 
 map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
-map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
+// map.on('zoom', function(e){defaultMap.current_zoom = map.getZoom();});
 map.on('click', onMapClick);
 map.on('zoomend', showZoomLevel);
 showZoomLevel();
@@ -159,15 +146,6 @@ decodeJurisdiction.onAdd = function (map) {
     this.field     = L.DomUtil.create('input', '', this.container);
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
-    this.label     = L.DomUtil.create('label', '', this.container);
-    // this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    // this.label.for = 'jcover';
-    // this.label.innerHTML = 'Cover: ';
-    // this.checkbox.id = 'jcover';
-    // this.checkbox.type = 'checkbox';
-    // this.checkbox.checked = false;
-
     this.field.type = 'text';
     this.field.placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
     this.field.id = 'fieldjurisdiction';
@@ -178,8 +156,6 @@ decodeJurisdiction.onAdd = function (map) {
     L.DomEvent.disableClickPropagation(this.button);
     L.DomEvent.disableScrollPropagation(this.field);
     L.DomEvent.disableClickPropagation(this.field);
-    // L.DomEvent.disableScrollPropagation(this.checkbox);
-    // L.DomEvent.disableClickPropagation(this.checkbox);
     L.DomEvent.on(this.button, 'click', getJurisdiction, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getJurisdiction(data);}}, this.container);
 
@@ -196,7 +172,7 @@ decodeGgeohash.onAdd = function (map) {
     this.label_field.innerHTML = 'Grid code: ';
 
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
     this.field.id = 'fielddecode';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
@@ -216,7 +192,7 @@ searchDecodeList.onAdd = function (map) {
     this.search    = L.DomUtil.create('textarea', '', this.container);
     this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
 
-    this.search.placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderList;
+    this.search.placeholder = 'list geocodes, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderList;
     this.search.id = 'fielddecodelist';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
@@ -240,7 +216,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
     this.field.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
@@ -250,7 +226,7 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
     return this.container;
-  }; // \onAdd(map)
+  };
 
 var level = L.control({position: 'topleft'});
 level.onAdd = function (map) {
@@ -264,13 +240,13 @@ level.onAdd = function (map) {
     this.label_grid.innerHTML = ' ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
-    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid)
+    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
-    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
+    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -287,7 +263,7 @@ clear.onAdd = function (map) {
 
     L.DomEvent.disableScrollPropagation(this.button);
     L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', clearAll, this.container);
+    L.DomEvent.on(this.button, 'click', resetDef, this.container);
 
     return this.container; };
 
@@ -380,8 +356,7 @@ b.appendChild(toggleCover.getContainer());
 b.appendChild(noTooltip.getContainer());
 b.appendChild(zoomClick.getContainer());
 
-
-function clearAllLayers()
+function resetDef()
 {
     layerPolygonCurrent.clearLayers();
     layerPolygonCurrentGrid.clearLayers();
@@ -394,32 +369,14 @@ function clearAllLayers()
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
-    document.getElementById('fielddecode').value = '';
-    document.getElementById('fieldencode').value = '';
     document.getElementById('fielddecodelist').value= '';
-}
-
-function resetDef()
-{
     map.setView(defaultMap.center, defaultMap.zoom);
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMapBase],defaultMapBase);
-    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMapBase].selectGrid);
-    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMapBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMapBase].placeholderEncode;
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
+    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
 }
 
-function clearAll()
-{
-    clearAllLayers();
-    resetDef();
-}
-
-function toggleCountry()
-{
-    clearAllLayers();
-    defaultMapBase = defaultMap.defaultBase;
-    resetDef();
-}
 
 function toggleTooltipLayers()
 {
@@ -496,7 +453,7 @@ function getDecode(data)
 
         if(!regex.test(input))
         {
-            uri += defaultMap.isocode + defaultMap.bases[defaultMapBase].symbol
+            uri += defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol
         }
 
         uri += input + ".json"
@@ -512,7 +469,7 @@ function getDecodeList(data)
 
     if(input !== null && input !== '')
     {
-        var uri = uri_base + "/geo:osmcodes:" + defaultMap.isocode + defaultMap.bases[defaultMapBase].symbol + sortAndRemoveDuplicates(input) + ".json"
+        var uri = uri_base + "/geo:osmcodes:" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + sortAndRemoveDuplicates(input) + ".json"
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
         document.getElementById('fielddecodelist').value = '';
@@ -525,7 +482,7 @@ function getJurisdiction(data)
 {
     let input = document.getElementById('fieldjurisdiction').value
 
-    var base = defaultMapBase
+    var base = defaultMap.scientificBase
 
     if(input !== null && input !== '')
     {
@@ -554,7 +511,7 @@ function getEncode(noData)
         let grid = document.getElementById('grid').value
         let context = defaultMap.isocode;
 
-        var base = defaultMapBase
+        var base = defaultMap.scientificBase
 
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
 
@@ -564,7 +521,7 @@ function getEncode(noData)
 
             if(u_value == 0)
             {
-                u_value = levelValues[defaultMap.bases[defaultMapBase].endLevel]
+                u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
             }
 
             uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
@@ -644,7 +601,7 @@ function onMapClick(e)
     let grid = document.getElementById('grid').value
     let context = defaultMap.isocode;
 
-    var base = defaultMapBase
+    var base = defaultMap.scientificBase
     var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
     var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
@@ -986,14 +943,14 @@ function afterData(data,layer)
     {
         if(data.features[0].properties.jurisd_base_id)
         {
-            checkCountryn(data.features[0].properties.jurisd_base_id,false)
+            checkCountry(data.features[0].properties.jurisd_base_id,false)
         }
 
         if (!data.features[0].properties.index)
         {
             if(data.features[0].properties.code)
             {
-                var nextURL = window.location.protocol + "//" + window.location.host + "/" + defaultMap.isocode + defaultMap.bases[defaultMapBase].symbol + data.features[0].properties.code + window.location.search
+                var nextURL = uri_base2 + "/" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + data.features[0].properties.code
                 const nextTitle = 'OSM.codes: ' + data.features[0].properties.code;
                 const nextState = { additionalInformation: 'to canonical.' };
 
@@ -1009,7 +966,7 @@ function afterData(data,layer)
 
             if(data.features[0].properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMapBase],defaultMapBase,data.features[0].properties.side);
+                document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
@@ -1046,12 +1003,10 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 
 function toggleCoverLayers()
 {
-//     !this.checked ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll) ;
     toggleCoverStatus ? map.addLayer(layerCoverAll) : map.removeLayer(layerCoverAll);
     fixZOrder(overlays);
     toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
 }
-
 
 var uriApi = ''
 var uriApiJurisd = ''
