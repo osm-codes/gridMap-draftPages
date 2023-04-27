@@ -19,7 +19,7 @@ var layerJurisd = new L.geoJSON(null,{
         });
 
 var overlays = {
-    'Jurisdiction': layerJurisd
+    'Feature': layerJurisd
 };
 
 var map = L.map('map',{
@@ -42,9 +42,9 @@ escala.addTo(map);
 
 function onEachFeature(feature,layer)
 {
+    let popupContent = "";
     if (feature.properties.osm_id)
     {
-        var popupContent = "";
         popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
         popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
         popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
@@ -61,33 +61,17 @@ function onEachFeature(feature,layer)
         popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
         popupContent += "area: " + feature.properties.area + "<br>";
         popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-
-        layer.bindPopup(popupContent);
     }
-
-    if (feature.properties.osm_id)
+    else if (feature.olc)
     {
-        var popupContent = "";
-        popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
-        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-        popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
-        popupContent += "parent_id: " + feature.properties.parent_id + "<br>";
-        popupContent += "admin_level: " + feature.properties.admin_level + "<br>";
-        popupContent += "name: " + feature.properties.name + "<br>";
-        popupContent += "parent_abbrev: " + feature.properties.parent_abbrev + "<br>";
-        popupContent += "abbrev: " + feature.properties.abbrev + "<br>";
-        popupContent += "wikidata_id: " + feature.properties.wikidata_id + "<br>";
-        popupContent += "lexlabel: " + feature.properties.lexlabel + "<br>";
-        popupContent += "isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
-        popupContent += "lex_urn: " + feature.properties.lex_urn + "<br>";
-        popupContent += "name_en: " + feature.properties.name_en + "<br>";
-        popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
-        popupContent += "area: " + feature.properties.area + "<br>";
-        popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-
-        layer.bindPopup(popupContent);
+        popupContent += "olc: " + feature.properties.olc;
+    }
+    else if (feature.ghs)
+    {
+        popupContent += "ghs: " + feature.properties.ghs;
     }
 
+    layer.bindPopup(popupContent);
     layer.on({click: onFeatureClick});
 }
 
@@ -149,10 +133,9 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 var uri = window.location.href;
 let pathname = window.location.pathname;
 
-if (pathname.match(/^\/(urn|geo):lex:([A-Z]{2}(;[A-Z\.]+)?(;[A-Z\.]+)?)$/i))
+if (pathname.match(/^\/(urn|geo):(lex|ghs|olc):.+$/i))
 {
     var uriApi = uri + '.json'
 
-    // loadGeojson(uriApi,[layerJurisd],afterLoadJurisdAll,afterData);
     loadGeojson(uriApi,[layerJurisd],afterLoadJurisdAll,function(e){});
 }

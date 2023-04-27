@@ -1,31 +1,29 @@
 <!DOCTYPE html><html lang="pt-br">
-<head><title>Postal OSMcodes</title>
+<head>
+<title>Postal OSMcodes</title>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Postal geocode"/>
-<meta name="keywords" content="geocode"/>
-<meta name="author" content="AddressForAll"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<meta name="author" content=""/>
 <link rel="shortcut icon" type="image/png" href="/resources/img/address_for_all-01-colorful.ico.png" />
 <link rel="stylesheet" href="/postal/style.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
 </head><body>
-
-<h3>OSMcode:
- <code title="contextual geocode of the last click, or the page entrance" id="postalCode">(click the map)</code>
- <a title="less digits (previous larger level)" href="#" onclick="changeLevel_byDigits(-1)"><img src="/resources/img/osmCodes-lessDigits.png"/></a><a title="more digits (next smaller level)" href="#" onclick="changeLevel_byDigits(+1)"><img src="/resources/img/osmCodes-moreDigits.png" /></a>
- <span id="nameJurisd"></span>
-</h3>
-<!-- <a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a> -->
-
 <section id="map"></section>
 
-<aside id="custom-map-controls">&nbsp;</aside>
-<div class="leaflet-control-container" id="custom-map-controlsc"></div>
+<aside id="custom-map-controls">
+
+<!--- h1>Postal OSMcodes<span id="nameJurisd"></span></h1 -->
+<h3>Postal code: <code id="postalCode"></code> <br/> <span id="nameJurisd"></span></h3>
+
+<p>Select a level and click into the map!</p>
+<hr />
+<div class="leaflet-control-container" id="custom-map-controlsa">
+</div>
 <hr style="clear:both" />
 <div class="leaflet-control-container" id="custom-map-controlsb"></div>
-<hr style="clear:both" />
-<div class="leaflet-control-container" id="custom-map-controlsa"></div>
 <hr style="clear:both" />
 
 <p>Equivalent cell:</p>
@@ -36,17 +34,13 @@
 <!-- <br/>&nbsp; for QRcode: $codigo_paisBase32_absoluto -->
 <!-- <br/>&nbsp; in the Scientic grid: $scientific_link -->
 
-<p>Back to <a href=".">OSMcodes and other countries</a></p>
-
-<p><a href="#top">Go to the top page</a></p>
-
-<hr/>
-
-<p><small>Software version: <span id="swVersions"></span></small></p>
-
+<p>Back to <a href="https://osm.codes">OSMcodes and other countries</a></p>
+<!-- <p>Zoom level: <span id="zoom"></span></p> -->
+</aside>
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
-<script src="/resources/js/jurisdictions_select.js"></script>
-<script src="/resources/js/def.js"></script>
+<script src="jurisdictions_select.js"></script><!-- basta incluir um asterisco nos aprovados, e depois remover -->
+<script src="approved_jurisdictions_select.js"></script>
 <script src="/postal/main.js"></script>
 </body></html>
+

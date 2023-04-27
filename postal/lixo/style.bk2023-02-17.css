@@ -1,15 +1,10 @@
 @font-face {
 	font-family: 'FE-Schrift';
-	src: URL('../resources/fonts/EuroPlate.woff2') format('woff2');
+	src: URL('EuroPlate.woff2') format('woff2');
 }
 
 h2, h3 {color: #666;}
 hr {clear:both;width: 100%;box-sizing: border-box;}
-
-h3 img {
- height: 14pt;
- background-color:yellow;
-}
 
 .font_small{font-size: small;}
 
@@ -21,25 +16,17 @@ h3 img {
 }
 
 #map {
-	width: 99vw; /* old 85 */
-	height: 70vh;
+	width: 85vw;
+	height: 85vh;
 	float: left;
 	box-sizing: border-box;
 }
 
-
-a#hasGeoUri, a#hasGeoUri:link, a#hasGeoUri:visited, a#hasGeoUri:active {
-  color: #666;
-  text-decoration: none;
-}
-a#hasGeoUri:hover { color: hotpink; }
-
-
 #custom-map-controls {
-	width: 60pt;
+	width: 14vw;
 	float: right;
 	box-sizing: border-box;
- 	/* padding-left:10pt; */
+ 	padding-left:1%;
 }
 
 #custom-map-controls2 {
@@ -54,9 +41,6 @@ a#hasGeoUri:hover { color: hotpink; }
 	padding-top:2%;
 	padding-bottom:2%;
 }
-/*
-#custom-map-controlsc, #custom-map-controlsc option, #custom-map-controlsc select { font-size: 9pt;}
-*/
 
 #custom-map-controlsb .leaflet-control {
 	clear:none;
