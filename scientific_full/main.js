@@ -69,6 +69,46 @@ var layerCoverAll = new L.geoJSON(null,{
             pointToLayer: pointToLayer,
         });
 
+
+
+var layerJurisdCurrent2 = new L.geoJSON(null,{
+            style: styleJurisdAll,
+            onEachFeature: onEachFeatureJurisd,
+        });
+
+var layerCoverCurrent2 = new L.geoJSON(null,{
+            style: styleCoverAll,
+            onEachFeature: onEachFeatureCoverAll,
+            filter: filterLayerCover,
+        });
+
+var layerCoverCurrentOverlay2 = new L.geoJSON(null,{
+            style: styleCoverAll,
+            onEachFeature: onEachFeatureCoverAll,
+            filter: filterLayerOverlay,
+        });
+
+var layerJurisdAll2 = new L.geoJSON(null,{
+            style: styleJurisdAll,
+            onEachFeature: onEachFeatureJurisd,
+        });
+
+var layerCoverAll2 = new L.geoJSON(null,{
+            style: styleCoverAll,
+            onEachFeature: onEachFeatureCoverAll,
+            filter: filterLayerCover,
+        });
+
+// layerCoverCurrent2
+function filterLayerCover(feature, layer) {
+        return feature.properties.is_overlay === false;
+    }
+
+// layerCoverCurrentOverlay2
+function filterLayerOverlay(feature, layer) {
+        return feature.properties.is_overlay === true;
+    }
+
 var layerMarkerCurrent = new L.featureGroup();
 var layerMarkerAll = new L.featureGroup();
 
@@ -85,6 +125,12 @@ var overlays = {
     'All grid': layerGridAll,
     'Current grid2': layerPolygonCurrentGrid2,
     'All grid2': layerGridAll2,
+
+    'JurisdCurrent2': layerJurisdCurrent2,
+    'JurisdCover2': layerCoverCurrent2,
+    'JurisdOverlay2': layerCoverCurrentOverlay2,
+    'JurisdAll2': layerJurisdAll2,
+    'JurisdCoverAll2': layerCoverAll2,
 };
 
 var defaultMap;
@@ -123,7 +169,7 @@ var map = L.map('map',{
     zoom:   defaultMap.zoom,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerGridAll, layerPolygonAll, layerCenterAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerGridAll, layerPolygonAll, layerCenterAll, layerCoverAll, layerJurisdAll,layerJurisdCurrent2,layerCoverCurrent2,layerCoverCurrentOverlay2] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -138,28 +184,6 @@ showZoomLevel();
 var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
 var escala = L.control.scale({position:'bottomright',imperial: false});
-
-var decodeJurisdiction = L.control({position: 'topleft'});
-decodeJurisdiction.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.field     = L.DomUtil.create('input', '', this.container);
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.jurisdictionPlaceholder;
-    this.field.id = 'fieldjurisdiction';
-    this.button.type = 'button';
-    this.button.innerHTML= "Jurisdiction";
-
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.disableScrollPropagation(this.field);
-    L.DomEvent.disableClickPropagation(this.field);
-    L.DomEvent.on(this.button, 'click', getJurisdiction, this.container);
-    L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getJurisdiction(data);}}, this.container);
-
-    return this.container; };
 
 var decodeGgeohash = L.control({position: 'topleft'});
 decodeGgeohash.onAdd = function (map) {
@@ -332,7 +356,6 @@ noTooltip.onAdd = function (map) {
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
-// decodeJurisdiction.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
@@ -345,7 +368,6 @@ zoomClick.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
-// a.appendChild(decodeJurisdiction.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
@@ -368,6 +390,11 @@ function resetDef()
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
+    layerJurisdCurrent2.clearLayers();
+    layerCoverCurrent2.clearLayers();
+    layerCoverCurrentOverlay2.clearLayers();
+    layerJurisdAll2.clearLayers();
+    layerCoverAll2.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     document.getElementById('fielddecodelist').value= '';
     map.setView(defaultMap.center, defaultMap.zoom);
@@ -478,34 +505,25 @@ function getDecodeList(data)
     }
 }
 
-function getJurisdiction(data)
-{
-    let input = document.getElementById('fieldjurisdiction').value
-
-    var base = defaultMap.scientificBase
-
-    if(input !== null && input !== '')
-    {
-        // let uri = uri_base + "/geo:iso_ext:" + input + '.json/cover' + (base == 'base16h' ? '/base16h' : (base == 'base16h1c' ? '/base16h1c' : ''));
-
-        // loadGeojson(uri,[layerCoverAll],afterLoadLayer,afterData);
-        document.getElementById('fieldjurisdiction').value = '';
-
-        uri = uri_base + "/geo:iso_ext:" + input + ".json";
-        // loadGeojson(uri,[layerJurisdAll],afterLoadLayer,afterData);
-
-    loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
-    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
-
-        // checkCountry(input);
-    }
-}
-
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
 
-    if(input !== null && input !== '')
+    if(input.match(/^(urn|geo):(lex):.+$/i))
+    {
+        var uriApi = uri_base + "/" + input + ".json";
+
+        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
+        loadGeojson(uriApi,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
+    }
+    else if(input.match(/^[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
+    {
+        var uriApi = uri_base + "/geo:iso_ext:" + input + ".json";
+
+        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
+        loadGeojson(uriApi,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
+    }
+    else if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
         let grid = document.getElementById('grid').value
@@ -906,16 +924,23 @@ function afterLoadCurrent(featureGroup)
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
 }
 
-function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true)
+function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true,minzoom=true)
 {
     if(fittobounds)
     {
         map.fitBounds(featureGroup.getBounds(),{reset: true});
-        map.options.minZoom = map.getZoom();
+
+        if(minzoom)
+        {
+            map.options.minZoom = map.getZoom();
+        }
     }
     else
     {
-        map.options.minZoom = map.getBoundsZoom(featureGroup.getBounds());
+        if(minzoom)
+        {
+            map.options.minZoom = map.getBoundsZoom(featureGroup.getBounds());
+        }
     }
 
     if(setmaxbounds)
@@ -924,11 +949,11 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true)
     }
 }
 
-function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true)
+function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true,minzoom=true)
 {
     if(toggleCoverStatus)
     {
-        afterLoadJurisdAll(featureGroup,fittobounds,setmaxbounds)
+        afterLoadJurisdAll(featureGroup,fittobounds,setmaxbounds,minzoom)
     }
     else
     {
