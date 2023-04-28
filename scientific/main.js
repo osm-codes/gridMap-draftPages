@@ -1,3 +1,30 @@
+function changeLevel_byDigits(x)
+{
+    let input = document.getElementById('fielddecode').value
+
+    if (input.length > 0)
+    {
+        if (x>0)
+        {
+            document.getElementById('fielddecode').value = input + '7';
+            getDecode();
+        }
+        else if (x < 0 && input.length > 1)
+        {
+            document.getElementById('fielddecode').value = input.substring(0,input.length-1);
+            getDecode();
+        }
+        else
+        {
+            alert('Check code or level limits');
+        }
+    }
+    else
+    {
+        alert('Click a point first.');
+    }
+}
+
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
     grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
@@ -15,6 +42,20 @@ var layerCenterCurrent = new L.geoJSON(null, {
             style: style,
             onEachFeature: onEachFeature,
             pointToLayer: pointToLayer,
+        });
+
+var layerPolygonCurrentGrid = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonCurrentGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
+        });
+
+var layerGridAll = new L.geoJSON(null, {
+            style: stylePolygonCurrentGrid,
+            onEachFeature: onEachFeaturePolygonCurrentGrid,
+            pointToLayer: pointToLayer,
+            filter: filterLayer,
         });
 
 var layerPolygonAll = new L.geoJSON(null,{
@@ -46,11 +87,13 @@ var layerMarkerAll = new L.featureGroup();
 
 var overlays = {
     'Current polygon': layerPolygonCurrent,
-    'All polygon': layerPolygonAll,
+    // 'All polygon': layerPolygonAll,
     'Current center': layerCenterCurrent,
-    'All center': layerCenterAll,
+    // 'All center': layerCenterAll,
+    'Current grid': layerPolygonCurrentGrid,
+    // 'All grid': layerGridAll,
     'Current marker': layerMarkerCurrent,
-    'All markers': layerMarkerAll,
+    // 'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll
 };
@@ -75,6 +118,7 @@ function checkCountry(string,reset=true)
 
 var uri = window.location.href;
 let pathname = window.location.pathname;
+pathname = pathname.split(/[#]/)[0]
 
 if (pathname.match(/^\/[A-Z]{2}.+$/i))
 {
@@ -86,7 +130,7 @@ var map = L.map('map',{
     zoom:   defaultMap.zoom,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -151,6 +195,14 @@ level.onAdd = function (map) {
     this.container     = L.DomUtil.create('div');
     this.label_level   = L.DomUtil.create('label', '', this.container);
     this.select_level  = L.DomUtil.create('select', '', this.container);
+    this.label_grid    = L.DomUtil.create('label', '', this.container);
+    this.select_grid   = L.DomUtil.create('select', '', this.container);
+
+    this.label_grid.for = 'grid';
+    this.label_grid.innerHTML = ' ';
+    this.select_grid.id = 'grid';
+    this.select_grid.name = 'grid';
+    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: ';
@@ -177,13 +229,40 @@ clear.onAdd = function (map) {
 
     return this.container; };
 
+var toggleTooltip = L.control({position: 'topleft'});
+toggleTooltip.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
+
+    this.button.type = 'button';
+    this.button.innerHTML= "Tooltip";
+
+    L.DomEvent.disableScrollPropagation(this.button);
+    L.DomEvent.disableClickPropagation(this.button);
+    L.DomEvent.on(this.button, 'click', toggleTooltipLayers, this.container);
+
+    return this.container; };
+
+var geoUriDiv = L.control({position: 'topright'});
+geoUriDiv.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+
+    this.container.innerHTML= '<a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a>';
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
 zoom.addTo(map);
 layers.addTo(map);
+geoUriDiv.addTo(map);
 escala.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
 clear.addTo(map);
+toggleTooltip.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
@@ -191,23 +270,55 @@ a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
 b.appendChild(clear.getContainer());
+b.appendChild(toggleTooltip.getContainer());
 
 function resetDef()
 {
     layerPolygonCurrent.clearLayers();
     layerCenterCurrent.clearLayers();
+    layerPolygonCurrentGrid.clearLayers();
+    layerGridAll.clearLayers();
     layerCenterAll.clearLayers();
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
-    document.getElementById('fielddecode').value = '';
-    document.getElementById('fieldencode').value = '';
-
     map.setView(defaultMap.center, defaultMap.zoom);
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
     document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
     document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
+}
+
+function toggleTooltipLayers()
+{
+    map.eachLayer(function(l)
+    {
+        if(map.hasLayer(l))
+            if (l.getTooltip())
+            {
+                var tooltip = l.getTooltip();
+                l.unbindTooltip();
+                toggleTooltipStatus ? tooltip.options.permanent = false : tooltip.options.permanent = true
+                l.bindTooltip(tooltip)
+            }
+    })
+
+    toggleTooltipStatus ? toggleTooltipStatus = false : toggleTooltipStatus = true;
+}
+
+function generateSelectGrid(grids)
+{
+    let htmlA = '';
+    let htmlB = '';
+
+    for (let i = 0; i < grids.length; i++)
+    {
+        htmlA += '<option value="grid' +  grids[i]    + '">' + grids[i] + ' grid</option>'
+        htmlB += '<option value="grid' + (grids[i]+1) + '">' + grids[i] + ' points</option>'
+    }
+
+    return '<option value="">Cell</option>' + htmlA + htmlB
 }
 
 function generateSelectLevel(base,baseValue)
@@ -271,6 +382,7 @@ function getEncode(noData)
     if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
+        let grid = document.getElementById('grid').value
         let context = defaultMap.isocode;
 
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
@@ -295,6 +407,8 @@ function getEncode(noData)
 
         var uri_ = uri + '/' + context
 
+        var uriGrid = uri + (grid ? '/' + grid : '') + '/' + context
+
         document.getElementById('fielddecode').value = '';
 
         input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
@@ -305,7 +419,18 @@ function getEncode(noData)
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
         L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
 
-        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+        if(grid !== '')
+        {
+            layerPolygonCurrent.clearLayers();
+            layerCenterCurrent.clearLayers();
+            layerPolygonCurrentGrid.clearLayers();
+            loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
+        }
+        else
+        {
+            layerPolygonCurrentGrid.clearLayers();
+            loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+        }
     }
 }
 
@@ -344,9 +469,10 @@ function latRound(x)
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
-    let context = defaultMap.isocode;
+    let grid = document.getElementById('grid').value
 
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + '/' + context
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -357,7 +483,18 @@ function onMapClick(e)
     L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
     L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
 
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+    if(grid !== '')
+    {
+        layerPolygonCurrent.clearLayers();
+        layerCenterCurrent.clearLayers();
+        layerPolygonCurrentGrid.clearLayers();
+        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
+    }
+    else
+    {
+        layerPolygonCurrentGrid.clearLayers();
+        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+    }
 }
 
 // Layer layerPolygonCurrent
@@ -408,6 +545,16 @@ function layerTooltipFeature(feature,layer)
     }
 
     layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1c'});
+}
+
+function layerTooltipFeature2(feature,layer)
+{
+    layer.bindTooltip(feature.properties.code,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+}
+
+function layerTooltipFeature3(feature,layer)
+{
+    layer.bindTooltip(feature.properties.code_subcell,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
 function highlightFeature(e)
@@ -526,6 +673,58 @@ function styleCoverAll(feature)
     return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
 }
 
+// Layer layerPolygonCurrentGrid
+function highlightFeaturePolygonCurrentGrid(e)
+{
+    this.openTooltip();
+}
+
+function filterLayer(feature, layer) {
+        return feature.properties.code_subcell;
+    }
+
+function resetHighlightPolygonCurrentGrid(e,layer)
+{
+    layerPolygonCurrentGrid.resetStyle(e.target);
+    layerGridAll.resetStyle(e.target);
+}
+
+function stylePolygonCurrentGrid(feature)
+{
+    if(feature.geometry.type === 'Point')
+    {
+        return {color: 'deeppink', weight:1};
+    }
+    else
+    {
+        return {color: 'deeppink', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
+    }
+}
+
+function onEachFeaturePolygonCurrentGrid(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature3(feature,layer);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeaturePolygonCurrentGrid,
+        mouseout: resetHighlightPolygonCurrentGrid
+    });
+}
+
+function onEachFeaturePolygonAllGrid(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature2(feature,layer);
+
+    layer.on({
+        click: onFeatureClick
+    });
+}
+
+//
+
 function afterLoadLayer(featureGroup)
 {
     let zoom = map.getBoundsZoom(featureGroup.getBounds());
@@ -630,7 +829,15 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 var uriApi = ''
 var uriApiJurisd = ''
 
-if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
+if (pathname.match(/\/base16\/grid/))
+{
+    uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
+}
+else if (pathname.match(/(\/base16h)?\/grid/))
+{
+    uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
+}
+else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
 {
     uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
     uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");

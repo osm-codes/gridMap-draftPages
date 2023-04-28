@@ -1,3 +1,30 @@
+function changeLevel_byDigits(x)
+{
+    let input = document.getElementById('fielddecode').value
+
+    if (input.length > 0)
+    {
+        if (x>0)
+        {
+            document.getElementById('fielddecode').value = input + '7';
+            getDecode();
+        }
+        else if (x < 0 && input.length > 1)
+        {
+            document.getElementById('fielddecode').value = input.substring(0,input.length-1);
+            getDecode();
+        }
+        else
+        {
+            alert('Check code or level limits');
+        }
+    }
+    else
+    {
+        alert('Click a point first.');
+    }
+}
+
 var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
     grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
@@ -353,9 +380,21 @@ noTooltip.onAdd = function (map) {
 
     return this.container; };
 
+var geoUriDiv = L.control({position: 'topright'});
+geoUriDiv.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+
+    this.container.innerHTML= '<a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a>';
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
 zoom.addTo(map);
 layers.addTo(map);
 escala.addTo(map);
+geoUriDiv.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
@@ -368,6 +407,7 @@ zoomClick.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
+var d = document.getElementById('custom-map-controlsd');
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
@@ -375,8 +415,8 @@ a.appendChild(searchDecodeList.getContainer());
 b.appendChild(clear.getContainer());
 b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
-b.appendChild(noTooltip.getContainer());
-b.appendChild(zoomClick.getContainer());
+d.appendChild(noTooltip.getContainer());
+d.appendChild(zoomClick.getContainer());
 
 function resetDef()
 {
@@ -529,8 +569,6 @@ function getEncode(noData)
         let grid = document.getElementById('grid').value
         let context = defaultMap.isocode;
 
-        var base = defaultMap.scientificBase
-
         var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
 
         if(input.match(/.*;u=.*/))
@@ -549,7 +587,7 @@ function getEncode(noData)
             uri += input + ";u=" + level
         }
 
-        uri += ".json" + (base != 'base32' ? '/' + base : '')
+        uri += ".json/" + defaultMap.scientificBase
 
         var uri_ = uri + '/' + context
 
@@ -617,11 +655,9 @@ function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
-    let context = defaultMap.isocode;
 
-    var base = defaultMap.scientificBase
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + '/' + context
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (base != 'base32' ? '/' + base : '') + (grid ? '/' + grid : '') + '/' + context
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -742,6 +778,8 @@ function onEachFeature(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
+
+    layerCenterCurrent.clearLayers();
 
     L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterCurrent);
 
@@ -875,8 +913,6 @@ function resetHighlightPolygonCurrentGrid(e,layer)
 
 function stylePolygonCurrentGrid(feature)
 {
-    let grid = document.getElementById('grid').value
-
     if(feature.geometry.type === 'Point')
     {
         return {color: 'deeppink', weight:1};

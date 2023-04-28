@@ -11,18 +11,22 @@
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
 </head><body>
 
+<h3>Scientific OSMcode:
+ <code class="feSchrift" id="sciCode"></code>
+ <a title="less digits (previous larger level)" href="#" onclick="changeLevel_byDigits(-1)"><img src="/resources/img/osmCodes-lessDigits.png"/></a><a title="more digits (next smaller level)" href="#" onclick="changeLevel_byDigits(+1)"><img src="/resources/img/osmCodes-moreDigits.png" /></a>
+ <span id="nameJurisd"></span>
+</h3>
+
 <section id="map"></section>
 
-<aside id="custom-map-controls">
-<h3>Scientific OSMcode: <code id="sciCode"></code> <span id="nameJurisd"></span></h3>
-<span id="geoUri" class="font_small"></span>
-<hr />
 <div class="leaflet-control-container" id="custom-map-controlsa"></div>
 <hr style="clear:both" />
 <div class="leaflet-control-container" id="custom-map-controlsb"></div>
 <hr style="clear:both" />
+
+<p><a href="#top">Go to the top page</a></p>
 <p>Software version: <span id="swVersions"></span></p>
-</aside>
+<p align="right"><a href="./_talk/">Contact us</a></p>
 
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>

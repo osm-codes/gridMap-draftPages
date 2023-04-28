@@ -341,7 +341,7 @@ noTooltip.onAdd = function (map) {
     this.checkbox  = L.DomUtil.create('input', '', this.container);
 
     this.label.for= 'notooltip';
-    this.label.innerHTML= '<br/>No tooltip: ';
+    this.label.innerHTML= 'No tooltip: ';
     this.checkbox.id = 'notooltip';
     this.checkbox.type = 'checkbox';
     this.checkbox.checked = false;
@@ -379,6 +379,7 @@ zoomClick.addTo(map);
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
 var c = document.getElementById('custom-map-controlsc');
+var d = document.getElementById('custom-map-controlsd');
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
@@ -386,8 +387,8 @@ c.appendChild(level.getContainer());
 b.appendChild(clear.getContainer());
 b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
-b.appendChild(noTooltip.getContainer());
-b.appendChild(zoomClick.getContainer());
+d.appendChild(noTooltip.getContainer());
+d.appendChild(zoomClick.getContainer());
 
 function resetDef()
 {
@@ -985,6 +986,7 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
+                document.getElementById('canonicalCode').innerHTML = data.features[0].properties.short_code;
 
                 if(data.features[0].properties.truncated_code)
                 {

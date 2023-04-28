@@ -13,7 +13,7 @@ h3 img {
 
 .font_small{font-size: small;}
 
-#postalCode {
+.feSchrift {
 	color: #000;
 	font-family: "FE-Schrift";
 	font-size: 150%;
@@ -27,51 +27,32 @@ h3 img {
 	box-sizing: border-box;
 }
 
-
 a#hasGeoUri, a#hasGeoUri:link, a#hasGeoUri:visited, a#hasGeoUri:active {
   color: #666;
   text-decoration: none;
 }
 a#hasGeoUri:hover { color: hotpink; }
 
-
-#custom-map-controls {
-	width: 60pt;
-	float: right;
-	box-sizing: border-box;
- 	/* padding-left:10pt; */
-}
-
-#custom-map-controls2 {
- 	width: 99vw;
-	float: left;
-	box-sizing: border-box;
-}
-
 #custom-map-controlsa, #custom-map-controlsb,
-#custom-map-controlsc {
+#custom-map-controlsc, #custom-map-controlsd {
 	float: left;
-	padding-top:2%;
-	padding-bottom:2%;
+	padding-top:0.5%;
+	padding-bottom:0.5%;
 }
-/*
-#custom-map-controlsc, #custom-map-controlsc option, #custom-map-controlsc select { font-size: 9pt;}
-*/
 
 #custom-map-controlsb .leaflet-control {
 	clear:none;
 }
 
-.leaflet-control-encode {
+#custom-map-controlsd {
+	clear:both;
+}
+
+.leaflet-control {
 	padding-top:2%;
 }
 
-.leaflet-tooltip.tooltipbase16h {
-	border-left-color: rgb(255, 250, 205, 1);
-	background-color: rgb(255, 250, 205, 1)
-}
-
-.leaflet-tooltip.tooltipbase16h1c {
+.leaflet-tooltip.tooltipbase16h, .leaflet-tooltip.tooltipbase16h1c {
 	border-left-color: rgb(255, 250, 205, 1);
 	background-color: rgb(255, 250, 205, 1)
 }
@@ -82,4 +63,3 @@ and (min-width: 600px) and (max-width: 959px)
 @media (min-width:500px) {
 	.test { font-size: 20px; }
 }
-
