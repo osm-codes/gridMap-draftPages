@@ -986,7 +986,7 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
-                document.getElementById('canonicalCode').innerHTML = data.features[0].properties.short_code;
+                document.getElementById('canonicalCode').innerHTML = (data.features[0].properties.short_code).replace( /([a-z])([A-Z])/g, '$1.$2' );
 
                 if(data.features[0].properties.truncated_code)
                 {
@@ -1043,7 +1043,7 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
 
 var uriApi = ''
 var uriApiJurisd = ''
-const reg_esp_caracter = /\./
+const reg_esp_caracter = /\./g
 
 if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
 {
@@ -1076,6 +1076,8 @@ else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 else
 {
     pathnameNoDot = pathname.replace(reg_esp_caracter,"");
+
+    console.log(pathnameNoDot)
 
     if (pathnameNoDot.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
     {
