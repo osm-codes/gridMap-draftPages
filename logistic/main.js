@@ -441,7 +441,7 @@ function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
 {
     let html = '';
 
-    for (let i = base.iniLevel, j=0, k=base.iniDigit; i < base.endLevel; i+=base.modLevel, j++, k++)
+    for (let i = base.iniLevel, j=0, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, j++, k++)
     {
         if (k >= size_shortestprefix)
         {
