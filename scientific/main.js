@@ -321,7 +321,7 @@ function generateSelectGrid(grids)
     return '<option value="">Cell</option>' + htmlA + htmlB
 }
 
-function generateSelectLevel(base,baseValue)
+function generateSelectLevel(base,baseValue,size=0)
 {
     let html = '';
 
@@ -331,23 +331,7 @@ function generateSelectLevel(base,baseValue)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
-        html += '<option value="' + levelValues[i] + '">L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
-    }
-
-    return html
-}
-
-function generateSelectLevel2(base,baseValue,size)
-{
-    let html = '';
-
-    let m=0;
-
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
-    {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
-
-        html += '<option value="' + levelValues[i] + (Math.floor(size) <= levelSize[i] ? '" selected>' : '">') + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  '">'  ) + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
     }
 
     return html
@@ -791,7 +775,7 @@ function afterData(data,layer)
 
             if(data.features[0].properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel2(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
+                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;

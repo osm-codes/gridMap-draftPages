@@ -127,12 +127,12 @@ var overlays = {
 };
 
 var defaultMap;
-var arrayOfSideCoverCell = new Array();
-var arrayOfLevelCoverCell = new Array();
 var sizeCurrentCell = 0;
 var centerCurrentCell;
 var getJurisdAfterLoad = false;
 var jurisdIsMultipolygon = false;
+var size_shortestprefix = 0;
+var getCover = true;
 
 function checkCountry(string,reset=true)
 {
@@ -423,19 +423,27 @@ function toggleTooltipLayers()
 
 function toggleCoverLayers()
 {
-    toggleCoverStatus ? map.addLayer(layerCoverAll) : map.removeLayer(layerCoverAll);
-    fixZOrder(overlays);
-    toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
+    if(getCover)
+    {
+        let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
+        loadGeojson(uri_base + "/" + input + ".json/cover/" + defaultMap.scientificBase,[layerCoverAll],function(e){},function(e){});
+        getCover = false;
+    }
+    else
+    {
+        toggleCoverStatus ? map.addLayer(layerCoverAll) : map.removeLayer(layerCoverAll);
+        fixZOrder(overlays);
+        toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
+    }
 }
 
-function generateSelectLevel(base,baseValue,size=0)
+function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
 {
     let html = '';
-    let a = Math.min(...arrayOfLevelCoverCell);
 
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
+    for (let i = base.iniLevel, j=0, k=base.iniDigit; i < base.endLevel; i+=base.modLevel, j++, k++)
     {
-        if (arrayOfLevelCoverCell.length > 0 && j >= a-1)
+        if (k >= size_shortestprefix)
         {
             html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
@@ -473,14 +481,12 @@ function getEncode(noData)
     {
         var uriApi = uri_base + "/" + input + ".json";
 
-        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
         loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
     }
     if (input.match(/^geo:olc:.+$/i))
     {
         var uriApi = uri_base + "/" + input + ".json";
 
-        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
         loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
     }
     else if(input !== null && input !== '')
@@ -862,6 +868,7 @@ function onEachFeatureJurisd(feature,layer)
     layer.bindPopup(popupContent);
 
     jurisdIsMultipolygon = feature.properties.is_multipolygon;
+    size_shortestprefix = feature.properties.size_shortestprefix;
 }
 
 // Layer layerCoverAll
@@ -880,9 +887,6 @@ function onEachFeatureCoverAll(feature,layer)
         mouseover: highlightFeature,
         mouseout: resetHighlightCoverAll
     });
-
-    arrayOfSideCoverCell.push(feature.properties.side);
-    arrayOfLevelCoverCell.push(feature.properties.level);
 }
 
 function styleCoverAll(feature)
@@ -917,6 +921,8 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true)
     }
 
     map.setMaxBounds(featureGroup.getBounds())
+
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix);
 }
 
 function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true)
@@ -924,28 +930,6 @@ function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true)
     afterLoadJurisdAll(featureGroup,fittobounds)
 
     getMyLocationJurisd()
-}
-
-function afterLoadLayerCoverAll(featureGroup,fittobounds=true)
-{
-    if(!toggleCoverStatus)
-    {
-        map.removeLayer(featureGroup);
-        toggleCoverStatus = true
-    }
-    if(fittobounds)
-    {
-        if(sizeCurrentCell > 0)
-        {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,sizeCurrentCell);
-            const { lat, lng } = centerCurrentCell;
-            document.getElementById('fieldencode').value = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
-        }
-        else
-        {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase)
-        }
-    }
 }
 
 function afterData(data,layer)
@@ -976,7 +960,6 @@ function afterData(data,layer)
                     var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.short_code.split(/[~]/)[0] + ".json";
 
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
-                    loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){map.removeLayer(e);},function(e){});
                 }
 
                 var nextURL = uri_base + "/" + data.features[0].properties.short_code
@@ -997,7 +980,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)
@@ -1048,29 +1031,21 @@ const reg_esp_caracter = /\./g
 if (pathname.match(/^\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
 {
     uriApi = uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
-
-    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else if (pathname.match(/\/CO-\d+$/i))
 {
     uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
-
-    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else if (pathname.match(/\/BR-\d+$/i))
 {
     uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
-
-    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 {
     uriApi = uri.replace(/\/(BR-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
-
-    loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverAll], afterLoadLayerCoverAll,afterData);
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
 else
@@ -1123,6 +1098,5 @@ else
     if(uriApiJurisd !== null && uriApiJurisd !== '')
     {
         loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
-        loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],afterLoadLayerCoverAll,function(e){});
     }
 }
