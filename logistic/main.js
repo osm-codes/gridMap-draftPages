@@ -969,7 +969,7 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];                
-                let df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'</small>~';
+                let df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'</small>~');
                 document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
 
                 if(data.features[0].properties.truncated_code)
