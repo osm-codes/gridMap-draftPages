@@ -102,6 +102,18 @@ var layerPolygonAll = new L.geoJSON(null,{
             pointToLayer: pointToLayer,
         });
 
+var layerOlcGhsCurrent = new L.geoJSON(null, {
+            style: styleOlcGhs,
+            onEachFeature: onEachFeatureOlcGhs,
+            pointToLayer: pointToLayer,
+        });
+
+var layerOlcGhsAll = new L.geoJSON(null,{
+            style: styleOlcGhs,
+            onEachFeature: onEachFeatureOlcGhsAll,
+            pointToLayer: pointToLayer,
+        });
+
 var layerJurisdAll = new L.geoJSON(null,{
             style: styleJurisdAll,
             onEachFeature: onEachFeatureJurisd,
@@ -118,8 +130,10 @@ var layerMarkerCurrent = new L.featureGroup();
 var layerMarkerAll = new L.featureGroup();
 
 var overlays = {
-    'Current polygon': layerPolygonCurrent,
-    'All polygon': layerPolygonAll,
+    'Current Ggeohash': layerPolygonCurrent,
+    'All Ggeohash': layerPolygonAll,
+    'Current OLC or GHS': layerOlcGhsCurrent,
+    'All OLC or GHS': layerOlcGhsAll,
     'Current marker': layerMarkerCurrent,
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
@@ -165,7 +179,7 @@ var map = L.map('map',{
     maxBoundsViscocity: 1,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -453,9 +467,16 @@ function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
 
 function getDecode(data)
 {
-    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + document.getElementById('fielddecode').value
+    let fdvalue = document.getElementById('fielddecode').value;
+    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + fdvalue;
 
-    if(input !== null && input !== '')
+    if (fdvalue.match(/^geo:(olc|ghs):.+$/i))
+    {
+        var uri = uri_base + "/" + fdvalue + ".json";
+
+        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
+    }
+    else if(input !== null && input !== '')
     {
         var uri = uri_base + "/geo:osmcodes:"
 
@@ -479,15 +500,15 @@ function getEncode(noData)
 
     if (input.match(/^(urn|geo):(lex):.+$/i))
     {
-        var uriApi = uri_base + "/" + input + ".json";
+        var uri = uri_base + "/" + input + ".json";
 
-        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+        loadGeojson(uri,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
     }
-    if (input.match(/^geo:olc:.+$/i))
+    if (input.match(/^geo:(olc|ghs):.+$/i))
     {
-        var uriApi = uri_base + "/" + input + ".json";
+        var uri = uri_base + "/" + input + ".json";
 
-        loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
     }
     else if(input !== null && input !== '')
     {
@@ -820,6 +841,69 @@ function pointToLayer(feature,latlng)
     });
 }
 
+// Layer layerOlcGhsAll
+
+function highlightFeatureOlcGhs(e)
+{
+    const layer = e.target;
+
+    let noTooltip = document.getElementById('notooltip')
+
+    if(noTooltip.checked)
+    {
+        this.closeTooltip();
+        layer.setStyle({
+            color: 'yellow',
+            weight:1
+        });
+
+        layer.bringToFront();
+    }
+    else
+    {
+        this.openTooltip();
+    }
+}
+
+function resetHighlightOlcGhs(e,layer)
+{
+    layerOlcGhsCurrent.resetStyle(e.target);
+    layerOlcGhsAll.resetStyle(e.target);
+}
+
+function styleOlcGhs(feature)
+{
+    return {color: 'black', fillColor: 'yellow', fillOpacity: 0.1, weight:0};
+}
+
+function onEachFeatureOlcGhs(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsCurrent);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
+}
+
+function onEachFeatureOlcGhsAll(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsAll);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeatureOlcGhs,
+        mouseout: resetHighlightOlcGhs
+    });
+}
+
 // Layer layerPolygonAll
 function onEachFeaturePolygonAll(feature,layer)
 {
@@ -1066,7 +1150,7 @@ else
 
         if (pathnameNoDot.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
-            uriApiJurisd = pathnameNoDot.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
+            uriApiJurisd = pathnameNoDot.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:br-geocodigo:$1.json");
         }
         else if (pathnameNoDot.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
         {
