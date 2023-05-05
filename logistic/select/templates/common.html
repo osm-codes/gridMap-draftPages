@@ -18,6 +18,12 @@ function sel_jurL1(abbrev,optc) {
     jL2dom.innerHTML=s+"</select>"
     let jL3dom = document.getElementById(optc+'_jurL3');
     jL3dom.innerHTML=""
+
+    var nextURL = "./" + abbrev
+    const nextTitle = '';
+    const nextState = { additionalInformation: 'to canonical.' };
+
+    window.history.pushState(nextState, nextTitle, nextURL);
   }
 }
 function sel_jurL2(abbrev,optc) {
@@ -32,6 +38,12 @@ function sel_jurL2(abbrev,optc) {
         s += '<option>'+i
     }
     jL3dom.innerHTML=s+"</select>"
+
+    var nextURL = "./" + country + '-' + state
+    const nextTitle = '';
+    const nextState = { additionalInformation: 'to canonical.' };
+
+    window.history.pushState(nextState, nextTitle, nextURL);
   }
 }
 function sel_jurL3(abbrev,optc) {
