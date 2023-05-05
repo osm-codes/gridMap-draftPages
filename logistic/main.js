@@ -47,8 +47,12 @@ function sel_jurL2(abbrev)
     let state = document.getElementById('sel_jurL2').value;
     let jL3dom = document.getElementById('sel_jurL3');
     let s = '<option value="">- City -</option>'
-    for ( var i of jurisdictions[country][state]['mun'] )
-        s += '<option>'+i
+
+    if(state != '')
+    {
+        for ( var i of jurisdictions[country][state]['mun'] )
+            s += '<option>'+i
+    }
     jL3dom.innerHTML=s
 }
 
@@ -57,7 +61,11 @@ function sel_jurL3(abbrev)
     // let country = document.getElementById('sel_jurL1').value;
     let country = defaultMap.isocode;
     let state = document.querySelector('#sel_jurL2').value;
-    window.location.href = uri_base + '/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
+    let jL3dom = document.getElementById('sel_jurL3').value;
+    if(jL3dom != '' && state != '')
+    {
+        window.location.href = uri_base + '/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
+    }
 }
 
 function latRound(x,maxDigits=6) {
@@ -1136,8 +1144,6 @@ else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 else
 {
     pathnameNoDot = pathname.replace(reg_esp_caracter,"");
-
-    console.log(pathnameNoDot)
 
     if (pathnameNoDot.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
     {
