@@ -148,7 +148,7 @@ var overlays = {
     'Jurisdictions': layerJurisdAll,
 };
 
-var defaultMap;
+var defaultMap = countries['BR'];
 var sizeCurrentCell = 0;
 var centerCurrentCell;
 var getJurisdAfterLoad = false;
@@ -1140,6 +1140,10 @@ else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 {
     uriApi = uri.replace(/\/(BR-[A-Z]+)$/i, "/geo:iso_ext:$1.json");
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
+else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
+{
+    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
 }
 else
 {
