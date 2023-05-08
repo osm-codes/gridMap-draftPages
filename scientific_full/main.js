@@ -1121,6 +1121,24 @@ function afterData(data,layer)
     }
 }
 
+function afterDataOlcGhs(data,layer)
+{
+    if(data.features.length = 1)
+    {
+        if(data.features[0].properties.side)
+        {
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
+
+            const center = layer.getBounds().getCenter();
+            const { lat, lng } = center;
+            const stringgeo = 'geo:' + latRound(lat) + "," + latRound(lng) + ";u=" + document.getElementById('level_size').value;
+
+            document.getElementById('geoUri').innerHTML = stringgeo;
+            document.getElementById('fieldencode').value = stringgeo;
+        }
+    }
+}
+
 function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 {
     fetch(uri)
@@ -1166,9 +1184,10 @@ else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([012345678
     uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
     uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
 }
-else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
+else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
-    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+    loadGeojson(uri.replace(/\/[A-Z]{2}\/(geo:(olc|ghs).*)$/i, "/$1.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
+    loadGeojson(uri.replace(/\/([A-Z]{2})\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
 }
 else if (pathname.match(/^\/geo:.+$/i))
 {

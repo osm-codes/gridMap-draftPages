@@ -1100,6 +1100,28 @@ function afterData(data,layer)
     }
 }
 
+function afterDataOlcGhs(data,layer)
+{
+    if(data.features.length = 1)
+    {
+        if(data.features[0].properties.side)
+        {
+            sizeCurrentCell = data.features[0].properties.side;
+
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix,sizeCurrentCell);
+
+            let level = document.getElementById('level_size').value
+            let decimals = (level <= 64 ? 5 : 4)
+
+            centerCurrentCell = layer.getBounds().getCenter();
+            const { lat, lng } = centerCurrentCell;
+
+            document.getElementById('geoUri').innerHTML  = 'geo:' + latRound(lat,decimals) + "," + latRound(lng,decimals);
+            document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+        }
+    }
+}
+
 function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
 {
     fetch(uri)
@@ -1151,6 +1173,11 @@ else if (pathname.match(/\/(BR-[A-Z]+)$/i))
 else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
 {
     loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+}
+else if (pathname.match(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)\/geo:(olc|ghs):.+$/i))
+{
+    loadGeojson(uri.replace(/\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+\/(geo:(olc|ghs).*)$/i, "/$1.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
+    loadGeojson(uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
 }
 else
 {

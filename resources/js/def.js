@@ -63,7 +63,7 @@ function generateAllSoftwareVersions()
     }
 }
 
-var uri_base = "."
+var uri_base = window.location.protocol + '//' + window.location.hostname;
 
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
