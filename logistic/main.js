@@ -512,7 +512,7 @@ function getEncode(noData)
 
         loadGeojson(uri,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
     }
-    if (input.match(/^geo:(olc|ghs):.+$/i))
+    else if (input.match(/^geo:(olc|ghs):.+$/i))
     {
         var uri = uri_base + "/" + input + ".json";
 

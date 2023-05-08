@@ -51,6 +51,18 @@ var layerPolygonCurrentGrid = new L.geoJSON(null, {
             filter: filterLayer,
         });
 
+var layerOlcGhsCurrent = new L.geoJSON(null, {
+            style: styleOlcGhs,
+            onEachFeature: onEachFeatureOlcGhs,
+            pointToLayer: pointToLayer,
+        });
+
+var layerOlcGhsAll = new L.geoJSON(null,{
+            style: styleOlcGhs,
+            onEachFeature: onEachFeatureOlcGhsAll,
+            pointToLayer: pointToLayer,
+        });
+
 var layerGridAll = new L.geoJSON(null, {
             style: stylePolygonCurrentGrid,
             onEachFeature: onEachFeaturePolygonCurrentGrid,
@@ -95,7 +107,11 @@ var overlays = {
     'Current marker': layerMarkerCurrent,
     // 'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
-    'Jurisdictions': layerJurisdAll
+    'Jurisdictions': layerJurisdAll,
+
+    'Current OLC or GHS': layerOlcGhsCurrent,
+    'All OLC or GHS': layerOlcGhsAll,
+
 };
 
 var defaultMap;
@@ -130,7 +146,7 @@ var map = L.map('map',{
     zoom:   defaultMap.zoom,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll] });
+    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
@@ -341,7 +357,13 @@ function getDecode(data)
 {
     let input = document.getElementById('fielddecode').value
 
-    if(input !== null && input !== '')
+    if (input.match(/^geo:(olc|ghs):.+$/i))
+    {
+        var uri = uri_base + "/" + input + ".json";
+
+        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
+    }
+    else if(input !== null && input !== '')
     {
         var uri = uri_base + "/geo:osmcodes:"
 
@@ -363,7 +385,13 @@ function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
 
-    if(input !== null && input !== '')
+    if (input.match(/^geo:(olc|ghs):.+$/i))
+    {
+        var uri = uri_base + "/" + input + ".json";
+
+        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+    }
+    else if(input !== null && input !== '')
     {
         let level = document.getElementById('level_size').value
         let grid = document.getElementById('grid').value
@@ -496,7 +524,15 @@ function popUpFeature(feature,layer)
 
     var popupContent = "";
 
-    popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+    if(feature.properties.type)
+    {
+        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+    }
+    else
+    {
+        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+    }
+
     popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
     popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -585,6 +621,69 @@ function pointToLayer(feature,latlng)
         weight: 1,
         opacity: 0.8,
         fillOpacity: 0.6,
+    });
+}
+
+// Layer layerOlcGhsAll
+
+function highlightFeatureOlcGhs(e)
+{
+    const layer = e.target;
+
+    let noTooltip = document.getElementById('notooltip')
+
+    if(noTooltip.checked)
+    {
+        this.closeTooltip();
+        layer.setStyle({
+            color: 'yellow',
+            weight:1
+        });
+
+        layer.bringToFront();
+    }
+    else
+    {
+        this.openTooltip();
+    }
+}
+
+function resetHighlightOlcGhs(e,layer)
+{
+    layerOlcGhsCurrent.resetStyle(e.target);
+    layerOlcGhsAll.resetStyle(e.target);
+}
+
+function styleOlcGhs(feature)
+{
+    return {color: 'black', fillColor: 'yellow', fillOpacity: 0.1, weight:0};
+}
+
+function onEachFeatureOlcGhs(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsCurrent);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
+}
+
+function onEachFeatureOlcGhsAll(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsAll);
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeatureOlcGhs,
+        mouseout: resetHighlightOlcGhs
     });
 }
 
@@ -825,6 +924,10 @@ else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([012345678
 {
     uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
     uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
+}
+else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
+{
+    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
 }
 else if (pathname.match(/^\/geo:.+$/i))
 {
