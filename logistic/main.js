@@ -427,6 +427,11 @@ function resetDef()
     map.fitBounds(layerJurisdAll.getBounds());
 }
 
+function zoomToJurisd()
+{
+    map.setView(defaultMap.center, defaultMap.zoom);
+}
+
 function toggleTooltipLayers()
 {
     map.eachLayer(function(l)

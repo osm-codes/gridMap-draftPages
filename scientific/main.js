@@ -307,6 +307,11 @@ function resetDef()
     document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
 }
 
+function zoomToJurisd()
+{
+    map.setView(defaultMap.center, defaultMap.zoom);
+}
+
 function toggleTooltipLayers()
 {
     map.eachLayer(function(l)
