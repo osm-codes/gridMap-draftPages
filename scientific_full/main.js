@@ -6,7 +6,7 @@ function changeLevel_byDigits(x)
     {
         if (x>0)
         {
-            document.getElementById('fielddecode').value = input + '7';
+            document.getElementById('fielddecode').value = input.replace(/[^0-9a-f]$/,"") + '7';
             getDecode();
         }
         else if (x < 0 && input.length > 1)
