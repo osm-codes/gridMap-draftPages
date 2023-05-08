@@ -603,7 +603,7 @@ function getMyLocation_write(position)
         {
             if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
             {
-                // console.log("DENTRO");
+                // console.log("in");
                 document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
                 getEncode();
             }
@@ -721,7 +721,7 @@ function popUpFeature(feature,layer)
 
     if(feature.properties.short_code )
     {
-        popupContent += "Postal code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
+        popupContent += "Logistic code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -737,7 +737,14 @@ function popUpFeature(feature,layer)
     }
     else
     {
-        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        if(feature.properties.type)
+        {
+            popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        }
+        else
+        {
+            popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        }
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
