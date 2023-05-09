@@ -732,13 +732,18 @@ function popUpFeature(feature,layer)
 
         if(defaultMap.isocode != 'CO')
         {
-            popupContent += "Jurisdiction: <code>" + feature.properties.short_code.split(/[~]/)[0] + "</code><br>";
+            popupContent += "Jurisdiction: <code>" + feature.properties.isolabel_ext + "</code><br>";
         }
 
         if(feature.properties.jurisd_local_id )
         {
             popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
         }
+
+        // if(feature.properties.isolabel_ext )
+        // {
+        //     popupContent += "Isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
+        // }
     }
     else
     {
@@ -840,7 +845,7 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.short_code)
     {
-        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.short_code.split(/[~]/)[0])
+        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.isolabel_ext)
         document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
     }
 
@@ -1045,10 +1050,10 @@ function afterData(data,layer)
             checkCountry(data.features[0].properties.jurisd_base_id,false)
         }
 
-        if(data.features[0].properties.isolabel_ext)
+        if(data.features[0].properties.isolabel_ext && !data.features[0].properties.short_code)
         {
-            var nextURL = uri_base + "/" + data.features[0].properties.isolabel_ext
-            const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
+            var nextURL = uri_base + "/" + data.features[0].properties.canonical_pathname
+            const nextTitle = 'OSM.codes: ' + data.features[0].properties.canonical_pathname;
             const nextState = { additionalInformation: 'to canonical.' };
 
             window.history.pushState(nextState, nextTitle, nextURL);
@@ -1061,7 +1066,7 @@ function afterData(data,layer)
                 {
                     getJurisdAfterLoad = false;
 
-                    var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.short_code.split(/[~]/)[0] + ".json";
+                    var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.isolabel_ext + ".json";
 
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
@@ -1072,7 +1077,7 @@ function afterData(data,layer)
 
                 window.history.pushState(nextState, nextTitle, nextURL);
 
-                document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];                
+                document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
                 let df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'</small>~');
                 document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
 
