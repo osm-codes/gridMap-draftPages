@@ -468,11 +468,11 @@ function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
 {
     let html = '';
 
-    for (let i = base.iniLevel, j=0, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, j++, k++)
+    for (let i = base.iniLevel, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, k++)
     {
         if (k >= size_shortestprefix)
         {
-            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*j*base.modLevel).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*i - 0.5*base.diffl0br).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]) : Math.round(levelSize[i]/1000)) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
         }
     }
     return html
