@@ -190,7 +190,6 @@ var map = L.map('map',{
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
-var toggleCoverStatus = false;
 
 map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
@@ -356,6 +355,24 @@ zoomClick.onAdd = function (map) {
 
     return this.container; };
 
+var keepPreviousClick = L.control({position: 'topleft'});
+keepPreviousClick.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+    this.label     = L.DomUtil.create('label', '', this.container);
+    this.checkbox  = L.DomUtil.create('input', '', this.container);
+
+    this.label.for= 'keepclick';
+    this.label.innerHTML= 'Keep previous clicks: ';
+    this.checkbox.id = 'keepclick';
+    this.checkbox.type = 'checkbox';
+    this.checkbox.checked = true;
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+    L.DomEvent.on(this.checkbox, 'click', toggleKeepClick, this.container);
+
+    return this.container; };
+
 var noTooltip = L.control({position: 'topleft'});
 noTooltip.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -370,6 +387,7 @@ noTooltip.onAdd = function (map) {
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
+    L.DomEvent.on(this.checkbox, 'click', toggleCoverLayers, this.container);
 
     return this.container; };
 
@@ -397,6 +415,7 @@ toggleCover.addTo(map);
 jurisdictionGgeohash.addTo(map);
 noTooltip.addTo(map);
 zoomClick.addTo(map);
+keepPreviousClick.addTo(map);
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
@@ -411,6 +430,7 @@ b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
 d.appendChild(noTooltip.getContainer());
 d.appendChild(zoomClick.getContainer());
+d.appendChild(keepPreviousClick.getContainer());
 
 function resetDef()
 {
@@ -418,7 +438,7 @@ function resetDef()
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
-    map.removeLayer(layerCoverAll); toggleCoverStatus = true
+    map.removeLayer(layerCoverAll);
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
     document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
@@ -452,6 +472,18 @@ function toggleTooltipLayers()
     toggleTooltipStatus ? toggleTooltipStatus = false : toggleTooltipStatus = true;
 }
 
+function toggleKeepClick()
+{
+    if(map.hasLayer(layerPolygonAll))
+    {
+        map.removeLayer(layerPolygonAll);
+    }
+    else
+    {
+        map.addLayer(layerPolygonAll)
+    }
+}
+
 function toggleCoverLayers()
 {
     if(getCover)
@@ -462,9 +494,8 @@ function toggleCoverLayers()
     }
     else
     {
-        toggleCoverStatus ? map.addLayer(layerCoverAll) : map.removeLayer(layerCoverAll);
+        map.hasLayer(layerCoverAll) ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll);
         fixZOrder(overlays);
-        toggleCoverStatus ? toggleCoverStatus = false : toggleCoverStatus = true;
     }
 }
 
