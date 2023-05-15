@@ -368,8 +368,7 @@ function generateSelectLevel(base,baseValue,size=0,filter=0) // 0: all, 1:meio, 
 {
     let html = '';
 
-    let m=0;
-    let p=1, q=0;
+    let m=0, p=1, q=0;
 
     if(filter == 1)
     {
@@ -385,7 +384,8 @@ function generateSelectLevel(base,baseValue,size=0,filter=0) // 0: all, 1:meio, 
     }
     else if(filter==5)
     {
-        p=5; q=0;
+        p=5;
+        q=defaultMap.bases[defaultMap.postalcodeBase].iniLevel - defaultMap.bases[defaultMap.scientificBase].iniLevel;
     }
 
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
