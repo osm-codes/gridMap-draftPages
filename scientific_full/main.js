@@ -302,26 +302,34 @@ level.onAdd = function (map) {
     this.label_grid    = L.DomUtil.create('label', '', this.container);
     this.select_grid   = L.DomUtil.create('select', '', this.container);
 
-    this.label_filter  = L.DomUtil.create('label', '', this.container);
-    this.select_filter = L.DomUtil.create('select', '', this.container);
-
     this.label_grid.for = 'grid';
     this.label_grid.innerHTML = ' ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
     this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
 
-    this.label_filter.for = 'filter';
-    this.label_filter.innerHTML = '<br/>Level filter: ';
-    this.select_filter.id = 'filter_size';
-    this.select_filter.name = 'filter';
-    this.select_filter.innerHTML = '<option value="0">All</option><option value="1">Half</option><option value="2">Int</option><option value="4">Hexadecimal</option><option value="5">base32</option>'
-
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
     this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
+var levelFilter = L.control({position: 'topleft'});
+levelFilter.onAdd = function (map) {
+    this.container     = L.DomUtil.create('div');
+    this.label_filter  = L.DomUtil.create('label', '', this.container);
+    this.select_filter = L.DomUtil.create('select', '', this.container);
+
+    this.label_filter.for = 'filter';
+    this.label_filter.innerHTML = 'Level filter: ';
+    this.select_filter.id = 'filter_size';
+    this.select_filter.name = 'filter';
+    this.select_filter.innerHTML = '<option value="0">All</option><option value="1">Half</option><option value="2">Int</option><option value="4">Hexadecimal</option><option value="5">base32</option>'
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -424,6 +432,7 @@ geoUriDiv.addTo(map);
 decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
+levelFilter.addTo(map);
 clear.addTo(map);
 toggleTooltip.addTo(map);
 toggleCover.addTo(map);
@@ -437,6 +446,7 @@ var d = document.getElementById('custom-map-controlsd');
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 a.appendChild(level.getContainer());
+a.appendChild(levelFilter.getContainer());
 a.appendChild(searchDecodeList.getContainer());
 b.appendChild(clear.getContainer());
 b.appendChild(toggleTooltip.getContainer());
