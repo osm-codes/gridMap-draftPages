@@ -734,20 +734,15 @@ function popUpFeature(feature,layer)
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
-        if(defaultMap.isocode != 'CO')
+        if(feature.properties.isolabel_ext)
         {
-            popupContent += "Jurisdiction: <code>" + feature.properties.isolabel_ext + "</code><br>";
+            popupContent += "Jurisdiction label: <code>" + feature.properties.isolabel_ext + "</code><br>";
         }
 
         if(feature.properties.jurisd_local_id )
         {
             popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
         }
-
-        // if(feature.properties.isolabel_ext )
-        // {
-        //     popupContent += "Isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
-        // }
     }
     else
     {
