@@ -215,11 +215,20 @@ level.onAdd = function (map) {
     this.label_grid    = L.DomUtil.create('label', '', this.container);
     this.select_grid   = L.DomUtil.create('select', '', this.container);
 
+    this.label_filter  = L.DomUtil.create('label', '', this.container);
+    this.select_filter = L.DomUtil.create('select', '', this.container);
+
     this.label_grid.for = 'grid';
     this.label_grid.innerHTML = ' ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
     this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
+
+    this.label_filter.for = 'filter';
+    this.label_filter.innerHTML = '<br/>Level filter: ';
+    this.select_filter.id = 'filter_size';
+    this.select_filter.name = 'filter';
+    this.select_filter.innerHTML = '<option value="0">All</option><option value="1">Half</option><option value="2">Int</option><option value="4">Hexadecimal</option><option value="5">base32</option>'
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = 'Level: ';
@@ -229,6 +238,8 @@ level.onAdd = function (map) {
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
+
+    L.DomEvent.on(this.select_filter, 'change', updateSelectLevel, this.container);
 
     return this.container; };
 
@@ -343,21 +354,58 @@ function generateSelectGrid(grids)
     return '<option value="">Cell</option>' + htmlA + htmlB
 }
 
-function generateSelectLevel(base,baseValue,size=0)
+function generateSelectLevel(base,baseValue,size=0,filter=0) // 0: all, 1:meio, 2:inteiro, 4:hex, 5:3base2
 {
     let html = '';
 
     let m=0;
+    let p=1, q=0;
+
+    if(filter == 1)
+    {
+        p=2; q=1;
+    }
+    else if(filter==2)
+    {
+        p=2; q=0;
+    }
+    else if(filter==4)
+    {
+        p=4; q=0;
+    }
+    else if(filter==5)
+    {
+        p=5; q=0;
+    }
 
     for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
     {
         m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
 
-        html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  '">'  ) + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ')</option>'
+        if(j % p === q)
+        {
+            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  '">'  ) + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ') ' + (i % 2 == 0 ? '&#9643;' : '&#9645;') + '</option>'
+        }
     }
 
     return html
 }
+
+function updateSelectLevel()
+{
+    let level = document.getElementById('level_size').value
+    let filter = document.getElementById('filter_size').value
+
+    let i = 0;
+
+    while (levelValues[i] > level)
+    {
+        i++;
+    }
+
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,levelSize[i],filter);
+}
+
 
 function getDecode(data)
 {
@@ -880,7 +928,7 @@ function afterData(data,layer)
 
             if(data.features[0].properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
+                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
@@ -899,7 +947,7 @@ function afterDataOlcGhs(data,layer)
     {
         if(data.features[0].properties.side)
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
 
             const center = layer.getBounds().getCenter();
             const { lat, lng } = center;
