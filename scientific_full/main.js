@@ -278,6 +278,17 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field  = L.DomUtil.create('label', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
+    this.span = L.DomUtil.create('span','', this.container);
+    this.label_tcode    = L.DomUtil.create('label', '', this.container);
+    this.select_tcode   = L.DomUtil.create('select', '', this.container);
+
+    this.label_tcode.for = 'tcode';
+    this.label_tcode.innerHTML = '';
+    this.select_tcode.id = 'tcode';
+    this.select_tcode.name = 'tcode';
+    this.select_tcode.innerHTML = '<option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
+
+    this.span.innerHTML= " or ";
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -614,74 +625,96 @@ function getDecodeList(data)
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
+    let level = document.getElementById('level_size').value
+    let tcode = document.getElementById('tcode').value
+    let grid = document.getElementById('grid').value
+    let context = defaultMap.isocode;
 
-    if(input.match(/^(urn|geo):(lex):.+$/i))
+    let uri = uri_base + "/";
+
+    if(input !== null && input !== '')
     {
-        var uriApi = uri_base + "/" + input + ".json";
-
-        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
-        loadGeojson(uriApi,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
-    }
-    else if (input.match(/^geo:(olc|ghs):.+$/i))
-    {
-        var uri = uri_base + "/" + input + ".json";
-
-        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
-    }
-    else if(input.match(/^[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
-    {
-        var uriApi = uri_base + "/geo:iso_ext:" + input + ".json";
-
-        loadGeojson(uriApi + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
-        loadGeojson(uriApi,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
-    }
-    else if(input !== null && input !== '')
-    {
-        let level = document.getElementById('level_size').value
-        let grid = document.getElementById('grid').value
-        let context = defaultMap.isocode;
-
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
-
-        if(input.match(/.*;u=.*/))
+        if(input.match(/^[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
         {
-            let u_value = Number(input.split(';u=')[1])
+            uri += "geo:iso_ext:" + input + ".json";
 
-            if(u_value == 0)
+            loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
+            loadGeojson(uri,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
+        }
+        else if(input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
+        {
+            let tp = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) ;
+
+            if (input.match(/^(urn|geo):(lex):.+$/i))
             {
-                u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
+                uri += input + ".json";
+
+                loadGeojson(uri + '/cover/' + defaultMap.scientificBase,[layerCoverCurrent2,layerCoverAll2,layerCoverCurrentOverlay2], function(e){afterLoadLayerCoverAll(e,true,false,false)},afterData);
+                loadGeojson(uri,[layerJurisdCurrent2,layerJurisdAll2],function(e){afterLoadJurisdAll(e,true,false,false)},afterData);
             }
+            else
+            {
+                let regex  = /^(.*:)(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
+                let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
 
-            uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
-        }
-        else
-        {
-            uri += input + ";u=" + level
-        }
+                if(input.match(regex))
+                {
+                    input = input.replace(regex, tp + "$2$3")
+                }
 
-        uri += ".json/" + defaultMap.scientificBase
+                let u_value;
 
-        var uri_ = uri + '/' + context
+                if(input.match(regex2))
+                {
+                    u_value = Number(input.split(';u=')[1])
 
-        var uriGrid = uri + (grid ? '/' + grid : '') + '/' + context
+                    if(u_value == 0)
+                    {
+                        u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
+                    }
 
-        document.getElementById('fielddecode').value = '';
+                    u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
+                }
+                else
+                {
+                    u_value = level
+                }
 
-        input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
+                input = input.replace(regex, "$1$2" + ';u=' + u_value)
 
-        var popupContent = "latlng: " + input;
-        layerPolygonCurrent.clearLayers();
-        layerMarkerCurrent.clearLayers();
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+                uri += input + ".json";
 
-        if(grid !== '')
-        {
-            loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
-        }
-        else
-        {
-            loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
+                let popupContent = "latlng: " + latlong;
+                layerMarkerCurrent.clearLayers();
+                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
+                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+
+                if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
+                {
+                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+                }
+                else
+                {
+                    document.getElementById('fielddecode').value = '';
+
+                    uri += "/" + defaultMap.scientificBase;
+
+                    layerPolygonCurrent.clearLayers();
+                    layerCenterCurrent.clearLayers();
+                    layerPolygonCurrentGrid.clearLayers();
+                    if(grid !== '')
+                    {
+                        uri += '/' + context
+                        loadGeojson(uri,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
+                    }
+                    else
+                    {
+                        uri += '/' + grid + '/' + context
+                        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                    }
+                }
+            }
         }
     }
 }

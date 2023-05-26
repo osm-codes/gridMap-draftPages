@@ -259,7 +259,17 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field  = L.DomUtil.create('label', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
+    this.span = L.DomUtil.create('span','', this.container);
     this.button2 = L.DomUtil.create('button','getGeo-button',this.container);
+    this.span2 = L.DomUtil.create('span','', this.container);
+    this.label_tcode    = L.DomUtil.create('label', '', this.container);
+    this.select_tcode   = L.DomUtil.create('select', '', this.container);
+
+    this.label_tcode.for = 'tcode';
+    this.label_tcode.innerHTML = '';
+    this.select_tcode.id = 'tcode';
+    this.select_tcode.name = 'tcode';
+    this.select_tcode.innerHTML = '<option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -268,6 +278,9 @@ encodeGgeohash.onAdd = function (map) {
     this.field.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
+
+    this.span.innerHTML= " or ";
+    this.span2.innerHTML= " or ";
 
     this.button2.type = 'button';
     this.button2.innerHTML= "My Location";
@@ -543,61 +556,72 @@ function getDecode(data)
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
+    let level = document.getElementById('level_size').value
+    let tcode = document.getElementById('tcode').value
 
-    if (input.match(/^(urn|geo):(lex):.+$/i))
+    let uri = uri_base + "/";
+
+    if(input !== null && input !== '' && input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
     {
-        var uri = uri_base + "/" + input + ".json";
-
-        loadGeojson(uri,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-    }
-    else if (input.match(/^geo:(olc|ghs):.+$/i))
-    {
-        var uri = uri_base + "/" + input + ".json";
-
-        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
-    }
-    else if(input !== null && input !== '')
-    {
-        let level = document.getElementById('level_size').value
-        let country = defaultMap.isocode;
-        let state = document.getElementById('sel_jurL2').value;
-        let jL3dom = document.getElementById('sel_jurL3').value;
-        let context = country + '-' + state + '-'+ jL3dom
-
-        var uri = uri_base + (input.match(/^geo:.*/) ? '/' : '/geo:' )
-
-        if(input.match(/.*;u=.*/))
+        if (input.match(/^(urn|geo):(lex):.+$/i))
         {
-            let u_value = Number(input.split(';u=')[1])
-
-            if(u_value == 0)
-            {
-                u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
-            }
-
-            uri += input.replace(/(.*;u=).*/i, "$1" +  (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 ) )
+            uri += input + ".json";
+            loadGeojson(uri,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
         }
         else
         {
-            uri += input + ";u=" + level
+            let tp = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) ;
+
+            let regex  = /^(.*:)(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
+            let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
+
+            if(input.match(regex))
+            {
+                input = input.replace(regex, tp + "$2$3")
+            }
+
+            let u_value;
+
+            if(input.match(regex2))
+            {
+                u_value = Number(input.split(';u=')[1])
+
+                if(u_value == 0)
+                {
+                    u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
+                }
+
+                u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
+            }
+            else
+            {
+                u_value = level
+            }
+
+            input = input.replace(regex, "$1$2" + ';u=' + u_value)
+
+            uri += input + ".json";
+
+            let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
+            let popupContent = "latlng: " + latlong;
+            layerMarkerCurrent.clearLayers();
+            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
+            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+
+            if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
+            {
+                loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+            }
+            else
+            {
+                uri += '/' + defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+
+                document.getElementById('fielddecode').value = '';
+
+                layerPolygonCurrent.clearLayers();
+                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+            }
         }
-
-        uri += ".json" + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '')
-
-        var uri_ = uri + '/' + context
-
-        var uriGrid = uri + '/' + context
-
-        document.getElementById('fielddecode').value = '';
-
-        input.match(/^geo:.*/) ? input = input.replace(/^geo:(.*)$/i, "$1") : ''
-
-        var popupContent = "latlng: " + input;
-        layerPolygonCurrent.clearLayers();
-        layerMarkerCurrent.clearLayers();
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-        L.marker(input.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-        loadGeojson(uri_,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
     }
 }
 
@@ -868,7 +892,7 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.scientic_code)
     {
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + feature.properties.scientic_code +'</a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code +'</a>';
     }
 
     if(feature.properties.short_code)
