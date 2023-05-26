@@ -309,7 +309,7 @@ level.onAdd = function (map) {
     this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
 
     this.label_level.for = 'level';
-    this.label_level.innerHTML = 'Level: ';
+    this.label_level.innerHTML = '<a href="https://wiki.addressforall.org/doc/osmc:Viz/Navega%C3%A7%C3%A3o" target="_help">Level</a>: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
     this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
