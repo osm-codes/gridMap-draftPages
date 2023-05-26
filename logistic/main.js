@@ -443,9 +443,7 @@ function resetDef()
     document.getElementById('fieldencode').value = '';
     document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
     document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
-
-    map.fitBounds(layerJurisdAll.getBounds());
-
+    // map.fitBounds(layerJurisdAll.getBounds());
     const nextTitle = 'Logistic OSMcodes';
     const nextState = { additionalInformation: 'to canonical.' };
     window.history.pushState(nextState, nextTitle, (window.location.href).split(/[~]/)[0]);

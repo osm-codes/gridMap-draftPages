@@ -321,7 +321,7 @@ function resetDef()
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
-    map.setView(defaultMap.center, defaultMap.zoom);
+    // map.setView(defaultMap.center, defaultMap.zoom);
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
     document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
     document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;

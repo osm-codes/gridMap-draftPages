@@ -473,7 +473,7 @@ function resetDef()
     layerCoverAll2.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     document.getElementById('fielddecodelist').value= '';
-    map.setView(defaultMap.center, defaultMap.zoom);
+    // map.setView(defaultMap.center, defaultMap.zoom);
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
     document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
     document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
