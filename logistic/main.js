@@ -456,6 +456,7 @@ function resetDef()
     document.getElementById('fieldencode').value = '';
     document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
     document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    document.getElementById('logCode').innerHTML = '(click the map)';
     // map.fitBounds(layerJurisdAll.getBounds());
     const nextTitle = 'Logistic OSMcodes';
     const nextState = { additionalInformation: 'to canonical.' };
@@ -898,7 +899,7 @@ function onEachFeature(feature,layer)
     if(feature.properties.short_code)
     {
         document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.isolabel_ext)
-        document.getElementById('postalCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
+        document.getElementById('logCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
     }
 
     layer.on({
