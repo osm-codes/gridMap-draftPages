@@ -573,54 +573,57 @@ function getEncode(noData)
         {
             let tp = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) ;
 
-            let regex  = /^(.*:)(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
+            let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
             let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
 
             if(input.match(regex))
             {
-                input = input.replace(regex, tp + "$2$3")
-            }
-
-            let u_value;
-
-            if(input.match(regex2))
-            {
-                u_value = Number(input.split(';u=')[1])
-
-                if(u_value == 0)
+                if (!input.match(/^geo:(olc|ghs|ghs64):.+$/i))
                 {
-                    u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
+                    input = input.replace(regex, tp + "$2$3")
                 }
 
-                u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
-            }
-            else
-            {
-                u_value = level
-            }
+                let u_value;
 
-            input = input.replace(regex, "$1$2" + ';u=' + u_value)
+                if(input.match(regex2))
+                {
+                    u_value = Number(input.split(';u=')[1])
 
-            uri += input + ".json";
+                    if(u_value == 0)
+                    {
+                        u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
+                    }
 
-            let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
-            let popupContent = "latlng: " + latlong;
-            layerMarkerCurrent.clearLayers();
-            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+                    u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
+                }
+                else
+                {
+                    u_value = level
+                }
 
-            if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-            {
-                loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
-            }
-            else
-            {
-                uri += '/' + defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+                input = input.replace(regex, "$1$2" + ';u=' + u_value)
 
-                document.getElementById('fielddecode').value = '';
+                uri += input + ".json";
 
-                layerPolygonCurrent.clearLayers();
-                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
+                let popupContent = "latlng: " + latlong;
+                layerMarkerCurrent.clearLayers();
+                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
+                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+
+                if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
+                {
+                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+                }
+                else
+                {
+                    uri += '/' + defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+
+                    document.getElementById('fielddecode').value = '';
+
+                    layerPolygonCurrent.clearLayers();
+                    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                }
             }
         }
     }
@@ -660,6 +663,7 @@ function getMyLocation(noData)
 function getMyLocation_write(position)
 {
     let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+    let tcode = document.getElementById('tcode').value
 
     layerJurisdAll.eachLayer(
         function(memberLayer)
@@ -667,7 +671,7 @@ function getMyLocation_write(position)
             if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
             {
                 // console.log("in");
-                document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                document.getElementById('fieldencode').value = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) + position.coords.latitude +','+ position.coords.longitude
                 getEncode();
             }
             else
@@ -689,6 +693,7 @@ function getMyLocationJurisd(noData)
 function getMyLocationJurisdTest(position)
 {
     let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
+    let tcode = document.getElementById('tcode').value
 
     layerJurisdAll.eachLayer(
         function(memberLayer)
@@ -697,7 +702,7 @@ function getMyLocationJurisdTest(position)
             {
                 if (confirm("Go to my location in " + context + "?"))
                 {
-                    document.getElementById('fieldencode').value = 'geo:'+ position.coords.latitude +','+ position.coords.longitude
+                    document.getElementById('fieldencode').value =  'geo:' + ( tcode === '' ? '' : tcode + ':' ) + position.coords.latitude +','+ position.coords.longitude
                     getEncode();
                 }
             }

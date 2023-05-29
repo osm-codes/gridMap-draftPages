@@ -654,66 +654,71 @@ function getEncode(noData)
             }
             else
             {
-                let regex  = /^(.*:)(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
+                let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
                 let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
 
                 if(input.match(regex))
                 {
-                    input = input.replace(regex, tp + "$2$3")
-                }
-
-                let u_value;
-
-                if(input.match(regex2))
-                {
-                    u_value = Number(input.split(';u=')[1])
-
-                    if(u_value == 0)
+                    if (!input.match(/^geo:(olc|ghs|ghs64):.+$/i))
                     {
-                        u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
+                        input = input.replace(regex, tp + "$2$3")
                     }
 
-                    u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
-                }
-                else
-                {
-                    u_value = level
-                }
+                    let u_value;
 
-                input = input.replace(regex, "$1$2" + ';u=' + u_value)
-
-                uri += input + ".json";
-
-                let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
-                let popupContent = "latlng: " + latlong;
-                layerMarkerCurrent.clearLayers();
-                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-
-                if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-                {
-                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
-                }
-                else
-                {
-                    document.getElementById('fielddecode').value = '';
-
-                    uri += "/" + defaultMap.scientificBase;
-
-                    layerPolygonCurrent.clearLayers();
-                    layerCenterCurrent.clearLayers();
-                    layerPolygonCurrentGrid.clearLayers();
-                    if(grid !== '')
+                    if(input.match(regex2))
                     {
-                        uri += '/' + context
-                        loadGeojson(uri,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
+                        u_value = Number(input.split(';u=')[1])
+
+                        if(u_value == 0)
+                        {
+                            u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
+                        }
+
+                        u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
                     }
                     else
                     {
-                        uri += '/' + grid + '/' + context
-                        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                        u_value = level
+                    }
+
+                    input = input.replace(regex, "$1$2" + ';u=' + u_value)
+
+                    uri += input + ".json";
+
+                    let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
+                    let popupContent = "latlng: " + latlong;
+                    layerMarkerCurrent.clearLayers();
+                    L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
+                    L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
+
+                    if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
+                    {
+                        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+                    }
+                    else
+                    {
+                        document.getElementById('fielddecode').value = '';
+
+                        uri += "/" + defaultMap.scientificBase;
+
+                        layerPolygonCurrent.clearLayers();
+                        layerCenterCurrent.clearLayers();
+                        layerPolygonCurrentGrid.clearLayers();
+                        if(grid !== '')
+                        {
+                            uri += '/' + context
+                            loadGeojson(uri,[layerPolygonCurrentGrid,layerGridAll,layerPolygonCurrentGrid2,layerGridAll2],afterLoadLayer,afterData)
+                        }
+                        else
+                        {
+                            uri += '/' + grid + '/' + context
+                            loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
+                        }
                     }
                 }
+
+
             }
         }
     }
