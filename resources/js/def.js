@@ -156,7 +156,7 @@ var countries = {
                 iniLevel: 5,
                 endLevel: 40,
                 modLevel: 5,
-                iniDigit: 1,
+                iniDigit: 2,
                 maxLength: 9,
                 diffl0br: 2,
                 levelDefault: 40,
