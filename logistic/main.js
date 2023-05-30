@@ -185,13 +185,14 @@ var map = L.map('map',{
     center: defaultMap.center,
     zoom:   defaultMap.zoom,
     maxBoundsViscocity: 1,
+    attributionControl: false,
     zoomControl: false,
     renderer: L.svg(),
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
 
-map.attributionControl.setPrefix(false);
+// map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
 map.on('click', onMapClick);
 
