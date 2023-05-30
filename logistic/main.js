@@ -257,19 +257,18 @@ var encodeGgeohash = L.control({position: 'topleft'});
 encodeGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div','leaflet-control-encode');
     this.label_field  = L.DomUtil.create('label', '', this.container);
+    this.label_tcode    = L.DomUtil.create('label', '', this.container);
+    this.select_tcode   = L.DomUtil.create('select', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
     this.span = L.DomUtil.create('span','', this.container);
     this.button2 = L.DomUtil.create('button','getGeo-button',this.container);
-    this.span2 = L.DomUtil.create('span','', this.container);
-    this.label_tcode    = L.DomUtil.create('label', '', this.container);
-    this.select_tcode   = L.DomUtil.create('select', '', this.container);
 
     this.label_tcode.for = 'tcode';
     this.label_tcode.innerHTML = '';
     this.select_tcode.id = 'tcode';
     this.select_tcode.name = 'tcode';
-    this.select_tcode.innerHTML = '<option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
+    this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -280,7 +279,6 @@ encodeGgeohash.onAdd = function (map) {
     this.button.innerHTML= "Encode";
 
     this.span.innerHTML= " or ";
-    this.span2.innerHTML= " or ";
 
     this.button2.type = 'button';
     this.button2.innerHTML= "My Location";
@@ -290,6 +288,8 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
     L.DomEvent.on(this.button2, 'click', getMyLocation, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
+    L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
+
     return this.container;
   };
 
@@ -451,6 +451,8 @@ function resetDef()
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
+    layerOlcGhsCurrent.clearLayers();
+    layerOlcGhsAll.clearLayers();
     map.removeLayer(layerCoverAll);
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
@@ -554,6 +556,21 @@ function getDecode(data)
     }
 }
 
+function changePlaceholder()
+{
+    let tcode = document.getElementById('tcode').value
+    let input = document.getElementById('fieldencode').value
+
+    if (tcode.match(/^(olc|ghs|ghs64)$/i) && (input === null || input === ''))
+    {
+        document.getElementById('fieldencode').placeholder = 'e.g.: geo:' + ( tcode === '' ? '' : tcode + ':' ) + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    }
+    else
+    {
+        document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    }
+}
+
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
@@ -571,7 +588,7 @@ function getEncode(noData)
         }
         else
         {
-            let tp = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) ;
+            let tp = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) ;
 
             let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
             let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
@@ -671,7 +688,7 @@ function getMyLocation_write(position)
             if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
             {
                 // console.log("in");
-                document.getElementById('fieldencode').value = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) + position.coords.latitude +','+ position.coords.longitude
+                document.getElementById('fieldencode').value = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) + position.coords.latitude +','+ position.coords.longitude
                 getEncode();
             }
             else
@@ -702,7 +719,7 @@ function getMyLocationJurisdTest(position)
             {
                 if (confirm("Go to my location in " + context + "?"))
                 {
-                    document.getElementById('fieldencode').value =  'geo:' + ( tcode === '' ? '' : tcode + ':' ) + position.coords.latitude +','+ position.coords.longitude
+                    document.getElementById('fieldencode').value =  'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) + position.coords.latitude +','+ position.coords.longitude
                     getEncode();
                 }
             }

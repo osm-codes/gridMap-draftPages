@@ -189,19 +189,16 @@ var encodeGgeohash = L.control({position: 'topleft'});
 encodeGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div','leaflet-control-encode');
     this.label_field  = L.DomUtil.create('label', '', this.container);
-    this.field = L.DomUtil.create('input', '', this.container);
-    this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
-    this.span = L.DomUtil.create('span','', this.container);
     this.label_tcode    = L.DomUtil.create('label', '', this.container);
     this.select_tcode   = L.DomUtil.create('select', '', this.container);
+    this.field = L.DomUtil.create('input', '', this.container);
+    this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.label_tcode.for = 'tcode';
     this.label_tcode.innerHTML = '';
     this.select_tcode.id = 'tcode';
     this.select_tcode.name = 'tcode';
-    this.select_tcode.innerHTML = '<option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
-
-    this.span.innerHTML= " or ";
+    this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -215,6 +212,8 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
+    L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
+
     return this.container;
   };
 
@@ -331,6 +330,8 @@ function resetDef()
     layerPolygonAll.clearLayers();
     layerMarkerCurrent.clearLayers();
     layerMarkerAll.clearLayers();
+    layerOlcGhsCurrent.clearLayers();
+    layerOlcGhsAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     // map.setView(defaultMap.center, defaultMap.zoom);
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
@@ -456,6 +457,21 @@ function getDecode(data)
     }
 }
 
+function changePlaceholder()
+{
+    let tcode = document.getElementById('tcode').value
+    let input = document.getElementById('fieldencode').value
+
+    if (tcode.match(/^(olc|ghs|ghs64)$/i) && (input === null || input === ''))
+    {
+        document.getElementById('fieldencode').placeholder = 'e.g.: geo:' + ( tcode === '' ? '' : tcode + ':' ) + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    }
+    else
+    {
+        document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    }
+}
+
 function getEncode(noData)
 {
     let input = document.getElementById('fieldencode').value
@@ -468,7 +484,7 @@ function getEncode(noData)
 
     if(input !== null && input !== '' && input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
     {
-        let tp = 'geo:' + ( tcode === '' ? '' : tcode + ':' ) ;
+        let tp = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) ;
 
         let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
         let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
