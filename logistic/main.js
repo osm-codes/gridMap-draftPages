@@ -1093,7 +1093,7 @@ function afterLoadCurrent(featureGroup)
     map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
 }
 
-function afterLoadJurisdAll(featureGroup,fittobounds=true)
+function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
 {
     if(fittobounds)
     {
@@ -1107,12 +1107,15 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true)
 
     map.setMaxBounds(featureGroup.getBounds())
 
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix);
+    if(genSelect)
+    {
+        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix);
+    }
 }
 
-function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true)
+function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true,genSelect=true)
 {
-    afterLoadJurisdAll(featureGroup,fittobounds)
+    afterLoadJurisdAll(featureGroup,fittobounds,genSelect)
 
     getMyLocationJurisd()
 }
@@ -1263,7 +1266,7 @@ else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
 else if (pathname.match(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)\/geo:(olc|ghs):.+$/i))
 {
     loadGeojson(uri.replace(/\/[A-Z]{2}-[A-Z]{1,3}-[A-Z]+\/(geo:(olc|ghs).*)$/i, "/$1.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
-    loadGeojson(uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
+    loadGeojson(uri.replace(/\/([A-Z]{2}-[A-Z]{1,3}-[A-Z]+)\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
 }
 else
 {
@@ -1312,6 +1315,6 @@ else
 
     if(uriApiJurisd !== null && uriApiJurisd !== '')
     {
-        loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
+        loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
     }
 }
