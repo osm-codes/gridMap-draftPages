@@ -21,7 +21,12 @@ function parseTemplate($template, $arr)
 
 $x = str_replace("/","",$_SERVER['REQUEST_URI']);
 
-$xx = explode("-", $x);
+$pattern1 = '/([a-zA-Z]{2})\+/i';
+$pattern2 = '/^([a-zA-Z]{2})(\-|~)$/i';
+$pattern3 = '/^([a-zA-Z]{2})(\-|~|\+)$/i';
+$replacement1 = '${1}';
+
+$xx = explode("-", preg_replace($pattern3, $replacement1, $x));
 
 $arrTags = array(
 	'country'=>$xx[0]
@@ -31,6 +36,21 @@ switch ($xx[0]) {
   case "BR":
     echo parseTemplate(getTemplate('pt.html'),$arrTags);
     echo getTemplate('infobox-BR.html');
+
+    if (preg_match($pattern1,$x))
+    {
+        echo getTemplate('infobox-BRsci.html');
+    }
+    else if (preg_match($pattern2,$x))
+    {
+        echo getTemplate('infobox-BRlog.html');
+    }
+    else
+    {
+        echo getTemplate('infobox-BRsci.html');
+        echo getTemplate('infobox-BRlog.html');
+    };
+
     echo getTemplate('common.html');
     break;
   case "CO":
@@ -44,4 +64,3 @@ switch ($xx[0]) {
     break;
 };
 ?>
-

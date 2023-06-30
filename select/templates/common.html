@@ -81,8 +81,7 @@ let pathname = window.location.pathname;
 
 if (pathname.match(/^\/[A-Z]{2}.*$/i))
 {
-    updateJurisd((pathname.replace(/^\/(.*)$/i, "$1")).toUpperCase(),false)
+    updateJurisd((pathname.replace(/^\/([A-Z]{2}(-[A-Z]{1,3}-[A-Z]+)?)(.*)$/i, "$1")).toUpperCase(),false)
 }
 </script>
 </body></html>
-
