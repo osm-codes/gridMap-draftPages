@@ -1,9 +1,5 @@
-<select name="countries1" id="wrk_jurL1" onchange="sel_jurL1(this.value,'wrk')">
-  <option value="" selected="1">-- Country --</option>
-  <option value="BR">BR - Brazil</option>
-  <option value="CO">CO - Colombia</option>
-  <option value="UY">UY - Uruguay</option>
-</select> &nbsp; <span id="wrk_jurL2" onchange="sel_jurL2(this.value,'wrk')"></span> &nbsp; <span id="wrk_jurL3"></span>
+
+&nbsp; <span id="wrk_jurL2" onchange="sel_jurL2(this.value,'wrk')"></span> &nbsp; <span id="wrk_jurL3"></span>
 
 <script>
 function sel_jurL1(abbrev,optc) {
@@ -27,10 +23,11 @@ function sel_jurL1(abbrev,optc) {
   }
 }
 function sel_jurL2(abbrev,optc) {
-  if (abbrev>'') {
+  let jL3dom = document.getElementById(optc+'_jurL3');
+  if (abbrev>'')
+  {
     let country = document.getElementById(optc+'_jurL1').value;
     let state = document.querySelector('#'+optc+'_jurL2 select').value;
-    let jL3dom = document.getElementById(optc+'_jurL3');
     let fcall = "sel_jurL3(this.value,'"+optc+"')"
     let s = '<select name="cities" onchange="'+fcall+'"><option value="">-- Cities --</option>'
     let lst = (optc=='wrk')? approved_jurisdictions[country][state]['mun']: jurisdictions[country][state]['mun'];
@@ -88,3 +85,4 @@ if (pathname.match(/^\/[A-Z]{2}.*$/i))
 }
 </script>
 </body></html>
+
