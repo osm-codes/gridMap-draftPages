@@ -637,6 +637,10 @@ function popUpFeature(feature,layer)
     {
         popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
     }
+    else if(feature.properties.index)
+    {
+        popupContent += "Code: <big><code>" + (feature.properties.index) + "</code></big><br>";
+    }
     else
     {
         popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
