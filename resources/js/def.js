@@ -70,6 +70,7 @@ var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
 var cartoUrl = 'https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}{r}.png';
 var cartoAttr = '<a href="https://carto.com/attributions">CARTO</a>';
 var osmAndCartoAttr = osmAttrib + '. ' + cartoAttr;
+var genericAttrib = '<a href="https://wiki.addressforall.org/doc/osmc:Atribui%C3%A7%C3%B5es" target="_help">info</a>';
 
 var levelSize = [1048576,741455.2,524288,370727.6,262144,185363.8,131072,92681.9,65536,46340.95,32768,23170.48,16384,11585.24,8192,5792.62,4096,2896.31,2048,1448.15,1024,724.08,512,362.04,256,181.02,128,90.51,64,45.25,32,22.63,16,11.31,8,5.66,4,2.83,2,1.41,1];
 

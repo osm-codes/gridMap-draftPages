@@ -91,8 +91,8 @@ function updateJurisd(jurisd)
     document.getElementById('sel_jurL3').innerHTML=s
 }
 
-var openstreetmap = L.tileLayer(osmUrl,{attribution: osmAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: osmAndCartoAttr,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+var openstreetmap = L.tileLayer(osmUrl,{attribution: genericAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', attribution: genericAttrib,detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
 
 var baseLayers = {
     'Grayscale': grayscale,
@@ -185,14 +185,14 @@ var map = L.map('map',{
     center: defaultMap.center,
     zoom:   defaultMap.zoom,
     maxBoundsViscocity: 1,
-    attributionControl: false,
+    attributionControl: true,
     zoomControl: false,
     renderer: L.svg(),
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
 
-// map.attributionControl.setPrefix(false);
+map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
 map.on('click', onMapClick);
 
