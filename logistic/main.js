@@ -920,7 +920,9 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.scientic_code)
     {
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code +'</a>';
+        const codsci = (feature.properties.scientic_code).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
+
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + codsci +'</a>';
     }
 
     if(feature.properties.short_code)

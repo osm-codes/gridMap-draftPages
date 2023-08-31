@@ -924,7 +924,7 @@ function onEachFeature(feature,layer)
 
     if(feature.properties.code)
     {
-        document.getElementById('sciCode').innerHTML = (feature.properties.code).replace(/(...)(?!$)/g,'$1.');
+        document.getElementById('sciCode').innerHTML = (((feature.properties.code).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.');
 
         let listBar = document.getElementById('fielddecodelist');
 
@@ -1293,6 +1293,9 @@ function toggleCoverLayers()
 var uriApi = ''
 var uriApiJurisd = ''
 
+const reg_esp_caracter = /\./g
+pathnameNoDot = pathname.replace(reg_esp_caracter,"");
+
 if (pathname.match(/\/base16\/grid/))
 {
     uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
@@ -1301,10 +1304,10 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 {
     uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
 }
-else if (pathname.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
+else if (pathnameNoDot.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
 {
-    uriApi = uri.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
-    uriApiJurisd = uri.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
+    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
+    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
