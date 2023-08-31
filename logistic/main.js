@@ -1088,7 +1088,8 @@ function afterLoadLayer(featureGroup)
 {
     let zoomclick = document.getElementById('zoomclick')
     let zoom = map.getBoundsZoom(featureGroup.getBounds());
-    zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
+    // zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
+    zoomclick.checked ? '' : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
 }
 
 function afterLoadCurrent(featureGroup)
