@@ -627,7 +627,7 @@ function style(feature)
 function popUpFeature(feature,layer)
 {
     sufix_area =(feature.properties.area<1000000)? 'm²': 'km²';
-    value_area =(feature.properties.area<1000000)? feature.properties.area: Math.round((feature.properties.area*100/1000000))/100;
+    value_area =(feature.properties.area<1000000)? Math.round(feature.properties.area*100.0)/100 : Math.round((feature.properties.area*100/1000000))/100;
     sufix_side =(feature.properties.side<1000)? 'm': 'km';
     value_side =(feature.properties.side<1000)? Math.round(feature.properties.side*100.0)/100 : Math.round(feature.properties.side*100.0/1000)/100;
 
