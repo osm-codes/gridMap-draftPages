@@ -269,7 +269,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_tcode.innerHTML = '';
     this.select_tcode.id = 'tcode';
     this.select_tcode.name = 'tcode';
-    this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">OSMcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
+    this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">AFAcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -461,7 +461,7 @@ function resetDef()
     document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
     document.getElementById('logCode').innerHTML = '(click the map)';
     // map.fitBounds(layerJurisdAll.getBounds());
-    const nextTitle = 'Logistic OSMcodes';
+    const nextTitle = 'Logistic AFAcodes';
     const nextState = { additionalInformation: 'to canonical.' };
     window.history.pushState(nextState, nextTitle, (window.location.href).split(/[~]/)[0]);
 }

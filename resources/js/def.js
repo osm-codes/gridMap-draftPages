@@ -6,6 +6,10 @@ var countriesSwVersions = {
     {
         softwareVersions: ['BR_new/v0.2.0'],
     },
+    CM:
+    {
+        softwareVersions: ['CO_new/v0.2.0'],
+    },
     CO:
     {
         softwareVersions: ['CO_new/v0.2.0'],
@@ -135,6 +139,52 @@ var countries = {
                 placeholderList: 'h,7,B',
                 selectGrid: [2,4,8,16],
             }
+        }
+    },
+    CM:
+    {
+        name: 'Cameroun',
+        center: [4.8,11.9],
+        zoom: 6,
+        current_zoom: 6,
+        defaultBase: 'base32',
+        scientificBase: 'base16h',
+        postalcodeBase: 'base32',
+        isocode: 'CM',
+        isocoden: 120,
+        jurisdictionPlaceholder: 'CM-',
+        selectedBases: ['base32','base16h'],
+        bases:
+        {
+            base16h:
+            {
+                iniLevel: 4,
+                endLevel: 36,
+                modLevel: 1,
+                iniDigit: 1,
+                maxLength: 10,
+                diffl0br: 4,
+                symbol: '+',
+                placeholderDecode: 'CM+a2',
+                placeholderEncode: '4.8,11.9;u=10',
+                placeholderList: 'b,a,c',
+                selectGrid: [2,4,8,16],
+            },
+            base32:
+            {
+                iniLevel: 5,
+                endLevel: 40,
+                modLevel: 5,
+                iniDigit: 2,
+                maxLength: 9,
+                diffl0br: 2,
+                levelDefault: 40,
+                symbol: '~',
+                placeholderDecode: '3D5',
+                placeholderEncode: '4.8,11.9;u=10',
+                placeholderList: '3D5,3D4,2',
+                selectGrid: [32],
+            },
         }
     },
     CO:
