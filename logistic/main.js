@@ -921,8 +921,7 @@ function onEachFeature(feature,layer)
     if(feature.properties.scientic_code)
     {
         const codsci = (feature.properties.scientic_code).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + codsci +'</a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
     }
 
     if(feature.properties.short_code)
@@ -1164,7 +1163,7 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
-                let df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'</small>~');
+                let df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'~</small>');
                 document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
 
                 if(data.features[0].properties.truncated_code)
@@ -1326,3 +1325,4 @@ else
         loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
     }
 }
+
