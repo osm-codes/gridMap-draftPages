@@ -1,3 +1,7 @@
+<!DOCTYPE html><html lang="pt-br">
+<head><title>Logistic AFAcodes</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Logistic geocode"/>
 <meta name="keywords" content="geocode"/>
 <meta name="author" content="AddressForAll"/>
@@ -7,7 +11,7 @@
 <link rel="stylesheet" href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' />
 </head><body>
 
-<h3>AFAcode:
+<h3><!-- img src="https://afa.codes/resources/img/OSMcodes-logo.png" alt="Smiley face" style="vertical-align:middle"--><span style="background-color:#00469f; color:#FFF;padding-right:2pt">AFA</span><span style="color:#00bb4f"><b>code</b></span>:
  <code title="contextual geocode of the last click, or the page entrance" class="feSchrift" id="logCode">(click the map)</code>
  <a title="less digits (previous larger level)" href="#" onclick="changeLevel_byDigits(-1)"><img src="/resources/img/osmCodes-lessDigits.png"/></a><a title="more digits (next smaller level)" href="#" onclick="changeLevel_byDigits(+1)"><img src="/resources/img/osmCodes-moreDigits.png" /></a>
  <span id="nameJurisd" onclick="zoomToJurisd()"></span>
@@ -21,12 +25,17 @@
 <div class="leaflet-control-container" id="custom-map-controlsd"></div>
 <hr style="clear:both" />
 <div class="leaflet-control-container" id="custom-map-controlsa"></div>
+
 <hr style="clear:both" />
 
-<p>Equivalent cell:</p>
-<p>&nbsp; as official geocode: <code class="feSchrift" id="canonicalCode"></code></p>
+<div style="background-color:#FFFF99;width:95%;height:9em;padding:3pt">
+
+<img src="https://afa.codes/resources/img/OSMcodes-logo-transp.png" alt="Smiley face" style="float:right; max-width:25%;max-height:9em;height:33%;padding:3pt">
+<p>Equivalent cell geocodes:</p>
+<p>&nbsp; Logistic: <code class="feSchrift" id="canonicalCode">(click the map)</code></p>
 <!-- <br/>&nbsp; for QRcode: $codigo_paisBase32_absoluto -->
-<p>&nbsp; in the Scientic grid: <code id="sciCode"></code></p>
+<p>&nbsp; Scientic: <code id="sciCode">(click the map)</code></p>
+</div>
 
 <p>Back to <a href=".">AFAcodes and other countries</a></p>
 

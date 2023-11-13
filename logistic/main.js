@@ -1325,4 +1325,3 @@ else
         loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
     }
 }
-
