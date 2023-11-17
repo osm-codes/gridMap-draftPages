@@ -6,6 +6,12 @@
 <meta name="keywords" content="geocode"/>
 <meta name="author" content="AddressForAll"/>
 <link rel="shortcut icon" type="image/png" href="/resources/img/address_for_all-01-colorful.ico.png" />
+<style>
+ .youtube-video-container{position:relative;overflow:hidden;width:750px}
+ .youtube-video-container:after{display:block;content:"";padding-top:56.25%}
+ .youtube-video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+</style>
+
 <script>
 function sel_jurL1(abbrev,optc) {
   if (abbrev>'') {
@@ -53,6 +59,7 @@ function sel_jurL3(abbrev,optc) {
 </head>
 
 <body style="padding:1em">
+<img src="https://afa.codes/resources/img/OSMcodes-logo.png" alt="Smiley face" style="float:right;width:30%;">
 <p>The AFAcodes infrastructure <b>is under testing and construction</b>.</p>
 <p><a href="./">AFA.codes</a> is the "AddressForAll Codes", and a project maintained by <a target="_blanck" href="https://AddressForAll.org/">AddressForAll Institute</a>.
 </p>
@@ -64,7 +71,7 @@ function sel_jurL3(abbrev,optc) {
 
 <p><b><i>Logistic AFAcodes</i></b>, by jurisdiction:
 <ul>
-  <li>Work cases: 
+  <li>Work cases:
 <select name="countries1" id="wrk_jurL1" onchange="sel_jurL1(this.value,'wrk')">
   <option value="" selected="1">-- Country --</option>
   <option value="BR">BR - Brazil</option>
@@ -96,6 +103,10 @@ function sel_jurL3(abbrev,optc) {
 </p>
 
 <hr/>
+
+<div class="youtube-video-container"><iframe src="https://www.youtube.com/embed/KSxutg7PAjo" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+
+<hr/>
 <p><small>Software version: <span id="swVersions"></span></small></p>
 <p align="right"><a href="./_talk/">Contact us</a></p>
 
@@ -108,8 +119,8 @@ function sel_jurL3(abbrev,optc) {
 <ul>
  <li>The geographic projections are limited to Statistical applications: population census and DGGS standard need <a href="https://en.wikipedia.org/wiki/Equal-area_map">Equal Area projection</a>.
  <li>The multiporpuse geocodes (postal and scientifi applications) demand hierarchical geocodes and hierarchical grids: they are limited to quadrilateral grids and base4 geocode internal representation.
- <li>Compressed human-readable representation for base4 are only possible using base16h, or "hierarchical hexadecimals", as described at  
- https://ppkrauss.github.io/Sfc4q/ 
+ <li>Compressed human-readable representation for base4 are only possible using base16h, or "hierarchical hexadecimals", as described at
+ https://ppkrauss.github.io/Sfc4q/
  <li>
 </ul>
 </p>
