@@ -50,7 +50,7 @@ function sel_jurL2(abbrev)
 
     if(state != '')
     {
-        for ( var i of jurisdictions[country][state]['mun'] )
+        for ( var i of (jurisdictions[country][state]['draft']).concat(jurisdictions[country][state]['work']).sort())
             s += '<option>'+i
     }
     jL3dom.innerHTML=s
@@ -86,7 +86,7 @@ function updateJurisd(jurisd)
     document.getElementById('sel_jurL2').innerHTML=s
 
     s = '<option value="">- City -</option>'
-    for ( var i of jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['mun'] )
+    for ( var i of (jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['draft']).concat(jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['work']).sort() )
         s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
     document.getElementById('sel_jurL3').innerHTML=s
 }
