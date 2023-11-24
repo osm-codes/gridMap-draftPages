@@ -651,7 +651,7 @@ function getEncode(noData)
 
     if(input !== null && input !== '')
     {
-        if(input.match(/^[A-Z]{2}-[A-Z]{1,3}-[A-Z]+$/i))
+        if(input.match(/^[A-Z]{2}-[A-Z0-9]{1,3}-[A-Z0-9]+$/i))
         {
             uri += "geo:iso_ext:" + input + ".json";
 
