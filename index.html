@@ -49,9 +49,14 @@ function sel_jurL2(abbrev,optc) {
     let s = '<select name="cities" onchange="'+fcall+'"><option value="">-- Cities --</option>'
     let lst = (optc=='wrk')? jurisdictions[country][state]['work']: jurisdictions[country][state]['draft'];
 
-    for ( var i of lst ){
-        s += '<option>'+i
+    if (lst)
+    {
+      for ( var i of lst )
+      {
+          s += '<option>'+i
+      }
     }
+
     jL3dom.innerHTML=s+"</select>"
   }
   else
@@ -86,7 +91,7 @@ function sel_jurL3(abbrev,optc) {
   <li>Work cases:
 <select name="countries1" id="wrk_jurL1" onchange="sel_jurL1(this.value,'wrk')">
   <option value="" selected="1">-- Country --</option>
-  <option value="BR">BR - Brazil</option>
+<!--   <option value="BR">BR - Brazil</option> -->
   <option value="CO">CO - Colombia</option>
 </select> &nbsp; <span id="wrk_jurL2"></span> &nbsp; <span id="wrk_jurL3"></span>
 <br/>&nbsp;</li>

@@ -43,9 +43,15 @@ function sel_jurL2(abbrev,optc) {
     let fcall = "sel_jurL3(this.value,'"+optc+"')"
     let s = '<select name="cities" onchange="'+fcall+'"><option value="">-- Cities --</option>'
     let lst = (optc=='wrk')? jurisdictions[country][state]['work']: jurisdictions[country][state]['draft'];
-    for ( var i of lst ){
-        s += '<option>'+i
+
+    if (lst)
+    {
+      for ( var i of lst )
+      {
+          s += '<option>'+i
+      }
     }
+
     jL3dom.innerHTML=s+"</select>"
 
     var nextURL = "./" + country + '-' + state
