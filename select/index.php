@@ -58,6 +58,26 @@ switch ($xx[0]) {
     echo getTemplate('infobox-CO.html');
     echo getTemplate('common.html');
     break;
+  case "CM":
+    echo parseTemplate(getTemplate('en.html'),$arrTags);
+    echo getTemplate('infobox-CM.html');
+
+    if (preg_match($pattern1,$x))
+    {
+        echo getTemplate('infobox-CMsci.html');
+    }
+    else if (preg_match($pattern2,$x))
+    {
+        echo getTemplate('infobox-CMlog.html');
+    }
+    else
+    {
+        echo getTemplate('infobox-CMsci.html');
+        echo getTemplate('infobox-CMlog.html');
+    };
+
+    echo getTemplate('common.html');
+    break;
   default:
     echo parseTemplate(getTemplate('es.html'),$arrTags);
     echo getTemplate('common.html');

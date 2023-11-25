@@ -18,7 +18,6 @@ function sel_jurL1(abbrev,optc) {
     let jL2dom = document.getElementById(optc+'_jurL2');
     let fcall = "sel_jurL2(this.value,'"+optc+"')"
     let s = '<select name="states" onchange="'+fcall+'"><option value="">-- States--</option>'
-    let lst = (optc=='wrk')? jurisdictions[abbrev]: jurisdictions[abbrev];
     for ( var i of Object.keys(jurisdictions[abbrev]) ){
       if (optc === 'wrk')
       {

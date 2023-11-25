@@ -85,10 +85,7 @@ function updateJurisd(jurisd)
 
     document.getElementById('sel_jurL2').innerHTML=s
 
-    s = '<option value="">- City -</option>'
-    for ( var i of (jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['draft']).concat(jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['work']).sort() )
-        s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
-    document.getElementById('sel_jurL3').innerHTML=s
+    sel_jurL2(jurisd.split("-",3)[1],'wrk')
 }
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: genericAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),

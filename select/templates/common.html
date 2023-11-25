@@ -7,9 +7,21 @@ function sel_jurL1(abbrev,optc) {
     let jL2dom = document.getElementById(optc+'_jurL2');
     let fcall = "sel_jurL2(this.value,'"+optc+"')"
     let s = '<select name="states" onchange="'+fcall+'"><option value="">-- States--</option>'
-    let lst = (optc=='wrk')? approved_jurisdictions[abbrev]: jurisdictions[abbrev];
-    for ( var i of Object.keys(lst) ){
-        s += '<option value="' + i + '">' + (abbrev != 'CO' ? i + ' - ' : '') + jurisdictions[abbrev][i]['name']
+    for ( var i of Object.keys(jurisdictions[abbrev]) ){
+      if (optc === 'wrk')
+      {
+        if (jurisdictions[abbrev][i]['work'])
+        {
+            s += '<option value="' + i + '">' + (abbrev != 'CO' ? i + ' - ' : '') + jurisdictions[abbrev][i]['name']
+        }
+      }
+      else
+      {
+        if (jurisdictions[abbrev][i]['draft'])
+        {
+            s += '<option value="' + i + '">' + (abbrev != 'CO' ? i + ' - ' : '') + jurisdictions[abbrev][i]['name']
+        }
+      }
     }
     jL2dom.innerHTML=s+"</select>"
     let jL3dom = document.getElementById(optc+'_jurL3');
@@ -30,7 +42,7 @@ function sel_jurL2(abbrev,optc) {
     let state = document.querySelector('#'+optc+'_jurL2 select').value;
     let fcall = "sel_jurL3(this.value,'"+optc+"')"
     let s = '<select name="cities" onchange="'+fcall+'"><option value="">-- Cities --</option>'
-    let lst = (optc=='wrk')? approved_jurisdictions[country][state]['mun']: jurisdictions[country][state]['mun'];
+    let lst = (optc=='wrk')? jurisdictions[country][state]['work']: jurisdictions[country][state]['draft'];
     for ( var i of lst ){
         s += '<option>'+i
     }
@@ -46,29 +58,28 @@ function sel_jurL2(abbrev,optc) {
 function sel_jurL3(abbrev,optc) {
     let country = document.getElementById(optc+'_jurL1').value;
     let state = document.querySelector('#'+optc+'_jurL2 select').value;
-    if (optc=='wrk' || (approved_jurisdictions[country] && approved_jurisdictions[country][state] && approved_jurisdictions[country][state]['mun'].includes(abbrev)) || confirm("It is not working,\nit is only to see city at the map ok?")) {
-      window.location.href = '/' + country+'-'+state+'-'+abbrev
+    if (optc=='wrk' || (jurisdictions[country] && jurisdictions[country][state] && jurisdictions[country][state]['draft'].includes(abbrev)) || confirm("It is not working,\nit is only to see city at the map ok?"))
+    {
+        window.location.href = './' + country+'-'+state+'-'+abbrev
     }
 }
 </script>
-<script src="/resources/js/jurisdictions_select.js"></script><!-- basta incluir um asterisco nos aprovados, e depois remover -->
-<script src="/resources/js/approved_jurisdictions_select.js"></script>
+<script src="/resources/js/jurisdictions_select.js"></script>
 <script>
 function selectElement(id,value)
 {
     let e = document.getElementById(id);
     e.value = value;
 }
-
 function updateJurisd(jurisd)
 {
     selectElement('wrk_jurL1',jurisd.split("-",3)[0])
 
     let s = '<select name="states" onchange="sel_jurL2(this.value,\'wrk\')"><option value="">-- States--</option>'
 
-    for ( var i of Object.keys(approved_jurisdictions[jurisd.split("-",3)[0]]) )
+    for ( var i of Object.keys(jurisdictions[jurisd.split("-",3)[0]]) )
     {
-        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   approved_jurisdictions[jurisd.split("-",3)[0]][i]['name'])
+        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   jurisdictions[jurisd.split("-",3)[0]][i]['name'])
     }
     s += '</select>'
 

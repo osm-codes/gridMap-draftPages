@@ -178,7 +178,7 @@ var countries = {
                 iniDigit: 2,
                 maxLength: 9,
                 diffl0br: 4,
-                levelDefault: 40,
+                levelDefault: 35,
                 symbol: '~',
                 placeholderDecode: '3D5',
                 placeholderEncode: '4.8,11.9;u=10',
