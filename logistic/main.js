@@ -648,18 +648,53 @@ function getEncode(noData)
 }
 
 // https://stackoverflow.com/questions/31790344/determine-if-a-point-reside-inside-a-leaflet-polygon
-function isMarkerInsidePolygon(latitude, longitude, poly) {
+// function isMarkerInsidePolygon(latitude, longitude, poly)
+function isMarkerInsidePolygon(x, y, poly)
+{
     var inside = false;
-    var x = latitude, y = longitude;
-    for (var ii=0;ii<poly.getLatLngs().length;ii++){
-        var polyPoints = poly.getLatLngs()[ii];
-        for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-            var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
-            var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
+    var polys = poly.getLatLngs();
+
+    for (var i = 0; i < polys.length; i++)
+    {
+        var polyPoints = polys[i];
+
+        for (var k = 0, l = polyPoints.length - 1; k < polyPoints.length; l = k++)
+        {
+            var xi = polyPoints[k].lat, yi = polyPoints[k].lng;
+            var xj = polyPoints[l].lat, yj = polyPoints[l].lng;
 
             var intersect = ((yi > y) != (yj > y))
                 && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
             if (intersect) inside = !inside;
+        }
+    }
+
+    return inside;
+};
+
+// function isMarkerInsideMultiPolygon(latitude, longitude, poly)
+function isMarkerInsideMultiPolygon(x, y, poly)
+{
+    var inside = false;
+    var polys = poly.getLatLngs();
+
+    for (var i = 0; i < polys.length; i++)
+    {
+        var polys2 = polys[i];
+
+        for (var j = 0; j < polys2.length; j++)
+        {
+            var polyPoints = polys2[j];
+
+            for (var k = 0, l = polyPoints.length - 1; k < polyPoints.length; l = k++)
+            {
+                var xi = polyPoints[k].lat, yi = polyPoints[k].lng;
+                var xj = polyPoints[l].lat, yj = polyPoints[l].lng;
+
+                var intersect = ((yi > y) != (yj > y))
+                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
         }
     }
 
@@ -770,7 +805,7 @@ function onMapClick(e)
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
-            if ( (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) || jurisdIsMultipolygon )
+            if (( !jurisdIsMultipolygon && (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) ) || ( jurisdIsMultipolygon && (isMarkerInsideMultiPolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) ) )
             {
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
