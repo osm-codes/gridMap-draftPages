@@ -1,6 +1,6 @@
 function changeLevel_byDigits(x)
 {
-    let input = document.getElementById('fielddecode').value
+    let input = (document.getElementById('fielddecode').value).trim()
 
     if (input.length > 0)
     {
@@ -269,7 +269,8 @@ encodeGgeohash.onAdd = function (map) {
     this.label_tcode.innerHTML = '';
     this.select_tcode.id = 'tcode';
     this.select_tcode.name = 'tcode';
-    this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">AFAcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
+    // this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">AFAcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
+    this.select_tcode.innerHTML = generateSelectTypeCode('aaa')
 
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
@@ -528,16 +529,29 @@ function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
     return html
 }
 
+function generateSelectTypeCode(type)
+{
+    let html = '';
+    avalue=['none','','olc','ghs','ghs64'];
+    aname=['(Free)','AFAcode','OLC','GHS','GHS64'];
+
+    for (let i = 0; i < 4; i++)
+    {
+        html += '<option value="' + avalue[i] + ( avalue[i] == type ?  '" selected>' : '">' ) + aname[i] + '</option>'
+    }
+    return html
+}
+
 function getDecode(data)
 {
-    let fdvalue = document.getElementById('fielddecode').value;
+    let fdvalue = (document.getElementById('fielddecode').value).trim();
     let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + fdvalue;
 
     if (fdvalue.match(/^geo:(olc|ghs):.+$/i))
     {
         var uri = uri_base + "/" + fdvalue + ".json";
 
-        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
+        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs);
     }
     else if(input !== null && input !== '')
     {
@@ -560,7 +574,7 @@ function getDecode(data)
 function changePlaceholder()
 {
     let tcode = document.getElementById('tcode').value
-    let input = document.getElementById('fieldencode').value
+    let input = (document.getElementById('fieldencode').value).trim()
 
     if (tcode.match(/^(olc|ghs|ghs64)$/i) && (input === null || input === ''))
     {
@@ -574,7 +588,7 @@ function changePlaceholder()
 
 function getEncode(noData)
 {
-    let input = document.getElementById('fieldencode').value
+    let input = (document.getElementById('fieldencode').value).trim()
     let level = document.getElementById('level_size').value
     let tcode = document.getElementById('tcode').value
 
@@ -631,7 +645,7 @@ function getEncode(noData)
 
                 if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
                 {
-                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
                 }
                 else
                 {
@@ -789,7 +803,7 @@ function fixZOrder(dataLayers) {
     });
 }
 
-function onMapClick(e)
+function onMapClickAFAcodes(e)
 {
     let level = document.getElementById('level_size').value
     let country = defaultMap.isocode;
@@ -823,6 +837,76 @@ function onMapClick(e)
             }
         }
     );
+}
+
+function onMapClickOLC(e)
+{
+    let level = document.getElementById('level_size').value
+    // let country = defaultMap.isocode;
+    // let state = document.getElementById('sel_jurL2').value;
+    // let jL3dom = document.getElementById('sel_jurL3').value;
+    // let context = country + '-' + state + '-'+ jL3dom
+
+    var uri = uri_base + "/geo:olc:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json"/* + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context*/
+    var popupContent =    "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
+
+    let decimals = (level <= 64 ? 5 : 4)
+
+    document.getElementById('fieldencode').value = 'geo:olc:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+    document.getElementById('geoUri').innerHTML = 'geo:olc:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals);
+
+    layerMarkerCurrent.clearLayers();
+
+    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
+    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
+
+    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterDataOlcGhs)
+}
+
+function onMapClickGHS(e)
+{
+    let level = document.getElementById('level_size').value
+    // let country = defaultMap.isocode;
+    // let state = document.getElementById('sel_jurL2').value;
+    // let jL3dom = document.getElementById('sel_jurL3').value;
+    // let context = country + '-' + state + '-'+ jL3dom
+
+    var uri = uri_base + "/geo:ghs:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json"/* + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context*/
+    var popupContent =    "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
+
+    let decimals = (level <= 64 ? 5 : 4)
+
+    document.getElementById('fieldencode').value = 'geo:ghs:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
+    document.getElementById('geoUri').innerHTML = 'geo:ghs:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals);
+
+    layerMarkerCurrent.clearLayers();
+
+    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
+    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
+
+    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterDataOlcGhs)
+}
+
+function onMapClick(e)
+{
+    let tcode = document.getElementById('tcode').value
+
+    if(tcode === '' || tcode === 'none')
+    {
+        onMapClickAFAcodes(e);
+    }
+    else if(tcode === 'olc')
+    {
+        onMapClickOLC(e)
+    }
+    else if(tcode === 'ghs')
+    {
+        onMapClickGHS(e)
+    }
+    else if(tcode === 'ghs64')
+    {
+        console.log("não implementado.")
+    }
 }
 
 // Layer layerPolygonCurrent
@@ -1173,7 +1257,7 @@ function afterData(data,layer)
         if(data.features[0].properties.isolabel_ext && !data.features[0].properties.short_code)
         {
             var nextURL = uri_base + "/" + data.features[0].properties.canonical_pathname
-            const nextTitle = 'OSM.codes: ' + data.features[0].properties.canonical_pathname;
+            const nextTitle = 'AFA.codes: ' + data.features[0].properties.canonical_pathname;
             const nextState = { additionalInformation: 'to canonical.' };
 
             window.history.pushState(nextState, nextTitle, nextURL);
@@ -1192,7 +1276,7 @@ function afterData(data,layer)
                 }
 
                 var nextURL = uri_base + "/" + data.features[0].properties.short_code
-                const nextTitle = 'OSM.codes: ' + data.features[0].properties.short_code;
+                const nextTitle = 'AFA.codes: ' + data.features[0].properties.short_code;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
@@ -1208,7 +1292,6 @@ function afterData(data,layer)
                 }
                 else
                 {
-                    console.log("vazio")
                     df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'~</small>');
                 }
 
@@ -1253,14 +1336,22 @@ function afterDataOlcGhs(data,layer)
 
             document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix,sizeCurrentCell);
 
+            document.getElementById('tcode').innerHTML = generateSelectTypeCode(data.features[0].properties.type);
+
             let level = document.getElementById('level_size').value
             let decimals = (level <= 64 ? 5 : 4)
 
             centerCurrentCell = layer.getBounds().getCenter();
             const { lat, lng } = centerCurrentCell;
 
-            document.getElementById('geoUri').innerHTML  = 'geo:' + latRound(lat,decimals) + "," + latRound(lng,decimals);
-            document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+            document.getElementById('geoUri').innerHTML  = 'geo:' + data.features[0].properties.type + ':' + latRound(lat,decimals) + "," + latRound(lng,decimals);
+            document.getElementById('fieldencode').value = 'geo:' + data.features[0].properties.type + ':' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
+
+            var nextURL = uri_base + "/geo:" + data.features[0].properties.type + ':' + data.features[0].properties.code
+            const nextTitle = 'AFA.codes: ' + data.features[0].properties.code;
+            const nextState = { additionalInformation: 'to canonical.' };
+
+            window.history.pushState(nextState, nextTitle, nextURL);
         }
     }
 }
@@ -1316,7 +1407,7 @@ else if (pathname.match(/^\/[A-Z]{2}((-[A-Z]+))((-[A-Z0-9]+))?$/i))
 }
 else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
 {
-    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
+    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
 }
 else if (pathname.match(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))\/geo:(olc|ghs):.+$/i))
 {
