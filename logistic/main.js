@@ -402,7 +402,7 @@ noTooltip.onAdd = function (map) {
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.checkbox, 'click', toggleCoverLayers, this.container);
+    L.DomEvent.on(this.checkbox, 'click', toggleTooltipLayers, this.container);
 
     return this.container; };
 
