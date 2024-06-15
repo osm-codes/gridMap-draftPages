@@ -398,7 +398,7 @@ noTooltip.onAdd = function (map) {
     this.label.innerHTML= 'No tooltip: ';
     this.checkbox.id = 'notooltip';
     this.checkbox.type = 'checkbox';
-    this.checkbox.checked = false;
+    this.checkbox.checked = true;
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -441,7 +441,7 @@ a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 c.appendChild(level.getContainer());
 b.appendChild(clear.getContainer());
-b.appendChild(toggleTooltip.getContainer());
+// b.appendChild(toggleTooltip.getContainer());
 b.appendChild(toggleCover.getContainer());
 d.appendChild(noTooltip.getContainer());
 d.appendChild(zoomClick.getContainer());
