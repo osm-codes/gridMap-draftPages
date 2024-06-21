@@ -425,7 +425,7 @@ decodeGgeohash.addTo(map);
 encodeGgeohash.addTo(map);
 level.addTo(map);
 clear.addTo(map);
-toggleTooltip.addTo(map);
+// toggleTooltip.addTo(map);
 toggleCover.addTo(map);
 jurisdictionGgeohash.addTo(map);
 noTooltip.addTo(map);
