@@ -126,7 +126,6 @@ function checkCountry(string,reset=true)
         {
             defaultMap = countries[key];
             reset ? resetDef() : '';
-            generateSoftwareVersions();
             break;
         }
     }
