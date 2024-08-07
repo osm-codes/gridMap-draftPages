@@ -1,5 +1,11 @@
 
-&nbsp; <span id="wrk_jurL2" onchange="sel_jurL2(this.value,'wrk')"></span> &nbsp; <span id="wrk_jurL3"></span>
+<li>Work cases:
+  &nbsp; <span id="wrk_jurL2" onchange="sel_jurL2(this.value,'wrk')"></span> &nbsp; <span id="wrk_jurL3"></span>
+</li>
+<br/>&nbsp;
+<li>(draft) Full list, only for list-test:
+  &nbsp; <span id="sel_jurL2" onchange="sel_jurL2(this.value,'sel')"></span> &nbsp; <span id="sel_jurL3"></span>
+</li>
 
 <script>
 function sel_jurL1(abbrev,optc) {
@@ -77,11 +83,12 @@ function selectElement(id,value)
     let e = document.getElementById(id);
     e.value = value;
 }
-function updateJurisd(jurisd)
+function updateJurisd(jurisd,optc)
 {
-    selectElement('wrk_jurL1',jurisd.split("-",3)[0])
+    selectElement(optc+'_jurL1',jurisd.split("-",3)[0])
 
-    let s = '<select name="states" onchange="sel_jurL2(this.value,\'wrk\')"><option value="">-- States--</option>'
+    let fcall = "sel_jurL2(this.value,'"+optc+"')"
+    let s = '<select name="states" onchange="'+fcall+'"><option value="">-- States--</option>'
 
     for ( var i of Object.keys(jurisdictions[jurisd.split("-",3)[0]]) )
     {
@@ -89,16 +96,17 @@ function updateJurisd(jurisd)
     }
     s += '</select>'
 
-    document.getElementById('wrk_jurL2').innerHTML=s
+    document.getElementById(optc+'_jurL2').innerHTML=s
 
-    sel_jurL2(jurisd.split("-",3)[1],'wrk')
+    sel_jurL2(jurisd.split("-",3)[1],optc)
 }
 
 let pathname = window.location.pathname;
 
 if (pathname.match(/^\/[A-Z]{2}.*$/i))
 {
-    updateJurisd((pathname.replace(/^\/([A-Z]{2}(-[A-Z]{1,3})?)(.*)$/i, "$1")).toUpperCase(),false)
+    updateJurisd((pathname.replace(/^\/([A-Z]{2}(-[A-Z]{1,3})?)(.*)$/i, "$1")).toUpperCase(),'wrk')
+    updateJurisd((pathname.replace(/^\/([A-Z]{2}(-[A-Z]{1,3})?)(.*)$/i, "$1")).toUpperCase(),'sel')
 }
 </script>
 </body></html>
