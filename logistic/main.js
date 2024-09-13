@@ -1394,6 +1394,11 @@ else if (pathname.match(/\/BR-\d+$/i))
     uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
 }
+else if (pathname.match(/\/CM-\d+$/i))
+{
+    uriApi = uri.replace(/\/CM-(\d+)$/i, "/geo:cm-code:$1.json");
+    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
+}
 // else if (pathname.match(/^\/[A-Z]{2}((-[A-Z0-9]+){1,2})$/i))
 // {
 //     uriApi = uri.replace(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))$/i, "/geo:iso_ext:$1.json");
