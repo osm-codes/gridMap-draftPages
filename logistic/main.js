@@ -1241,7 +1241,7 @@ function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true,genSelect
 {
     afterLoadJurisdAll(featureGroup,fittobounds,genSelect)
 
-    getMyLocationJurisd()
+    // getMyLocationJurisd()
 }
 
 function afterData(data,layer)
