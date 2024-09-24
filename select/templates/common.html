@@ -90,15 +90,27 @@ function updateJurisd(jurisd,optc)
     let fcall = "sel_jurL2(this.value,'"+optc+"')"
     let s = '<select name="states" onchange="'+fcall+'"><option value="">-- States--</option>'
 
-    for ( var i of Object.keys(jurisdictions[jurisd.split("-",3)[0]]) )
+    // Get the relevant jurisdiction
+    let currentJurisdiction = jurisdictions[jurisd.split("-",3)[0]];
+
+    // Filter out keys with null values
+    let lst = (optc=='wrk')? 'work': 'draft';
+    let validKeys = Object.keys(currentJurisdiction).filter(key => currentJurisdiction[key][lst] !== null);
+    if (validKeys.length === 0)
     {
-        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   jurisdictions[jurisd.split("-",3)[0]][i]['name'])
+      s = 'no work cases. See full list.';
+      document.getElementById(optc+'_jurL2').innerHTML=s
     }
-    s += '</select>'
-
-    document.getElementById(optc+'_jurL2').innerHTML=s
-
-    sel_jurL2(jurisd.split("-",3)[1],optc)
+    else
+    {
+      for ( var i of validKeys )
+      {
+          s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   jurisdictions[jurisd.split("-",3)[0]][i]['name'])
+      }
+      s += '</select>'
+      document.getElementById(optc+'_jurL2').innerHTML=s
+      sel_jurL2(jurisd.split("-",3)[1],optc)
+    }
 }
 
 let pathname = window.location.pathname;
