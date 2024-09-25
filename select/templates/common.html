@@ -98,7 +98,7 @@ function updateJurisd(jurisd,optc)
     let validKeys = Object.keys(currentJurisdiction).filter(key => currentJurisdiction[key][lst] !== null);
     if (validKeys.length === 0)
     {
-      s = 'no work cases. See full list.';
+      s = (optc=='wrk')? 'no work cases.': 'no draft cases.';
       document.getElementById(optc+'_jurL2').innerHTML=s
     }
     else
