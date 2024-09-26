@@ -73,22 +73,36 @@ function latRound(x,maxDigits=6) {
   // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
 }
 
+function buildOptionsHTML(options, selectedOption, getOptionLabel) {
+    return options.map(option => {
+        const isSelected = selectedOption === option ? ' selected' : '';
+        return `<option value="${option}"${isSelected}>${getOptionLabel(option)}</option>`;
+    }).join('');
+}
+
 function updateJurisd(jurisd)
 {
-    document.getElementById('sel_jurL1').innerHTML = jurisd.split("-",3)[0];
+    const [jurisd_country, jurisd_state, jurisd_city] = jurisd.split("-", 3);
+    const countryStates = jurisdictions[jurisd_country];
 
-    let s = '<option value="">- opt -</option>'
-    for ( var i of Object.keys(jurisdictions[jurisd.split("-",3)[0]]) )
-        // s += '<option' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') +i
+    // Build states options
+    const statesOptions = buildOptionsHTML(
+        Object.keys(countryStates),
+        jurisd_state,
+        (stateKey) => (jurisd_country !== 'CO' ? stateKey : countryStates[stateKey]['name'])
+    );
 
-        s += '<option value="' + i + '"' + (jurisd.split("-",3)[1] == i ? ' selected>' : '>') + (jurisd.split("-",3)[0] != 'CO' ? i :   jurisdictions[jurisd.split("-",3)[0]][i]['name'])
+    // Build city options
+    const citiesOptions = buildOptionsHTML(
+        [...(countryStates[jurisd_state]['draft'] || []), ...(countryStates[jurisd_state]['work'] || [])].sort(),
+        jurisd_city,
+        (city) => city
+    );
 
-    document.getElementById('sel_jurL2').innerHTML=s
-
-    s = '<option value="">- City -</option>'
-    for ( var i of (jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['draft']).concat(jurisdictions[jurisd.split("-",3)[0]][jurisd.split("-",3)[1]]['work']).sort() )
-        s += '<option' + (jurisd.split("-",3)[2] == i ? ' selected>' : '>') +i
-    document.getElementById('sel_jurL3').innerHTML=s
+    // Update the dropdowns
+    document.getElementById('sel_jurL1').innerHTML = jurisd_country;
+    document.getElementById('sel_jurL2').innerHTML = `<option value="">- opt -</option>${statesOptions}`;
+    document.getElementById('sel_jurL3').innerHTML = `<option value="">- City -</option>${citiesOptions}`;
 }
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: genericAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
