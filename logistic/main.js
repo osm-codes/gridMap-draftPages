@@ -1399,7 +1399,11 @@ const reg_esp_caracter = /\./g
 
 if (pathname.startsWith('/geo:')) {
     // pathname = pathname.substring(5);
-    pathname = pathname.replace(/\/geo:(.*)$/i, "/$1");
+
+    if (pathname.match(/^\/geo:[A-Z]{2}-.*?$/i))
+    {
+        pathname = pathname.replace(/\/geo:(.*)$/i, "/$1");
+    }
 }
 
 if (pathname.match(/\/CO-\d+$/i))
