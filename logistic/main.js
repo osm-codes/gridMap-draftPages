@@ -676,57 +676,42 @@ function getEncode(noData)
 
 // https://stackoverflow.com/questions/31790344/determine-if-a-point-reside-inside-a-leaflet-polygon
 // function isMarkerInsidePolygon(latitude, longitude, poly)
-function isMarkerInsidePolygon(x, y, poly)
-{
-    var inside = false;
-    var polys = poly.getLatLngs();
+function isMarkerInsidePolygonOrMultiPolygon(x, y, poly) {
+    let inside = false;
+    const polys = poly.getLatLngs();
 
-    for (var i = 0; i < polys.length; i++)
-    {
-        var polyPoints = polys[i];
+    // Check if the input is a multi-polygon or a single polygon
+    const isMultiPolygon = Array.isArray(polys[0]) && Array.isArray(polys[0][0]);
+    console.log(isMultiPolygon)
 
-        for (var k = 0, l = polyPoints.length - 1; k < polyPoints.length; l = k++)
-        {
-            var xi = polyPoints[k].lat, yi = polyPoints[k].lng;
-            var xj = polyPoints[l].lat, yj = polyPoints[l].lng;
+    // Function to check if a point is inside a polygon
+    const checkInside = (polyPoints) => {
+        for (let k = 0, l = polyPoints.length - 1; k < polyPoints.length; l = k++) {
+            const xi = polyPoints[k].lat, yi = polyPoints[k].lng;
+            const xj = polyPoints[l].lat, yj = polyPoints[l].lng;
 
-            var intersect = ((yi > y) != (yj > y))
+            const intersect = ((yi > y) != (yj > y))
                 && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
             if (intersect) inside = !inside;
         }
-    }
+    };
 
-    return inside;
-};
-
-// function isMarkerInsideMultiPolygon(latitude, longitude, poly)
-function isMarkerInsideMultiPolygon(x, y, poly)
-{
-    var inside = false;
-    var polys = poly.getLatLngs();
-
-    for (var i = 0; i < polys.length; i++)
-    {
-        var polys2 = polys[i];
-
-        for (var j = 0; j < polys2.length; j++)
-        {
-            var polyPoints = polys2[j];
-
-            for (var k = 0, l = polyPoints.length - 1; k < polyPoints.length; l = k++)
-            {
-                var xi = polyPoints[k].lat, yi = polyPoints[k].lng;
-                var xj = polyPoints[l].lat, yj = polyPoints[l].lng;
-
-                var intersect = ((yi > y) != (yj > y))
-                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
+    if (isMultiPolygon) {
+        // Iterate through each polygon in the multi-polygon
+        for (const polys2 of polys) {
+            for (const polyPoints of polys2) {
+                checkInside(polyPoints);
             }
+        }
+    } else {
+        // Single polygon case
+        for (const polyPoints of polys) {
+            checkInside(polyPoints);
         }
     }
 
     return inside;
-};
+}
 
 function getMyLocation(noData)
 {
@@ -832,7 +817,7 @@ function onMapClickAFAcodes(e)
     layerJurisdAll.eachLayer(
         function(memberLayer)
         {
-            if (( !jurisdIsMultipolygon && (isMarkerInsidePolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) ) || ( jurisdIsMultipolygon && (isMarkerInsideMultiPolygon(e.latlng['lat'], e.latlng['lng'], memberLayer)) ) )
+            if ( isMarkerInsidePolygonOrMultiPolygon(e.latlng['lat'], e.latlng['lng'], memberLayer) )
             {
                 document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
                 document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
