@@ -207,7 +207,7 @@ var toggleTooltipStatus = false;
 
 map.attributionControl.setPrefix(false);
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
-map.on('click', onMapClick);
+map.on('click', handleMapClick);
 
 var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
@@ -301,8 +301,8 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
-    L.DomEvent.on(this.button2, 'click', getMyLocation, this.container);
-    L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
+    L.DomEvent.on(this.button2, 'click', () => getMyLocation(handleLocation), this.container);
+    L.DomEvent.on(this.field, 'keyup', (data) => {if(data.keyCode === 13){getEncode(data);}}, this.container);
     L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
 
     return this.container;
@@ -430,6 +430,30 @@ geoUriDiv.onAdd = function (map) {
 
     return this.container; };
 
+// Create a "My Location" control
+const myLocationControl = L.Control.extend({
+    options: {
+        position: 'topleft'
+    },
+    onAdd: function () {
+        const container = L.DomUtil.create('div', 'leaflet-control-button');
+        container.innerHTML = '&#8982';
+        container.style.cursor = 'pointer';
+        container.style.backgroundColor = 'white';
+        container.style.padding = '5px';
+        container.style.border = '1px solid gray';
+
+        // Event handler for the button click
+        container.onclick = () => { getMyLocation(handleLocationJurisd); };
+
+        L.DomEvent.disableScrollPropagation(container);
+        L.DomEvent.disableClickPropagation(container);
+        return container;
+    }
+});
+
+//map.addControl(new myLocationControl());
+
 zoom.addTo(map);
 layers.addTo(map);
 geoUriDiv.addTo(map);
@@ -555,134 +579,13 @@ function generateSelectTypeCode(type)
     return html
 }
 
-function getDecode(data)
-{
-    let fdvalue = (document.getElementById('fielddecode').value).trim();
-    let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value + defaultMap.bases[defaultMap.defaultBase].symbol + fdvalue;
-
-    if (fdvalue.match(/^geo:(olc|ghs):.+$/i))
-    {
-        var uri = uri_base + "/" + fdvalue + ".json";
-
-        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs);
-    }
-    else if(input !== null && input !== '')
-    {
-        var uri = uri_base + "/geo:osmcodes:"
-
-        let regex = new RegExp("^" + defaultMap.isocode + "[+-~].*","i");
-
-        if(!regex.test(input))
-        {
-            uri += defaultMap.isocode + defaultMap.bases[defaultMap.defaultBase].symbol
-        }
-
-        uri += input + ".json"
-        document.getElementById('fieldencode').value = '';
-
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
-    }
-}
-
-function changePlaceholder()
-{
-    let tcode = document.getElementById('tcode').value
-    let input = (document.getElementById('fieldencode').value).trim()
-
-    if (tcode.match(/^(olc|ghs|ghs64)$/i) && (input === null || input === ''))
-    {
-        document.getElementById('fieldencode').placeholder = 'e.g.: geo:' + ( tcode === '' ? '' : tcode + ':' ) + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
-    }
-    else
-    {
-        document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
-    }
-}
-
-function getEncode(noData)
-{
-    let input = (document.getElementById('fieldencode').value).trim()
-    let level = document.getElementById('level_size').value
-    let tcode = document.getElementById('tcode').value
-
-    let uri = uri_base + "/";
-
-    if(input !== null && input !== '' && input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
-    {
-        if (input.match(/^(urn|geo):(lex):.+$/i))
-        {
-            uri += input + ".json";
-            loadGeojson(uri,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-        }
-        else
-        {
-            let tp = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) ;
-
-            let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
-            let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
-
-            if(input.match(regex))
-            {
-                if (!input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-                {
-                    input = input.replace(regex, tp + "$2$3")
-                }
-
-                let u_value;
-
-                if(input.match(regex2))
-                {
-                    u_value = Number(input.split(';u=')[1])
-
-                    if(u_value == 0)
-                    {
-                        u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
-                    }
-
-                    u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
-                }
-                else
-                {
-                    u_value = level
-                }
-
-                input = input.replace(regex, "$1$2" + ';u=' + u_value)
-
-                uri += input + ".json";
-
-                let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
-                let popupContent = "latlng: " + latlong;
-                layerMarkerCurrent.clearLayers();
-                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-                L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-
-                if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-                {
-                    loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
-                }
-                else
-                {
-                    uri += '/' + defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
-
-                    document.getElementById('fielddecode').value = '';
-
-                    layerPolygonCurrent.clearLayers();
-                    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
-                }
-            }
-        }
-    }
-}
-
 // https://stackoverflow.com/questions/31790344/determine-if-a-point-reside-inside-a-leaflet-polygon
-// function isMarkerInsidePolygon(latitude, longitude, poly)
 function isMarkerInsidePolygonOrMultiPolygon(x, y, poly) {
     let inside = false;
     const polys = poly.getLatLngs();
 
     // Check if the input is a multi-polygon or a single polygon
     const isMultiPolygon = Array.isArray(polys[0]) && Array.isArray(polys[0][0]);
-    console.log(isMultiPolygon)
 
     // Function to check if a point is inside a polygon
     const checkInside = (polyPoints) => {
@@ -713,66 +616,271 @@ function isMarkerInsidePolygonOrMultiPolygon(x, y, poly) {
     return inside;
 }
 
-function getMyLocation(noData)
+function isLatLngInsideJurisdiction(lat,lng,layer)
 {
-    if (navigator.geolocation)
+    let inside = false
+    layer.eachLayer(
+        function(memberLayer)
+        {
+            if ( isMarkerInsidePolygonOrMultiPolygon(lat,lng, memberLayer) )
+            {
+                inside = true;
+            }
+        }
+    );
+
+    return inside;
+}
+
+// Function to get the jurisdiction context based on selected values
+function getJurisdictionContext() {
+    const country = defaultMap.isocode;
+    const state = document.getElementById('sel_jurL2').value;
+    const city = document.getElementById('sel_jurL3').value;
+
+    if (state !== null && state !== '' && city !== null && city !== '')
     {
-        navigator.geolocation.getCurrentPosition(getMyLocation_write)
+        return `${country}-${state}-${city}`;
+    }
+
+    return null;
+}
+
+// Function to check if type is Afacode
+function isTypeAfaCode()
+{
+    const type = document.getElementById('tcode').value;
+    return type === '' || type === 'none';
+}
+
+// Function to build the geo prefix
+function buildGeoPrefix(encode = true)
+{
+    return encode ? `geo:${isTypeAfaCode() ? '' : `${document.getElementById('tcode').value}:`}` : 'geo:osmcodes:';
+}
+
+// Regular expressions for geoURI validation
+const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
+const regexLex  = /^(urn|geo):lex:.+$/i;
+
+function changePlaceholder()
+{
+    let input = (document.getElementById('fieldencode').value).trim()
+    const geoPrefix = buildGeoPrefix();
+
+    if ( input === null || input === '' )
+    {
+        document.getElementById('fieldencode').placeholder = `e.g.: ${geoPrefix}${defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode}`;
     }
     else
     {
-        alert( "Geolocation is not supported by this browser." )
+        if(input.match(regexGeoUri))
+        {
+            input = input.replace(regexGeoUri, `${geoPrefix}$4$5`)
+            document.getElementById('fieldencode').value = `${input}`;
+        }
     }
 }
 
-function getMyLocation_write(position)
+function checkUValue(input)
 {
-    let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
-    let tcode = document.getElementById('tcode').value
+    const match = input.match(regexGeoUri);
+    let u_value = document.getElementById('level_size').value;
 
-    layerJurisdAll.eachLayer(
-        function(memberLayer)
+    if(match && match[7] !== undefined)
+    {
+        u_value = Number(match[7])
+
+        if(u_value == 0)
         {
-            if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
-            {
-                // console.log("in");
-                document.getElementById('fieldencode').value = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) + position.coords.latitude +','+ position.coords.longitude
-                getEncode();
-            }
-            else
-            {
-                alert("Error: location out of " + context + ".");
-            }
+            u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
         }
-    );
+
+        u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
+    }
+
+    return u_value;
 }
 
-function getMyLocationJurisd(noData)
+// Function to add a marker to the specified layers
+function addMarker(layerMarkerCurrent,layerMarkerAll,latLng)
+{
+    const latlng  = `${latRound(latLng.lat)},${latRound(latLng.lng)}`;
+
+    const popupContent = `latlng: ${latlng}`;
+
+    // Clear the current markers
+    layerMarkerCurrent.clearLayers();
+
+    // Create markers for both layers
+    L.marker(latLng).addTo(layerMarkerCurrent).bindPopup(popupContent);
+    L.marker(latLng).addTo(layerMarkerAll).bindPopup(popupContent);
+}
+
+// Main function for processing geolocation URI and loading layers
+function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = false)
+{
+    let layerToLoad;
+    let afterDataCallback;
+    let context;
+    let uri = `${uri_base}/${geouri}.json`;
+
+    if (isLex) {
+        loadGeojson(geouri,[layerJurisdAll],afterLoadJurisdAll,afterData);
+        return;
+    }
+
+    if (geolocation) {
+        window.location.href = `${uri_base}/${geouri}`;
+        return;
+    }
+
+    switch (isAfacode)
+    {
+        case true:
+            layerToLoad = [layerPolygonCurrent, layerPolygonAll];
+            afterDataCallback = afterData;
+            break;
+        case false:
+            layerToLoad = [layerOlcGhsCurrent, layerOlcGhsAll];
+            afterDataCallback = afterDataOlcGhs;
+            break;
+    }
+
+    if(encode)
+    {
+        const latlng = geouri.replace(regexGeoUri, "$4");
+        const latLngArray = latlng.split(/[;,]/, 2);
+        const insidePolygon = isLatLngInsideJurisdiction(latLngArray[0],latLngArray[1],layerJurisdAll);
+        const context = getJurisdictionContext();
+
+        if(isAfacode && context !== null)
+        {
+            uri += '/' + context;
+        }
+
+        if( isAfacode && context !== null && !insidePolygon )
+        {
+            alert("Error: outside of current jurisdiction.");
+        }
+        else
+        {
+            addMarker(layerMarkerCurrent,layerMarkerAll,L.latLng(latLngArray))
+            loadGeojson(uri,layerToLoad,afterLoadLayer,afterDataCallback);
+        }
+    }
+    else
+    {
+        loadGeojson(uri,layerToLoad,afterLoadLayer,afterDataCallback);
+    }
+}
+
+function getDecode(data)
+{
+    const geouri = (document.getElementById('fielddecode').value).trim();
+
+    if(geouri !== null && geouri !== '')
+    {
+        const isCode = geouri.match(regexGeoUri);
+        const isAfacode = isCode && (isCode[3] == undefined);
+
+        if (isCode)
+        {
+            const context = getJurisdictionContext();
+
+            if (isAfacode && context !== null)
+            {
+                geouri = buildGeoPrefix(false) + context + defaultMap.bases[defaultMap.defaultBase].symbol + geouri
+            }
+            processGeoUri(geouri, isAfacode, encode = false, isLex = false, geolocation = false);
+        }
+    }
+}
+
+function getEncode(noData)
+{
+    let geouri = (document.getElementById('fieldencode').value).trim()
+
+    if(geouri !== null && geouri !== '')
+    {
+        const isCode = geouri.match(regexGeoUri);
+        const isLex  = geouri.match(regexLex);
+        let isAfacode = isCode && (isCode[3] === undefined);
+
+        if (isCode || isLex)
+        {
+            if (isCode)
+            {
+                geouri = buildGeoPrefix() + isCode[4] + ';u=' + checkUValue(geouri);
+            }
+            processGeoUri(geouri, isAfacode, encode = true, isLex, geolocation = false);
+        }
+    }
+}
+
+function handleMapClick(e)
+{
+    const isAfacode = isTypeAfaCode();
+    const geoPrefix = buildGeoPrefix();
+    let geouri = `${geoPrefix}${latRound(e.latlng.lat)},${latRound(e.latlng.lng)}`;
+    geouri += ';u=' + checkUValue(geouri);
+
+    processGeoUri(geouri,isAfacode,encode = true);
+}
+
+function handleLocationError(error) {
+    const messages = {
+        [error.PERMISSION_DENIED]: "User denied the request for Geolocation.",
+        [error.POSITION_UNAVAILABLE]: "Location information is unavailable.",
+        [error.TIMEOUT]: "The request to get user location timed out.",
+        [error.UNKNOWN_ERROR]: "An unknown error occurred."
+    };
+
+    alert(messages[error.code] || "An unexpected error occurred.");
+}
+
+function getMyLocation(callback)
 {
     if (navigator.geolocation)
     {
-        navigator.geolocation.getCurrentPosition(getMyLocationJurisdTest)
+        navigator.geolocation.getCurrentPosition(callback,handleLocationError)
+    }
+    else
+    {
+        alert("Geolocation is not supported by this browser.");
     }
 }
 
-function getMyLocationJurisdTest(position)
+function buildGeoUri(position, includeAccuracy = false)
 {
-    let context = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-'+ document.getElementById('sel_jurL3').value
-    let tcode = document.getElementById('tcode').value
+    const { latitude, longitude, accuracy } = position.coords;
+    let geouri = `${buildGeoPrefix()}${latitude},${longitude}`;
 
-    layerJurisdAll.eachLayer(
-        function(memberLayer)
+    if (includeAccuracy && accuracy > 100)
+    {
+        const userConfirmed = confirm(`Poor GPS accuracy: ${accuracy} m. Do you want to include this in the geolocation?`);
+
+        if (userConfirmed)
         {
-            if ( (isMarkerInsidePolygon(position.coords.latitude, position.coords.longitude, memberLayer)) || jurisdIsMultipolygon )
-            {
-                if (confirm("Go to my location in " + context + "?"))
-                {
-                    document.getElementById('fieldencode').value =  'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) + position.coords.latitude +','+ position.coords.longitude
-                    getEncode();
-                }
-            }
+            geouri += `;u=${accuracy}`;
         }
-    );
+    }
+
+    return geouri;
+}
+
+function handleLocation(position)
+{
+    const geouri = buildGeoUri(position, true);
+
+    processGeoUri(geouri,isAfacode = isTypeAfaCode(),encode = true, isLex = false, geolocation = false);
+}
+
+function handleLocationJurisd(position)
+{
+    const geouri = buildGeoUri(position, false);
+
+    processGeoUri(geouri,isAfacode = isTypeAfaCode(),encode = true, isLex = false, geolocation = true);
 }
 
 function sortAndRemoveDuplicates(value)
@@ -799,112 +907,6 @@ function fixZOrder(dataLayers) {
             && layerGroup._layers[Object.keys(layerGroup._layers)[0]]._path.parentNode)
             layerGroup.bringToFront();
     });
-}
-
-function onMapClickAFAcodes(e)
-{
-    let level = document.getElementById('level_size').value
-    let country = defaultMap.isocode;
-    let state = document.getElementById('sel_jurL2').value;
-    let jL3dom = document.getElementById('sel_jurL3').value;
-    let context = country + '-' + state + '-'+ jL3dom
-
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json" + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context
-    var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
-
-    let decimals = (level <= 64 ? 5 : 4)
-
-    layerJurisdAll.eachLayer(
-        function(memberLayer)
-        {
-            if ( isMarkerInsidePolygonOrMultiPolygon(e.latlng['lat'], e.latlng['lng'], memberLayer) )
-            {
-                document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-                document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals) //+ ";u=" + level;
-
-                layerMarkerCurrent.clearLayers();
-
-                L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-                L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
-
-                loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
-            }
-            else
-            {
-                alert("Error: click out of " + context + ".");
-            }
-        }
-    );
-}
-
-function onMapClickOLC(e)
-{
-    let level = document.getElementById('level_size').value
-    // let country = defaultMap.isocode;
-    // let state = document.getElementById('sel_jurL2').value;
-    // let jL3dom = document.getElementById('sel_jurL3').value;
-    // let context = country + '-' + state + '-'+ jL3dom
-
-    var uri = uri_base + "/geo:olc:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json"/* + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context*/
-    var popupContent =    "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
-
-    let decimals = (level <= 64 ? 5 : 4)
-
-    document.getElementById('fieldencode').value = 'geo:olc:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    document.getElementById('geoUri').innerHTML = 'geo:olc:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals);
-
-    layerMarkerCurrent.clearLayers();
-
-    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
-
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterDataOlcGhs)
-}
-
-function onMapClickGHS(e)
-{
-    let level = document.getElementById('level_size').value
-    // let country = defaultMap.isocode;
-    // let state = document.getElementById('sel_jurL2').value;
-    // let jL3dom = document.getElementById('sel_jurL3').value;
-    // let context = country + '-' + state + '-'+ jL3dom
-
-    var uri = uri_base + "/geo:ghs:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json"/* + (defaultMap.postalcodeBase != 'base32' ? '/' + defaultMap.postalcodeBase : '') + '/' + context*/
-    var popupContent =    "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
-
-    let decimals = (level <= 64 ? 5 : 4)
-
-    document.getElementById('fieldencode').value = 'geo:ghs:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    document.getElementById('geoUri').innerHTML = 'geo:ghs:' + latRound(e.latlng['lat'],decimals) + "," + latRound(e.latlng['lng'],decimals);
-
-    layerMarkerCurrent.clearLayers();
-
-    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
-
-    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterDataOlcGhs)
-}
-
-function onMapClick(e)
-{
-    let tcode = document.getElementById('tcode').value
-
-    if(tcode === '' || tcode === 'none')
-    {
-        onMapClickAFAcodes(e);
-    }
-    else if(tcode === 'olc')
-    {
-        onMapClickOLC(e)
-    }
-    else if(tcode === 'ghs')
-    {
-        onMapClickGHS(e)
-    }
-    else if(tcode === 'ghs64')
-    {
-        console.log("não implementado.")
-    }
 }
 
 // Layer layerPolygonCurrent
@@ -1236,13 +1238,6 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
     }
 }
 
-function afterLoadJurisdAllCheckLocation(featureGroup,fittobounds=true,genSelect=true)
-{
-    afterLoadJurisdAll(featureGroup,fittobounds,genSelect)
-
-    // getMyLocationJurisd()
-}
-
 function afterData(data,layer)
 {
     if(data.features.length = 1)
@@ -1285,7 +1280,6 @@ function afterData(data,layer)
 
                 if(data.features[0].properties.isolabel_ext_abbrev)
                 {
-                    console.log(data.features[0].properties.isolabel_ext_abbrev)
                     df_short_code = '<small>'+(data.features[0].properties.isolabel_ext_abbrev)+ '~</small>' + data.features[0].properties.short_code.split(/[~]/)[1];
                 }
                 else
@@ -1378,100 +1372,77 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
     .catch(err => {})
 }
 
-var uriApi = ''
-var uriApiJurisd = ''
-const reg_esp_caracter = /\./g
+// Remove prefixo 'geo:' se for sucedido por [A-Z]{2}.
+// Exemplo:  /geo:BR-Sampa~LCGHJ -> /BR-Sampa~LCGHJ
+if (pathname.startsWith('/geo:') && pathname.match(/^\/geo:[A-Z]{2}-.*?$/i))
+{
+    pathname = pathname.replace(/\/geo:(.*)$/i, "/$1");
 
-if (pathname.startsWith('/geo:')) {
-    // pathname = pathname.substring(5);
+}
 
-    if (pathname.match(/^\/geo:[A-Z]{2}-.*?$/i))
+// Function to generate URI and load GeoJSON
+const loadGeoApi = (pattern, prefix, suffix, afterLoad, afterData) => {
+    const match = pathname.match(pattern);
+    if (match)
     {
-        pathname = pathname.replace(/\/geo:(.*)$/i, "/$1");
+        loadGeojson( pathname.replace(pattern, `/${prefix}:${match[1]}${suffix}`) , [layerJurisdAll] , afterLoad , afterData );
     }
-}
+};
 
-if (pathname.match(/\/CO-\d+$/i))
+// Define patterns and corresponding parameters
+const patterns = [
+    { regex: /\/CO-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:co-divipola',  suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /\/BR-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /\/CM-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:cm-code', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:iso_ext', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})\/geo:(olc|ghs):.+$/i, prefix: 'geo:iso_ext', suffix: '.json', afterLoad: (e) => afterLoadJurisdAll(e, false), afterData: function(e){} }/*,
+    { regex: /\/([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i, prefix: 'geo:iso_ext',  suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData }*/
+];
+// Load GeoJSON for each pattern
+// Resolve jurisdiction
+// Exemplo: /CO-15001       -> /geo:co-divipola:15001.json
+//          /BR-3550308     -> /geo:br-geocodigo:3550308.json
+//          /CM-20101       -> /geo:cm-code:20101.json
+//          /BR-Sampa       -> /geo:iso_ext:BR-Sampa.json
+//          /BR-SP-SaoPaulo -> /geo:iso_ext:BR-SP-SaoPaulo.json
+//          /BR-SP-SP       -> /geo:iso_ext:BR-SP-SP.json
+//          /BR-SP          -> /geo:iso_ext:BR-SP.json
+//          /CM-YE1         -> /geo:iso_ext:CM-YE1.json
+//          /BR-Rio         -> /geo:iso_ext:BR-Rio.json
+patterns.forEach(({ regex, prefix, suffix, afterLoad }) => {
+    loadGeoApi(regex, prefix, suffix, afterLoad, afterData);
+});
+
+// Resolve requisições OLC e GHS com e sem contexto
+// Acresenta sufixo '.json' se existir o sufixo geo:(olc|ghs):.
+// Exemplo:  /geo:olc:-23.550408,-46.633110;u=3           -> /geo:olc:-23.550408,-46.633110;u=3.json
+// Exemplo:  /BR-Sampa/geo:olc:-23.550408,-46.633110;u=3  -> /geo:olc:-23.550408,-46.633110;u=3.json
+if (pathname.match(/^(\/[A-Z]{2}(-[A-Z0-9]+){1,2})?\/geo:(olc|ghs):.+$/i))
 {
-    uriApi = uri.replace(/\/CO-(\d+)$/i, "/geo:co-divipola:$1.json");
-    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-}
-else if (pathname.match(/\/BR-\d+$/i))
-{
-    uriApi = uri.replace(/\/BR-(\d+)$/i, "/geo:br-geocodigo:$1.json");
-    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-}
-else if (pathname.match(/\/CM-\d+$/i))
-{
-    uriApi = uri.replace(/\/CM-(\d+)$/i, "/geo:cm-code:$1.json");
-    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-}
-// else if (pathname.match(/^\/[A-Z]{2}((-[A-Z0-9]+){1,2})$/i))
-// {
-//     uriApi = uri.replace(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))$/i, "/geo:iso_ext:$1.json");
-//     loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-// }
-else if (pathname.match(/^\/[A-Z]{2}((-[A-Z]+))((-[A-Z0-9]+))?$/i))
-{
-    uriApi = uri.replace(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))$/i, "/geo:iso_ext:$1.json");
-    loadGeojson(uriApi,[layerJurisdAll],afterLoadJurisdAllCheckLocation,afterData);
-}
-else if (pathname.match(/^\/geo:(olc|ghs):.+$/i))
-{
-    loadGeojson(uri + '.json',[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
-}
-else if (pathname.match(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))\/geo:(olc|ghs):.+$/i))
-{
-    loadGeojson(uri.replace(/\/[A-Z]{2}((-[A-Z0-9]+){1,2})\/(geo:(olc|ghs).*)$/i, "/$1.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
-    loadGeojson(uri.replace(/\/([A-Z]{2}((-[A-Z0-9]+){1,2}))\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
+    loadGeojson(pathname.replace(/^(\/[A-Z]{2}(-[A-Z0-9]+){1,2})?\/(geo:(olc|ghs):.+)$/i, "/$3.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
 }
 else
 {
-    pathnameNoDot = pathname.replace(reg_esp_caracter,"");
-
-    if (pathnameNoDot.match(/\/[A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*$/i))
+    let uriApi = ''
+    // Resolve AFAcodes logistico se municipio é numérico ou string.
+    // Exemplo: /BR-3550308~LCGHJ     -> /geo:osmcodes:BR-3550308~LCGHJ.json
+    //          /CO-15001~8HJF20      -> /geo:osmcodes:CO-15001~8HJF20.json
+    //          /CM-20101~0G220       -> /geo:osmcodes:CM-20101~0G220.json
+    //          /CM-CE-Yaounde1~0G220 -> /geo:osmcodes:CM-CE-Yaounde1~0G220.json
+    //          /CM-YE1~0G220         -> /geo:osmcodes:CM-YE1~0G220.json
+    if (pathname.match(/^\/((([A-Z]{2})-\d+)|([A-Z]{2}((-[A-Z0-9]+){1,2})))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i))
     {
-        uriApi = pathnameNoDot.replace(/\/([A-Z]{2}~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:osmcodes:$1.json");
-        uriApiJurisd = pathnameNoDot.replace(/\/(([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)*)$/i, "/geo:iso_ext:$2.json");
-    }
-    else if (pathnameNoDot.match(/^\/([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-    {
-        uriApi = pathnameNoDot.replace(/\/(([A-Z]{2})-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-
-        if (pathnameNoDot.match(/^\/BR-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-        {
-            uriApiJurisd = pathnameNoDot.replace(/\/BR-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:br-geocodigo:$1.json");
-        }
-        else if (pathnameNoDot.match(/^\/CO-\d+(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-        {
-            uriApiJurisd = pathnameNoDot.replace(/\/CO-(\d+)(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i, "/geo:co-divipola:$1.json");
-        }
-    }
-    else if (pathnameNoDot.match(/^\/[A-Z]{2}((-[A-Z0-9]+){1,2})(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+$/i))
-    {
-        uriApi = pathnameNoDot.replace(/\/([A-Z]{2}((-[A-Z0-9]+){1,2})(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:osmcodes:$1.json");
-        uriApiJurisd = pathnameNoDot.replace(/\/(([A-Z]{2}((-[A-Z0-9]+){1,2}))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ]+)$/i, "/geo:iso_ext:$2.json");
+        pathname = pathname.replace(/\./g,""); // Remove ponto, caso exista
+        uriApi = pathname.replace(/\/(.+)$/i, "/geo:osmcodes:$1.json");
     }
     else if (pathname.match(/^\/geo:.+$/i))
     {
         uriApi = pathname + '.json';
         getJurisdAfterLoad = true;
     }
-    else
-    {
-        uriApi = pathname + '.json';
-    }
 
-    uriApi = uri_base + uriApi;
-    uriApiJurisd = uri_base + uriApiJurisd;
-
-    if(uriApi !== null && uriApi !== '')
+    if(uriApi !== '')
     {
-        loadGeojson(uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
-    }
-
-    if(uriApiJurisd !== null && uriApiJurisd !== '')
-    {
-        loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},function(e){});
+        loadGeojson(uri_base + uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
     }
 }
