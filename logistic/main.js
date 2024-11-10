@@ -436,12 +436,14 @@ const myLocationControl = L.Control.extend({
         position: 'topleft'
     },
     onAdd: function () {
-        const container = L.DomUtil.create('div', 'leaflet-control-button');
-        container.innerHTML = '&#8982';
-        container.style.cursor = 'pointer';
-        container.style.backgroundColor = 'white';
-        container.style.padding = '5px';
-        container.style.border = '1px solid gray';
+        // Criação do contêiner para o botão com as classes do Leaflet
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+
+        // Criar o botão dentro do contêiner
+        const button = L.DomUtil.create('a', '', container);
+        button.innerHTML = '&#8982';
+        button.href = '#';
+        button.title = 'My location';
 
         // Event handler for the button click
         container.onclick = () => { getMyLocation(handleLocationJurisd); };
@@ -452,7 +454,7 @@ const myLocationControl = L.Control.extend({
     }
 });
 
-//map.addControl(new myLocationControl());
+map.addControl(new myLocationControl());
 
 zoom.addTo(map);
 layers.addTo(map);
