@@ -1,23 +1,24 @@
 function changeLevel_byDigits(x)
 {
-    let input = (document.getElementById('fielddecode').value).trim()
+    const inputField = document.getElementById('fielddecode');
+    let input = inputField.value.trim();
 
     if (input.length > 0)
     {
         if (x>0)
         {
-            document.getElementById('fielddecode').value = input + '7';
-            getDecode();
+            inputField.value = input + '7';
         }
         else if (x < 0 && input.length > 1)
         {
-            document.getElementById('fielddecode').value = input.substring(0,input.length-1);
-            getDecode();
+            inputField.value = input.substring(0,input.length-1);
         }
         else
         {
             alert('Check code or level limits');
+            return;
         }
+        getDecode();
     }
     else
     {
@@ -61,10 +62,10 @@ function sel_jurL3(abbrev)
     // let country = document.getElementById('sel_jurL1').value;
     let country = defaultMap.isocode;
     let state = document.querySelector('#sel_jurL2').value;
-    let jL3dom = document.getElementById('sel_jurL3').value;
-    if(jL3dom != '' && state != '')
+    let city = document.getElementById('sel_jurL3').value;
+    if(city != '' && state != '')
     {
-        window.location.href = uri_base + '/' + country + '-' + state + '-' + document.getElementById('sel_jurL3').value;
+        window.location.href = `${uri_base}/${country}-${state}-${city}`;
     }
 }
 
@@ -205,14 +206,20 @@ var map = L.map('map',{
 
 var toggleTooltipStatus = false;
 
-map.attributionControl.setPrefix(false);
+map.attributionControl.setPrefix(false); // Disable the attribution prefix
+
+// Add fullscreen control
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
+
+// Event handler for map click
 map.on('click', handleMapClick);
 
+// Standard Leaflet controls
 var zoom   = L.control.zoom({position:'topleft'});
 var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
 var escala = L.control.scale({position:'bottomright',imperial: false});
 
+// Custom controls
 var jurisdictionGgeohash = L.control({position: 'topleft'});
 jurisdictionGgeohash.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -324,100 +331,63 @@ level.onAdd = function (map) {
 
     return this.container; };
 
-var clear = L.control();
-clear.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
+// Function to create a basic Leaflet control with a label and button
+function createControl({ id, label, buttonLabel, buttonAction, position = 'topleft', type = 'button', checkbox = false, checked = false }) {
+    const control = L.control({ position });
+    control.onAdd = function (map) {
+        const container = L.DomUtil.create('div');
 
-    this.button.type = 'button';
-    this.button.innerHTML= "Clear all";
+        if (label)
+        {
+            const controlLabel = L.DomUtil.create('label', '', container);
+            controlLabel.innerHTML = label;
+        }
 
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', resetDef, this.container);
+        if (checkbox)
+        {
+            const checkboxInput = L.DomUtil.create('input', '', container);
+            checkboxInput.type = 'checkbox';
+            checkboxInput.id = id;
+            checkboxInput.checked = checked;
+            L.DomEvent.on(checkboxInput, 'click', buttonAction);
+        }
+        else
+        {
+            const button = L.DomUtil.create(type, '', container);
+            button.innerHTML = buttonLabel;
+            L.DomEvent.on(button, 'click', buttonAction);
+        }
 
-    return this.container; };
+        L.DomEvent.disableScrollPropagation(container);
+        L.DomEvent.disableClickPropagation(container);
 
-var toggleTooltip = L.control({position: 'topleft'});
-toggleTooltip.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
+        return container;
+    };
 
-    this.button.type = 'button';
-    this.button.innerHTML= "Tooltip";
+    return control;
+}
 
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', toggleTooltipLayers, this.container);
+// "Clear all" button control
+const clearControl = createControl({id: 'clear', buttonLabel: 'Clear all', buttonAction: resetDef, position: 'topleft'});
 
-    return this.container; };
+// Tooltip toggle control
+const toggleTooltipControl = createControl({id: 'tooltip', buttonLabel: 'Tooltip', buttonAction: toggleTooltipLayers, position: 'topleft'});
 
-var toggleCover = L.control({position: 'topleft'});
-toggleCover.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
+// Coverage toggle control
+const toggleCoverageControl = createControl({id: 'coverage', buttonLabel: 'Coverage', buttonAction: toggleCoverLayers, position: 'topleft'});
 
-    this.button.type = 'button';
-    this.button.innerHTML= "Coverage";
+// Official Borders toggle control
+const officialBordersControl = createControl({id: 'officialborders', buttonLabel: 'Official Borders', buttonAction: toggleOfficialBordersLayers, position: 'topleft'});
 
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', toggleCoverLayers, this.container);
+// Zoom-click disable control
+const zoomClickControl = createControl({id: 'zoomclick', label: 'Disable zoom-click: ', checkbox: true, checked: false, buttonAction: () => {}, position: 'topleft'});
 
-    return this.container; };
+// Keep previous click control
+const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep previous clicks: ', checkbox: true, checked: true, buttonAction: toggleKeepClick, position: 'topleft'});
 
-var zoomClick = L.control({position: 'topleft'});
-zoomClick.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
+// No-tooltip control
+const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
 
-    this.label.for= 'zoomclick';
-    this.label.innerHTML= 'Disable zoom-click: ';
-    this.checkbox.id = 'zoomclick';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = false;
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-
-    return this.container; };
-
-var keepPreviousClick = L.control({position: 'topleft'});
-keepPreviousClick.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    this.label.for= 'keepclick';
-    this.label.innerHTML= 'Keep previous clicks: ';
-    this.checkbox.id = 'keepclick';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = true;
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.checkbox, 'click', toggleKeepClick, this.container);
-
-    return this.container; };
-
-var noTooltip = L.control({position: 'topleft'});
-noTooltip.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.label     = L.DomUtil.create('label', '', this.container);
-    this.checkbox  = L.DomUtil.create('input', '', this.container);
-
-    this.label.for= 'notooltip';
-    this.label.innerHTML= 'No tooltip: ';
-    this.checkbox.id = 'notooltip';
-    this.checkbox.type = 'checkbox';
-    this.checkbox.checked = true;
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.checkbox, 'click', toggleTooltipLayers, this.container);
-
-    return this.container; };
 
 var geoUriDiv = L.control({position: 'topright'});
 geoUriDiv.onAdd = function (map) {
@@ -454,22 +424,42 @@ const myLocationControl = L.Control.extend({
     }
 });
 
+
 map.addControl(new myLocationControl());
 
-zoom.addTo(map);
-layers.addTo(map);
-geoUriDiv.addTo(map);
-escala.addTo(map);
-decodeGgeohash.addTo(map);
-encodeGgeohash.addTo(map);
-level.addTo(map);
-clear.addTo(map);
-// toggleTooltip.addTo(map);
-toggleCover.addTo(map);
-jurisdictionGgeohash.addTo(map);
-noTooltip.addTo(map);
-zoomClick.addTo(map);
-keepPreviousClick.addTo(map);
+[zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl]
+    .forEach(control => control.addTo(map));
+
+// // Select the parent elements once
+// const containerA = document.getElementById('custom-map-controlsa');
+// const containerB = document.getElementById('custom-map-controlsb');
+// const containerC = document.getElementById('custom-map-controlsc');
+// const containerD = document.getElementById('custom-map-controlsd');
+//
+// // Create a mapping of controls to append to specific containers
+// const controlsToAdd = {
+//   containerA: [jurisdictionGgeohash, decodeGgeohash, encodeGgeohash],
+//   containerB: [clearControl, toggleCoverageControl, officialBordersControl],
+//   containerC: [level],
+//   containerD: [noTooltipControl, zoomClickControl, keepPreviousClickControl]
+// };
+//
+// // Loop through each container and append the controls
+// Object.entries(controlsToAdd).forEach(([containerKey, controls]) => {
+//   const container = window[containerKey]; // Get the actual DOM element from window object
+//   if (!container) {
+//     console.error(`Container ${containerKey} is undefined or null.`);
+//     return; // Skip if the container is not found
+//   }
+//
+//   controls.forEach(control => {
+//     if (control && control.getContainer) {
+//       container.appendChild(control.getContainer()); // Append only if control is valid
+//     } else {
+//       console.warn(`Control ${control} does not have a valid getContainer method.`);
+//     }
+//   });
+// });
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
@@ -479,12 +469,13 @@ a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
 c.appendChild(level.getContainer());
-b.appendChild(clear.getContainer());
-// b.appendChild(toggleTooltip.getContainer());
-b.appendChild(toggleCover.getContainer());
-d.appendChild(noTooltip.getContainer());
-d.appendChild(zoomClick.getContainer());
-d.appendChild(keepPreviousClick.getContainer());
+b.appendChild(clearControl.getContainer());
+// b.appendChild(toggleTooltipControl.getContainer());
+b.appendChild(toggleCoverageControl.getContainer());
+b.appendChild(officialBordersControl.getContainer());
+d.appendChild(noTooltipControl.getContainer());
+d.appendChild(zoomClickControl.getContainer());
+d.appendChild(keepPreviousClickControl.getContainer());
 
 function resetDef()
 {
@@ -553,7 +544,10 @@ function toggleCoverLayers()
         fixZOrder(overlays);
     }
 }
-
+function toggleOfficialBordersLayers()
+{
+    map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
+}
 function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
 {
     let html = '';
@@ -761,15 +755,15 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
             uri += '/' + context;
         }
 
-        if( isAfacode && context !== null && !insidePolygon )
-        {
-            alert("Error: outside of current jurisdiction.");
-        }
-        else
-        {
+        // if( isAfacode && context !== null && !insidePolygon )
+        // {
+        //     alert("Error: outside of current jurisdiction.");
+        // }
+        // else
+        // {
             addMarker(layerMarkerCurrent,layerMarkerAll,L.latLng(latLngArray))
             loadGeojson(uri,layerToLoad,afterLoadLayer,afterDataCallback);
-        }
+        // }
     }
     else
     {
@@ -779,12 +773,12 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
 
 function getDecode(data)
 {
-    const geouri = (document.getElementById('fielddecode').value).trim();
+    let geouri = (document.getElementById('fielddecode').value).trim();
 
     if(geouri !== null && geouri !== '')
     {
-        const isCode = geouri.match(regexGeoUri);
-        const isAfacode = isCode && (isCode[3] == undefined);
+        const isCode = true; //geouri.match(regexGeoUri);
+        const isAfacode = true; //isCode && (isCode[3] == undefined);
 
         if (isCode)
         {
@@ -1147,9 +1141,14 @@ function onEachFeaturePolygonAll(feature,layer)
 }
 
 // Layer layerJurisdAll
-function styleJurisdAll(feature)
-{
-    return {color: 'red', fillColor: 'none', fillOpacity: 0.1};
+function styleJurisdAll(feature) {
+    return {
+        color: 'red',          // Cor da linha
+        fillColor: 'none',     // Cor do preenchimento (nenhum preenchimento)
+        fillOpacity: 0.1,      // Opacidade do preenchimento
+        weight: 2,             // Espessura da linha
+        dashArray: '5, 5'      // Padrão de linha tracejada (5px de traço e 5px de espaço)
+    };
 }
 
 function onEachFeatureJurisd(feature,layer)
@@ -1240,6 +1239,14 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
     }
 }
 
+function generateBorderLinks(borderList)
+{
+    return borderList.map(item => {
+        // Monta o link (a URL pode ser ajustada conforme necessário)
+        return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;
+    }).join(', ');  // Une os links
+}
+
 function afterData(data,layer)
 {
     if(data.features.length = 1)
@@ -1247,6 +1254,15 @@ function afterData(data,layer)
         if(data.features[0].properties.jurisd_base_id)
         {
             checkCountry(data.features[0].properties.jurisd_base_id,false)
+
+            if(data.features[0].properties.shares_border_with)
+            {
+                // Usar a função para gerar os links
+                const borderLinksHtml = generateBorderLinks(data.features[0].properties.shares_border_with);
+
+                // Caso você queira adicionar os links a um elemento HTML com o id 'borderLinks', pode fazer o seguinte:
+                document.getElementById('borderLinks').innerHTML = borderLinksHtml;
+            }
         }
 
         if(data.features[0].properties.isolabel_ext && !data.features[0].properties.short_code)
