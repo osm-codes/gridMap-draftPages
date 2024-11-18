@@ -143,6 +143,12 @@ var layerJurisdAll = new L.geoJSON(null,{
             pointToLayer: pointToLayer,
         });
 
+var layerJurisdAll2 = new L.geoJSON(null,{
+            style: styleJurisdAll2,
+            onEachFeature: onEachFeatureJurisd,
+            pointToLayer: pointToLayer,
+        });
+
 var layerCoverAll = new L.geoJSON(null,{
             style: styleCoverAll,
             onEachFeature: onEachFeatureCoverAll,
@@ -161,6 +167,7 @@ var overlays = {
     'All markers': layerMarkerAll,
     'Covers': layerCoverAll,
     'Jurisdictions': layerJurisdAll,
+    'Jurisdictions2': layerJurisdAll2,
 };
 
 var defaultMap = countries['BR'];
@@ -202,7 +209,7 @@ var map = L.map('map',{
     attributionControl: true,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
+    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll2,layerOlcGhsCurrent,layerOlcGhsAll] });
 
 var toggleTooltipStatus = false;
 
@@ -429,37 +436,6 @@ map.addControl(new myLocationControl());
 
 [zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl]
     .forEach(control => control.addTo(map));
-
-// // Select the parent elements once
-// const containerA = document.getElementById('custom-map-controlsa');
-// const containerB = document.getElementById('custom-map-controlsb');
-// const containerC = document.getElementById('custom-map-controlsc');
-// const containerD = document.getElementById('custom-map-controlsd');
-//
-// // Create a mapping of controls to append to specific containers
-// const controlsToAdd = {
-//   containerA: [jurisdictionGgeohash, decodeGgeohash, encodeGgeohash],
-//   containerB: [clearControl, toggleCoverageControl, officialBordersControl],
-//   containerC: [level],
-//   containerD: [noTooltipControl, zoomClickControl, keepPreviousClickControl]
-// };
-//
-// // Loop through each container and append the controls
-// Object.entries(controlsToAdd).forEach(([containerKey, controls]) => {
-//   const container = window[containerKey]; // Get the actual DOM element from window object
-//   if (!container) {
-//     console.error(`Container ${containerKey} is undefined or null.`);
-//     return; // Skip if the container is not found
-//   }
-//
-//   controls.forEach(control => {
-//     if (control && control.getContainer) {
-//       container.appendChild(control.getContainer()); // Append only if control is valid
-//     } else {
-//       console.warn(`Control ${control} does not have a valid getContainer method.`);
-//     }
-//   });
-// });
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
@@ -747,7 +723,7 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
     {
         const latlng = geouri.replace(regexGeoUri, "$4");
         const latLngArray = latlng.split(/[;,]/, 2);
-        const insidePolygon = isLatLngInsideJurisdiction(latLngArray[0],latLngArray[1],layerJurisdAll);
+        const insidePolygon = isLatLngInsideJurisdiction(latLngArray[0],latLngArray[1],layerJurisdAll2);
         const context = getJurisdictionContext();
 
         if(isAfacode && context !== null)
@@ -755,15 +731,15 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
             uri += '/' + context;
         }
 
-        // if( isAfacode && context !== null && !insidePolygon )
-        // {
-        //     alert("Error: outside of current jurisdiction.");
-        // }
-        // else
-        // {
+        if( isAfacode && context !== null && !insidePolygon )
+        {
+            alert("Error: outside of current jurisdiction.");
+        }
+        else
+        {
             addMarker(layerMarkerCurrent,layerMarkerAll,L.latLng(latLngArray))
             loadGeojson(uri,layerToLoad,afterLoadLayer,afterDataCallback);
-        // }
+        }
     }
     else
     {
@@ -1151,6 +1127,15 @@ function styleJurisdAll(feature) {
     };
 }
 
+// Layer layerJurisdAll
+function styleJurisdAll2(feature) {
+    return {
+        color: 'red',          // Cor da linha
+        fillColor: 'none',     // Cor do preenchimento (nenhum preenchimento)
+        fillOpacity: 0.1,      // Opacidade do preenchimento
+    };
+}
+
 function onEachFeatureJurisd(feature,layer)
 {
     updateJurisd(feature.properties.isolabel_ext);
@@ -1260,7 +1245,6 @@ function afterData(data,layer)
                 // Usar a função para gerar os links
                 const borderLinksHtml = generateBorderLinks(data.features[0].properties.shares_border_with);
 
-                // Caso você queira adicionar os links a um elemento HTML com o id 'borderLinks', pode fazer o seguinte:
                 document.getElementById('borderLinks').innerHTML = borderLinksHtml;
             }
         }
@@ -1403,6 +1387,7 @@ const loadGeoApi = (pattern, prefix, suffix, afterLoad, afterData) => {
     const match = pathname.match(pattern);
     if (match)
     {
+        loadGeojson( pathname.replace(pattern, `/geo:iso_ext2:${match[1]}${suffix}`) , [layerJurisdAll2] , null , null );
         loadGeojson( pathname.replace(pattern, `/${prefix}:${match[1]}${suffix}`) , [layerJurisdAll] , afterLoad , afterData );
     }
 };
