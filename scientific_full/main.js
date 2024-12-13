@@ -592,7 +592,7 @@ function getDecode(data)
     }
     else if(input !== null && input !== '')
     {
-        var uri = uri_base + "/geo:osmcodes:"
+        var uri = uri_base + "/geo:afa:"
 
         let regex = new RegExp("^" + defaultMap.isocode + "[+].*","i");
 
@@ -614,7 +614,7 @@ function getDecodeList(data)
 
     if(input !== null && input !== '')
     {
-        var uri = uri_base + "/geo:osmcodes:" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + sortAndRemoveDuplicates(input) + ".json"
+        var uri = uri_base + "/geo:afa:" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + sortAndRemoveDuplicates(input) + ".json"
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
         document.getElementById('fielddecodelist').value = '';
@@ -1305,7 +1305,7 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 }
 else if (pathnameNoDot.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
 {
-    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:osmcodes:$1.json");
+    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:afa:$1.json");
     uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))

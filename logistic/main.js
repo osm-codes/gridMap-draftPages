@@ -628,7 +628,7 @@ function isTypeAfaCode()
 // Function to build the geo prefix
 function buildGeoPrefix(encode = true)
 {
-    return encode ? `geo:${isTypeAfaCode() ? '' : `${document.getElementById('tcode').value}:`}` : 'geo:osmcodes:';
+    return encode ? `geo:${isTypeAfaCode() ? '' : `${document.getElementById('tcode').value}:`}` : 'geo:afa:';
 }
 
 // Regular expressions for geoURI validation
@@ -1428,15 +1428,15 @@ else
 {
     let uriApi = ''
     // Resolve AFAcodes logistico se municipio é numérico ou string.
-    // Exemplo: /BR-3550308~LCGHJ     -> /geo:osmcodes:BR-3550308~LCGHJ.json
-    //          /CO-15001~8HJF20      -> /geo:osmcodes:CO-15001~8HJF20.json
-    //          /CM-20101~0G220       -> /geo:osmcodes:CM-20101~0G220.json
-    //          /CM-CE-Yaounde1~0G220 -> /geo:osmcodes:CM-CE-Yaounde1~0G220.json
-    //          /CM-YE1~0G220         -> /geo:osmcodes:CM-YE1~0G220.json
+    // Exemplo: /BR-3550308~LCGHJ     -> /geo:afa:BR-3550308~LCGHJ.json
+    //          /CO-15001~8HJF20      -> /geo:afa:CO-15001~8HJF20.json
+    //          /CM-20101~0G220       -> /geo:afa:CM-20101~0G220.json
+    //          /CM-CE-Yaounde1~0G220 -> /geo:afa:CM-CE-Yaounde1~0G220.json
+    //          /CM-YE1~0G220         -> /geo:afa:CM-YE1~0G220.json
     if (pathname.match(/^\/((([A-Z]{2})-\d+)|([A-Z]{2}((-[A-Z0-9]+){1,2})))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i))
     {
         pathname = pathname.replace(/\./g,""); // Remove ponto, caso exista
-        uriApi = pathname.replace(/\/(.+)$/i, "/geo:osmcodes:$1.json");
+        uriApi = pathname.replace(/\/(.+)$/i, "/geo:afa:$1.json");
     }
     else if (pathname.match(/^\/geo:.+$/i))
     {
