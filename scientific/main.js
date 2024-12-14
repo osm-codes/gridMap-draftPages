@@ -1053,10 +1053,10 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 {
     uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
 }
-else if (pathnameNoDot.match(/\/[A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*$/i))
+else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
 {
-    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:afa:$1.json");
-    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?(,[0123456789ABCDEFGHJKLMNPQRSTVZ]([0123456789ABCDEF]*([GQHMRVJKNPSTZY])?)?)*)$/i, "/geo:iso_ext:$2.json");
+    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1.json");
+    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2.json");
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
