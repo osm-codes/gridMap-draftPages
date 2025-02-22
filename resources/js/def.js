@@ -273,7 +273,7 @@ var countries = {
     SV:
     {
         name: 'El Salvador',
-        center: [13,6,-89,1],
+        center: [13.6,-89.1],
         zoom: 6,
         current_zoom: 6,
         defaultBase: 'base32',
