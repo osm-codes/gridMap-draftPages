@@ -269,7 +269,7 @@ var countries = {
                 selectGrid: [2,4,8,16],
             }
         }
-    }
+    },
     SV:
     {
         name: 'El Salvador',
@@ -300,5 +300,5 @@ var countries = {
                 selectGrid: [2,4,8,16],
             },
         }
-    },
+    }
 };
