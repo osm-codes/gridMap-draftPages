@@ -270,4 +270,35 @@ var countries = {
             }
         }
     }
+    SV:
+    {
+        name: 'El Salvador',
+        center: [13,6,-89,1],
+        zoom: 6,
+        current_zoom: 6,
+        defaultBase: 'base32',
+        scientificBase: 'base16h',
+        postalcodeBase: 'base32',
+        isocode: 'SV',
+        isocoden: 222,
+        jurisdictionPlaceholder: 'SV-',
+        selectedBases: ['base16h'],
+        bases:
+        {
+            base16h:
+            {
+                iniLevel: 8,
+                endLevel: 32,
+                modLevel: 1,
+                iniDigit: 1,
+                maxLength: 9,
+                diffl0br: 8,
+                symbol: '+',
+                placeholderDecode: 'SV+a',
+                placeholderEncode: '13,6,-89,1;u=10',
+                placeholderList: 'b,a,c',
+                selectGrid: [2,4,8,16],
+            },
+        }
+    },
 };
