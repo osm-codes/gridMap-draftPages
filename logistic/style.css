@@ -1,65 +1,153 @@
-@font-face {
-	font-family: 'FE-Schrift';
-	src: URL('../resources/fonts/EuroPlate.woff2') format('woff2');
+body {
+ margin-left: 0.3vw;
+ margin-right: 0.3vw;
 }
 
-h2, h3 {color: #666;}
-hr {clear:both;width: 100%;box-sizing: border-box;}
+@font-face {
+ font-family: 'FE-Schrift';
+ src: URL('../resources/fonts/EuroPlate.woff2') format('woff2');
+}
+
+.afa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.afa-header img {
+  max-width: 20%;
+}
+
+.afa-header_wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+h3 {color: #666;}
 
 h3 img {
  height: 14pt;
  background-color:yellow;
 }
 
-.font_small{font-size: small;}
+.font_small{
+ font-size: small;
+}
 
 .feSchrift {
-	color: #000;
-	font-family: "FE-Schrift";
-	font-size: 150%;
-	letter-spacing: 1.5pt;
+ color: #000;
+ font-family: "FE-Schrift";
+ font-size: 140%;
+ letter-spacing: 1.3pt;
+}
+
+.section-divider {
+    border-top: 2px solid #ccc;
+    margin: 20px 0;
+    clear:both;
 }
 
 #map {
-	width: 99vw; /* old 85 */
-	height: 70vh;
-	float: left;
-	box-sizing: border-box;
+ width: 99.4vw;
+ height: 70vh;
+ float: left;
+ box-sizing: border-box;
 }
 
 a#hasGeoUri, a#hasGeoUri:link, a#hasGeoUri:visited, a#hasGeoUri:active {
-  color: #666;
-  text-decoration: none;
+ color: #666;
+ text-decoration: none;
 }
 a#hasGeoUri:hover { color: hotpink; }
 
 #custom-map-controlsa, #custom-map-controlsb,
 #custom-map-controlsc, #custom-map-controlsd {
-	float: left;
-	padding-top:0.5%;
-	padding-bottom:0.5%;
+ float: left;
+ padding-top:0.5%;
+ padding-bottom:0.5%;
 }
 
 #custom-map-controlsb .leaflet-control {
-	clear:none;
+ clear:none;
 }
 
 #custom-map-controlsd {
-	clear:both;
+ clear:both;
 }
 
 .leaflet-control {
-	padding-top:2%;
+ padding-top:2%;
 }
 
-.leaflet-tooltip.tooltipbase16h, .leaflet-tooltip.tooltipbase16h1c {
-	border-left-color: rgb(255, 250, 205, 1);
-	background-color: rgb(255, 250, 205, 1)
+/*.leaflet-tooltip.tooltipbase16h, .leaflet-tooltip.tooltipbase16h1c {
+ border-left-color: rgb(255, 250, 205, 1);
+ background-color: rgb(255, 250, 205, 1)
+}*/
+
+.leaflet-tooltip.tooltipbase16h1c {
+	border: #ff0;
+	background: #ff0
+}
+
+.leaflet-tooltip.tooltipbase16h1ca {
+	border: #fff;
+	background: #fff
+}
+
+.leaflet-tooltip-left.tooltipbase16h1c::before {
+  border-left-color: #ff0;
+}
+.leaflet-tooltip-right.tooltipbase16h1c::before {
+  border-right-color: #ff0;
+}
+
+
+
+/* Estiliza o container principal */
+.geocode-container {
+ background-color: #FFFF99;
+/*  width: 95%; */
+/*  height: 9em; */
+ padding-top: 1%;
+ padding-bottom: 1%;
+}
+
+/* Estiliza a imagem dentro do link */
+.geocode-logo {
+ float: right;
+ max-width: 10%;
+/*  max-height: 9em; */
+/*  height: 33%; */
+/*  padding: 3pt; */
+}
+
+/* Adiciona espaço antes do conteúdo do parágrafo */
+.space-before {
+ margin-left: 0.3vw;
+}
+
+.afabox {
+ background-color: #00469f;
+ color: #FFF;
+ padding-right: 2pt;
+}
+
+.afabox2 {
+ color: #00bb4f; /* Largura */
 }
 
 /* condition for screen size minimum of 500px
 and (min-width: 600px) and (max-width: 959px)
 */
 @media (min-width:500px) {
-	.test { font-size: 20px; }
+ .test { font-size: 20px; }
 }
+
+
+.youtube-video-container{position:relative;overflow:hidden;width:100%;max-width:700px}
+.youtube-video-container:after{display:block;content:"";padding-top:56.25%}
+.youtube-video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%}
+
+
