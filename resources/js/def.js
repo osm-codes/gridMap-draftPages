@@ -288,7 +288,7 @@ var countries = {
             base16h:
             {
                 iniLevel: 8,
-                endLevel: 32,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 1,
                 maxLength: 9,
@@ -301,12 +301,13 @@ var countries = {
             },
             base16h2:
             {
-                iniLevel: 0,
-                endLevel: 32,
+                iniLevel: 8,
+                endLevel: 40,
                 modLevel: 1,
                 iniDigit: 1,
                 maxLength: 9,
                 diffl0br: 8,
+                levelDefault: 40,
                 symbol: '+',
                 placeholderDecode: 'SV+a',
                 placeholderEncode: '13,6,-89,1;u=10',
