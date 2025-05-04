@@ -278,7 +278,7 @@ var countries = {
         current_zoom: 6,
         defaultBase: 'base32',
         scientificBase: 'base16h',
-        postalcodeBase: 'base32',
+        postalcodeBase: 'base16h',
         isocode: 'SV',
         isocoden: 222,
         jurisdictionPlaceholder: 'SV-',
