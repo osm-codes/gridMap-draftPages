@@ -278,16 +278,30 @@ var countries = {
         current_zoom: 6,
         defaultBase: 'base32',
         scientificBase: 'base16h',
-        postalcodeBase: 'base16h',
+        postalcodeBase: 'base16h2',
         isocode: 'SV',
         isocoden: 222,
-        jurisdictionPlaceholder: 'SV-',
+        jurisdictionPlaceholder: 'SV-SA-SantaAna',
         selectedBases: ['base16h'],
         bases:
         {
             base16h:
             {
                 iniLevel: 8,
+                endLevel: 32,
+                modLevel: 1,
+                iniDigit: 1,
+                maxLength: 9,
+                diffl0br: 8,
+                symbol: '+',
+                placeholderDecode: 'SV+a',
+                placeholderEncode: '13,6,-89,1;u=10',
+                placeholderList: 'b,a,c',
+                selectGrid: [2,4,8,16],
+            },
+            base16h2:
+            {
+                iniLevel: 0,
                 endLevel: 32,
                 modLevel: 1,
                 iniDigit: 1,
