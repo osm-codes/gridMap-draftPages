@@ -19,56 +19,36 @@ var countries = {
         zoom: 4,
         current_zoom: 4,
         defaultBase: 'base32',
-        scientificBase: 'base16h1c',
+        scientificBase: 'base16h',
         postalcodeBase: 'base32',
         isocode: 'BR',
         isocoden: 76,
         jurisdictionPlaceholder: 'BR-SP-SaoPaulo',
-        selectedBases: ['base32','base16h1c'],
+        selectedBases: ['base32','base16h'],
         bases:
         {
-            base32:
-            {
-                iniLevel: 0,
-                endLevel: 40,
-                modLevel: 5,
-                iniDigit: 1,
-                maxLength: 9,
-                diffl0br: 0,
-                levelDefault: 35,
-                symbol: '~',
-                placeholderDecode: '42',
-                placeholderEncode: '-15.7,-47.8;u=10',
-                placeholderList: '3,5,7,A',
-                selectGrid: [32],
-            },
             base16h:
             {
-                iniLevel: 0,
                 endLevel: 40,
-                modLevel: 1,
-                iniDigit: 2,
+                iniDigit: 1,
                 maxLength: 12,
-                diffl0br: 0,
                 symbol: '+',
                 placeholderDecode: 'BR+3F',
                 placeholderEncode: '-15.7,-47.8;u=10',
                 placeholderList: '3,5,7,B',
                 selectGrid: [2,4,8,16],
             },
-            base16h1c:
+            base32:
             {
-                iniLevel: 0,
                 endLevel: 40,
-                modLevel: 1,
                 iniDigit: 1,
-                maxLength: 11,
-                diffl0br: 0,
-                symbol: '+',
-                placeholderDecode: 'BR+hF',
+                maxLength: 9,
+                levelDefault: 35,
+                symbol: '~',
+                placeholderDecode: '42',
                 placeholderEncode: '-15.7,-47.8;u=10',
-                placeholderList: 'h,7,B',
-                selectGrid: [2,4,8,16],
+                placeholderList: '3,5,7,A',
+                selectGrid: [32],
             }
         }
     },
@@ -89,12 +69,8 @@ var countries = {
         {
             base16h:
             {
-                iniLevel: 4,
                 endLevel: 36,
-                modLevel: 1,
-                iniDigit: 1,
                 maxLength: 10,
-                diffl0br: 4,
                 symbol: '+',
                 placeholderDecode: 'CM+a2',
                 placeholderEncode: '4.8,11.9;u=10',
@@ -103,12 +79,8 @@ var countries = {
             },
             base32:
             {
-                iniLevel: 5,
-                endLevel: 40,
-                modLevel: 5,
-                iniDigit: 2,
+                endLevel: 36,
                 maxLength: 9,
-                diffl0br: 4,
                 levelDefault: 35,
                 symbol: '~',
                 placeholderDecode: '3D5',
@@ -133,34 +105,26 @@ var countries = {
         selectedBases: ['base32','base16h'],
         bases:
         {
+            base16h:
+            {
+                endLevel: 38,
+                maxLength: 11,
+                symbol: '+',
+                placeholderDecode: 'CO+0A2',
+                placeholderEncode: '3.5,-72.3;u=10',
+                placeholderList: '0A,0B,0C',
+                selectGrid: [2,4,8,16],
+            },
             base32:
             {
-                iniLevel: 5,
-                endLevel: 40,
-                modLevel: 5,
-                iniDigit: 2,
+                endLevel: 38,
                 maxLength: 9,
-                diffl0br: 2,
                 levelDefault: 40,
                 symbol: '~',
                 placeholderDecode: '3D5',
                 placeholderEncode: '3.5,-72.3;u=10',
                 placeholderList: '3D5,3D4,2',
                 selectGrid: [32],
-            },
-            base16h:
-            {
-                iniLevel: 2,
-                endLevel: 40,
-                modLevel: 1,
-                iniDigit: 1,
-                maxLength: 11,
-                diffl0br: 2,
-                symbol: '+',
-                placeholderDecode: 'CO+0A2',
-                placeholderEncode: '3.5,-72.3;u=10',
-                placeholderList: '0A,0B,0C',
-                selectGrid: [2,4,8,16],
             }
         }
     },
@@ -181,12 +145,8 @@ var countries = {
         {
             base32:
             {
-                iniLevel: 5,
                 endLevel: 40,
-                modLevel: 5,
-                iniDigit: 1,
                 maxLength: 8,
-                diffl0br: 5,
                 levelDefault: 30,
                 symbol: '~',
                 placeholderDecode: '5P',
@@ -196,12 +156,8 @@ var countries = {
             },
             base16h:
             {
-                iniLevel: 5,
                 endLevel: 40,
-                modLevel: 1,
-                iniDigit: 2,
                 maxLength: 11,
-                diffl0br: 5,
                 symbol: '+',
                 placeholderDecode: 'EC+0E',
                 placeholderEncode: '-1.1,-78.4;u=10',
@@ -217,22 +173,18 @@ var countries = {
         zoom: 7,
         current_zoom: 7,
         defaultBase: 'base32',
-        scientificBase: 'base16h1c',
+        scientificBase: 'base16h',
         postalcodeBase: 'base32',
         isocode: 'UY',
         isocoden: 868,
         jurisdictionPlaceholder: 'UY-CA-LasPiedras',
-        selectedBases: ['base32','base16h1c'],
+        selectedBases: ['base32','base16h'],
         bases:
         {
             base32:
             {
-                iniLevel: 6,
                 endLevel: 36,
-                modLevel: 5,
-                iniDigit: 1,
                 maxLength: 7,
-                diffl0br: 6,
                 levelDefault: 36,
                 symbol: '~',
                 placeholderDecode: '3',
@@ -242,30 +194,12 @@ var countries = {
             },
             base16h:
             {
-                iniLevel: 6,
                 endLevel: 40,
-                modLevel: 1,
-                iniDigit: 2,
                 maxLength: 11,
-                diffl0br: 6,
                 symbol: '+',
                 placeholderDecode: 'UY+2',
                 placeholderEncode: '-32.9,-55.9;u=10',
                 placeholderList: '2G,3A,01',
-                selectGrid: [2,4,8,16],
-            },
-            base16h1c:
-            {
-                iniLevel: 6,
-                endLevel: 38,
-                modLevel: 1,
-                iniDigit: 1,
-                maxLength: 10,
-                diffl0br: 6,
-                symbol: '+',
-                placeholderDecode: 'UY+gB',
-                placeholderEncode: '-32.9,-55.9;u=10',
-                placeholderList: '3B,g,hB',
                 selectGrid: [2,4,8,16],
             }
         }
@@ -287,12 +221,8 @@ var countries = {
         {
             base16h:
             {
-                iniLevel: 8,
                 endLevel: 40,
-                modLevel: 1,
-                iniDigit: 1,
                 maxLength: 9,
-                diffl0br: 8,
                 symbol: '+',
                 placeholderDecode: 'SV+a',
                 placeholderEncode: '13,6,-89,1;u=10',
@@ -301,12 +231,8 @@ var countries = {
             },
             base16h2:
             {
-                iniLevel: 8,
                 endLevel: 40,
-                modLevel: 1,
-                iniDigit: 1,
                 maxLength: 9,
-                diffl0br: 8,
                 levelDefault: 40,
                 symbol: '+',
                 placeholderDecode: 'SV+a',

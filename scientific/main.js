@@ -400,13 +400,19 @@ function generateSelectLevel(base,baseValue,size=0,filter=0) // 0: all, 1:meio, 
         q=defaultMap.bases[defaultMap.postalcodeBase].iniLevel - defaultMap.bases[defaultMap.scientificBase].iniLevel;
     }
 
-    for (let i = base.iniLevel, j=0; i < levelValues.length; i+=base.modLevel, j++)
+    for (let j=0; j <= base.endLevel; j++)
     {
-        m = (j == 0 ? base.iniDigit : ((j%4)-1 == 0 ? m+1 : m) )
+        m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
+
+        LS = (j % 2 == 0 ? 2**((base.endLevel-j)/2) : 2**((base.endLevel-j-1)/2)*1.41)
+
+        LSr = ( (LS<1000)? (Math.round(LS*100.0)/100)+'m' : (Math.round(LS*100.0/1000)/100)+'km' )
+
+        C = (j % 2 == 0 ? '&#9643;' : '&#9645;')
 
         if(j % p === q)
         {
-            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  '">'  ) + 'L' + (0.5*j*base.modLevel).toString() + (baseValue == 'base32' ? ' (' + (base.iniDigit+j) + 'd) (' : ( (baseValue == 'base16h' || baseValue == 'base16h1c') ? ' (' + m + 'd) (' : ' (') ) + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ') ' + (i % 2 == 0 ? '&#9643;' : '&#9645;') + '</option>'
+            html += '<option value="' + levelValues[j] + ( Math.floor(size) <= LS ? '" selected>' : '">' ) + 'L' + j + ' (' + m + 'd) (' + LSr + ') ' + C + '</option>'
         }
     }
 
@@ -634,7 +640,7 @@ function popUpFeature(feature,layer)
 
     if(feature.properties.type)
     {
-        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.id) + "</code></big><br>";
     }
     else if(feature.properties.index)
     {
@@ -642,7 +648,7 @@ function popUpFeature(feature,layer)
     }
     else
     {
-        popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+        popupContent += "Code: <big><code>" + (feature.id) + "</code></big><br>";
     }
 
     popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
@@ -673,7 +679,7 @@ function layerTooltipFeature(feature,layer)
     }
     else
     {
-        var layerTooltip = (feature.properties.code);
+        var layerTooltip = (feature.id);
     }
 
     layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1c'});
@@ -681,7 +687,7 @@ function layerTooltipFeature(feature,layer)
 
 function layerTooltipFeature2(feature,layer)
 {
-    layer.bindTooltip(feature.properties.code,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+    layer.bindTooltip(feature.id,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
 function layerTooltipFeature3(feature,layer)
@@ -714,9 +720,9 @@ function onEachFeature(feature,layer)
 
     L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterCurrent);
 
-    if(feature.properties.code)
+    if(feature.id)
     {
-        document.getElementById('sciCode').innerHTML = (((feature.properties.code).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.');
+        document.getElementById('sciCode').innerHTML = (((feature.id).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.');
     }
 
     layer.on({
@@ -968,15 +974,15 @@ function afterData(data,layer)
 
         if (!data.features[0].properties.index)
         {
-            if(data.features[0].properties.code)
+            if(data.features[0].id)
             {
-                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + data.features[0].properties.code
-                const nextTitle = 'OSM.codes: ' + data.features[0].properties.code;
+                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + data.features[0].id
+                const nextTitle = 'OSM.codes: ' + data.features[0].id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
 
-                document.getElementById('fielddecode').value = data.features[0].properties.code;
+                document.getElementById('fielddecode').value = data.features[0].id;
 
                 if(data.features[0].properties.truncated_code)
                 {

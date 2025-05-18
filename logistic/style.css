@@ -49,6 +49,28 @@ h3 img {
     clear:both;
 }
 
+.section-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+/*     justify-content: center; */
+    text-align: center;
+    padding: 1em 0;
+}
+
+.section-footer p {
+    margin: 0;
+    white-space: nowrap; /* opcional: impede quebra de linha dentro do <p> */
+}
+
+/* Layout em coluna para telas pequenas */
+@media (max-width: 600px) {
+    .section-footer {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
 #map {
  width: 99.4vw;
  height: 70vh;
@@ -149,5 +171,3 @@ and (min-width: 600px) and (max-width: 959px)
 .youtube-video-container{position:relative;overflow:hidden;width:100%;max-width:700px}
 .youtube-video-container:after{display:block;content:"";padding-top:56.25%}
 .youtube-video-container iframe{position:absolute;top:0;left:0;width:100%;height:100%}
-
-
