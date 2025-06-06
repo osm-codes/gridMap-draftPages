@@ -30,8 +30,6 @@ var countries = {
             base16h:
             {
                 endLevel: 40,
-                iniDigit: 1,
-                maxLength: 12,
                 symbol: '+',
                 placeholderDecode: 'BR+3F',
                 placeholderEncode: '-15.7,-47.8;u=10',
@@ -41,8 +39,7 @@ var countries = {
             base32:
             {
                 endLevel: 40,
-                iniDigit: 1,
-                maxLength: 9,
+                iniLevel: 0,
                 levelDefault: 35,
                 symbol: '~',
                 placeholderDecode: '42',
@@ -70,7 +67,6 @@ var countries = {
             base16h:
             {
                 endLevel: 36,
-                maxLength: 10,
                 symbol: '+',
                 placeholderDecode: 'CM+a2',
                 placeholderEncode: '4.8,11.9;u=10',
@@ -80,8 +76,8 @@ var countries = {
             base32:
             {
                 endLevel: 36,
-                maxLength: 9,
-                levelDefault: 35,
+                iniLevel: 1,
+                levelDefault: 31,
                 symbol: '~',
                 placeholderDecode: '3D5',
                 placeholderEncode: '4.8,11.9;u=10',
@@ -108,7 +104,6 @@ var countries = {
             base16h:
             {
                 endLevel: 38,
-                maxLength: 11,
                 symbol: '+',
                 placeholderDecode: 'CO+0A2',
                 placeholderEncode: '3.5,-72.3;u=10',
@@ -118,8 +113,8 @@ var countries = {
             base32:
             {
                 endLevel: 38,
-                maxLength: 9,
-                levelDefault: 40,
+                iniLevel: 3,
+                levelDefault: 33,
                 symbol: '~',
                 placeholderDecode: '3D5',
                 placeholderEncode: '3.5,-72.3;u=10',
@@ -143,26 +138,25 @@ var countries = {
         selectedBases: ['base32','base16h'],
         bases:
         {
-            base32:
-            {
-                endLevel: 40,
-                maxLength: 8,
-                levelDefault: 30,
-                symbol: '~',
-                placeholderDecode: '5P',
-                placeholderEncode: '-1.1,-78.4;u=10',
-                placeholderList: '5P,FL,J9',
-                selectGrid: [32],
-            },
             base16h:
             {
-                endLevel: 40,
-                maxLength: 11,
+                endLevel: 35,
                 symbol: '+',
                 placeholderDecode: 'EC+0E',
                 placeholderEncode: '-1.1,-78.4;u=10',
                 placeholderList: '0E,0A,05',
                 selectGrid: [2,4,8,16],
+            },
+            base32:
+            {
+                endLevel: 35,
+                iniLevel: 0,
+                levelDefault: 35,
+                symbol: '~',
+                placeholderDecode: '5P',
+                placeholderEncode: '-1.1,-78.4;u=10',
+                placeholderList: '5P,FL,J9',
+                selectGrid: [32],
             }
         }
     },
@@ -181,26 +175,25 @@ var countries = {
         selectedBases: ['base32','base16h'],
         bases:
         {
-            base32:
-            {
-                endLevel: 36,
-                maxLength: 7,
-                levelDefault: 36,
-                symbol: '~',
-                placeholderDecode: '3',
-                placeholderEncode: '-32.9,-55.9;u=10',
-                placeholderList: '3,2C,4F',
-                selectGrid: [32],
-            },
             base16h:
             {
-                endLevel: 40,
-                maxLength: 11,
+                endLevel: 36,
                 symbol: '+',
                 placeholderDecode: 'UY+2',
                 placeholderEncode: '-32.9,-55.9;u=10',
                 placeholderList: '2G,3A,01',
                 selectGrid: [2,4,8,16],
+            },
+            base32:
+            {
+                endLevel: 36,
+                iniLevel: 4,
+                levelDefault: 29,
+                symbol: '~',
+                placeholderDecode: '3',
+                placeholderEncode: '-32.9,-55.9;u=10',
+                placeholderList: '3,2C,4F',
+                selectGrid: [32],
             }
         }
     },
@@ -221,8 +214,7 @@ var countries = {
         {
             base16h:
             {
-                endLevel: 40,
-                maxLength: 9,
+                endLevel: 32,
                 symbol: '+',
                 placeholderDecode: 'SV+a',
                 placeholderEncode: '13,6,-89,1;u=10',
@@ -231,15 +223,15 @@ var countries = {
             },
             base16h2:
             {
-                endLevel: 40,
-                maxLength: 9,
-                levelDefault: 40,
+                endLevel: 32,
+                iniLevel: 0,
+                levelDefault: 32,
                 symbol: '+',
                 placeholderDecode: 'SV+a',
                 placeholderEncode: '13,6,-89,1;u=10',
                 placeholderList: 'b,a,c',
                 selectGrid: [2,4,8,16],
-            },
+            }
         }
     }
 };

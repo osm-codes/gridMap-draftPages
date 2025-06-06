@@ -235,7 +235,7 @@ level.onAdd = function (map) {
     this.label_level.innerHTML = '<a href="https://wiki.addressforall.org/doc/osmc:Viz/Navega%C3%A7%C3%A3o" target="_help">Level</a>: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
-    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
+    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase]);
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -334,7 +334,7 @@ function resetDef()
     layerOlcGhsAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     // map.setView(defaultMap.center, defaultMap.zoom);
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase]);
     document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
     document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
     document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
@@ -376,44 +376,36 @@ function generateSelectGrid(grids)
     return '<option value="">Cell</option>' + htmlA + htmlB
 }
 
-function generateSelectLevel(base,baseValue,size=0,filter=0) // 0: all, 1:meio, 2:inteiro, 4:hex, 5:3base2
+function generateSelectLevel(base,size=0,filter=0) // 0: all, 1:meio, 2:inteiro, 4:hex, 5:base32
 {
     let html = '';
 
     let m=0, p=1, q=0;
 
-    if(filter == 1)
-    {
-        p=2; q=1;
-    }
-    else if(filter==2)
-    {
-        p=2; q=0;
-    }
-    else if(filter==4)
-    {
-        p=4; q=0;
-    }
-    else if(filter==5)
-    {
-        p=5;
-        q=defaultMap.bases[defaultMap.postalcodeBase].iniLevel - defaultMap.bases[defaultMap.scientificBase].iniLevel;
-    }
+    if(filter == 1)   {p=2; q=1;}
+    else if(filter==2){p=2; q=0;}
+    else if(filter==4){p=4; q=0;}
+    else if(filter==5){p=5; q=0;}
 
-    for (let j=0; j <= base.endLevel; j++)
+    const endLevel = base.endLevel;
+
+    for (let j=0; j <= endLevel; j++)
     {
+        if(j % p !== q) continue;
+
         m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
 
-        LS = (j % 2 == 0 ? 2**((base.endLevel-j)/2) : 2**((base.endLevel-j-1)/2)*1.41)
+        const levelSize = (j % 2 === 0)
+            ? Math.pow(2, (endLevel - j) / 2)
+            : Math.pow(2, (endLevel - j - 1) / 2) * 1.41;
 
-        LSr = ( (LS<1000)? (Math.round(LS*100.0)/100)+'m' : (Math.round(LS*100.0/1000)/100)+'km' )
+        const formattedSize = levelSize<1000 ? (Math.round(levelSize*100.0)/100)+'m' : (Math.round(levelSize*100.0/1000)/100)+'km' ;
 
-        C = (j % 2 == 0 ? '&#9643;' : '&#9645;')
+        const symbol = j % 2 === 0 ? '&#9643;' : '&#9645;';
 
-        if(j % p === q)
-        {
-            html += '<option value="' + levelValues[j] + ( Math.floor(size) <= LS ? '" selected>' : '">' ) + 'L' + j + ' (' + m + 'd) (' + LSr + ') ' + C + '</option>'
-        }
+        const selected = ( Math.floor(size) <= levelSize ? ' selected' : '' )
+
+        html += `<option value="${levelValues[j]}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
     }
 
     return html
@@ -431,7 +423,7 @@ function updateSelectLevel()
         i++;
     }
 
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,levelSize[i],filter);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],levelSize[i],filter);
 }
 
 
@@ -992,7 +984,7 @@ function afterData(data,layer)
 
             if(data.features[0].properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
+                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],data.features[0].properties.side,document.getElementById('filter_size').value);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
@@ -1011,7 +1003,7 @@ function afterDataOlcGhs(data,layer)
     {
         if(data.features[0].properties.side)
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],data.features[0].properties.side,document.getElementById('filter_size').value);
 
             const center = layer.getBounds().getCenter();
             const { lat, lng } = center;
@@ -1083,5 +1075,5 @@ if(uriApi !== null && uriApi !== '')
 if(uriApiJurisd !== null && uriApiJurisd !== '')
 {
     loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
-    loadGeojson(uriApiJurisd + '/cover/' + defaultMap.scientificBase,[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
+    loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
 }

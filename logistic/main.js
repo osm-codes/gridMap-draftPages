@@ -511,7 +511,7 @@ function toggleCoverLayers()
     if(getCover)
     {
         let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
-        loadGeojson(uri_base + "/" + input + ".json/cover/" + defaultMap.scientificBase,[layerCoverAll],function(e){},function(e){});
+        loadGeojson(uri_base + "/" + input + ".json/cover",[layerCoverAll],function(e){},function(e){});
         getCover = false;
     }
     else
@@ -524,17 +524,44 @@ function toggleOfficialBordersLayers()
 {
     map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
 }
-function generateSelectLevel(base,baseValue,size_shortestprefix,size=0)
+function generateSelectLevel(base,size_shortestprefix,size=0)
 {
+    // let html = '';
+    //
+    // for (let i = base.iniLevel, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, k++)
+    // {
+    //     if (k > size_shortestprefix)
+    //     {
+    //         html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*i - 0.5*base.diffl0br).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ') ' + (i % 2 == 0 ? '&#9643;' : '&#9645;') + '</option>'
+    //     }
+    // }
+    // return html
+
     let html = '';
 
-    for (let i = base.iniLevel, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, k++)
+    let m=0, p=5, q=base.iniLevel;
+
+    const endLevel = base.endLevel;
+
+    for (let j=0; j <= endLevel; j++)
     {
-        if (k > size_shortestprefix)
-        {
-            html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*i - 0.5*base.diffl0br).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ') ' + (i % 2 == 0 ? '&#9643;' : '&#9645;') + '</option>'
-        }
+        if(j % p !== q) continue;
+
+        m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
+
+        const levelSize = (j % 2 === 0)
+            ? Math.pow(2, (endLevel - j) / 2)
+            : Math.pow(2, (endLevel - j - 1) / 2) * 1.41;
+
+        const formattedSize = levelSize<1000 ? (Math.round(levelSize*100.0)/100)+'m' : (Math.round(levelSize*100.0/1000)/100)+'km' ;
+
+        const symbol = j % 2 === 0 ? '&#9643;' : '&#9645;';
+
+        const selected = ( Math.floor(size) <= levelSize ? ' selected' : '' )
+
+        html += `<option value="${levelValues[j]}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
     }
+
     return html
 }
 
@@ -558,6 +585,8 @@ function isMarkerInsidePolygonOrMultiPolygon(x, y, poly) {
 
     // Check if the input is a multi-polygon or a single polygon
     const isMultiPolygon = Array.isArray(polys[0]) && Array.isArray(polys[0][0]);
+
+    console.log(isMultiPolygon)
 
     // Function to check if a point is inside a polygon
     const checkInside = (polyPoints) => {
@@ -896,9 +925,9 @@ function popUpFeature(feature,layer)
 
     var popupContent = "";
 
-    if(feature.properties.short_code )
+    if(feature.properties.logistic_id )
     {
-        popupContent += "Logistic code: <big><code>" + (feature.properties.short_code.split(/[~]/)[1]) + "</code></big><br>";
+        popupContent += "Logistic code: <big><code>" + (feature.properties.logistic_id.split(/[~]/)[1]) + "</code></big><br>";
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -916,7 +945,7 @@ function popUpFeature(feature,layer)
     {
         if(feature.properties.type)
         {
-            popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+            popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.id) + "</code></big><br>";
         }
         else if(feature.properties.index)
         {
@@ -924,7 +953,7 @@ function popUpFeature(feature,layer)
         }
         else
         {
-            popupContent += "Code: <big><code>" + (feature.properties.code) + "</code></big><br>";
+            popupContent += "Code: <big><code>" + (feature.id) + "</code></big><br>";
         }
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
@@ -949,9 +978,9 @@ function layerTooltipFeature(feature,layer)
     {
         var layerTooltip = feature.properties.code_subcell;
     }
-    else if(feature.properties.short_code)
+    else if(feature.properties.logistic_id)
     {
-        var layerTooltip = '.' + (feature.properties.short_code.split(/[~]/)[1]);
+        var layerTooltip = '.' + (feature.properties.logistic_id.split(/[~]/)[1]);
     }
     else if(feature.properties.index)
     {
@@ -959,7 +988,7 @@ function layerTooltipFeature(feature,layer)
     }
     else
     {
-        var layerTooltip = (feature.properties.code);
+        var layerTooltip = (feature.id);
     }
 
     layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltip' + feature.properties.base});
@@ -1009,16 +1038,16 @@ function onEachFeature(feature,layer)
 
     L.circleMarker(center,{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerPolygonCurrent);
 
-    if(feature.properties.scientic_code)
+    if(feature.id)
     {
-        const codsci = (feature.properties.scientic_code).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.properties.scientic_code + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+        const codsci = (feature.id).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.id + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
     }
 
-    if(feature.properties.short_code)
+    if(feature.properties.logistic_id)
     {
-        document.getElementById('sel_jurL3').innerHTML == feature.properties.short_code.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.isolabel_ext)
-        document.getElementById('logCode').innerHTML = (feature.properties.short_code.split(/[~]/)[1]).replace(reg, '$1.');
+        document.getElementById('sel_jurL3').innerHTML == feature.properties.logistic_id.split(/[-~]/)[2] ? '' : updateJurisd(feature.properties.isolabel_ext)
+        document.getElementById('logCode').innerHTML = (feature.properties.logistic_id.split(/[~]/)[1]).replace(reg, '$1.');
     }
 
     layer.on({
@@ -1220,7 +1249,7 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
 
     if(genSelect)
     {
-        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix);
+        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix);
     }
 }
 
@@ -1249,7 +1278,7 @@ function afterData(data,layer)
             }
         }
 
-        if(data.features[0].properties.isolabel_ext && !data.features[0].properties.short_code)
+        if(data.features[0].properties.isolabel_ext && !data.features[0].properties.logistic_id)
         {
             var nextURL = uri_base + "/" + data.features[0].properties.canonical_pathname
             const nextTitle = 'AFA.codes: ' + data.features[0].properties.canonical_pathname;
@@ -1259,7 +1288,7 @@ function afterData(data,layer)
         }
         else if (!data.features[0].properties.index)
         {
-            if(data.features[0].properties.short_code)
+            if(data.features[0].properties.logistic_id)
             {
                 if(getJurisdAfterLoad)
                 {
@@ -1270,23 +1299,23 @@ function afterData(data,layer)
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
 
-                var nextURL = uri_base + "/" + data.features[0].properties.short_code
-                const nextTitle = 'AFA.codes: ' + data.features[0].properties.short_code;
+                var nextURL = uri_base + "/" + data.features[0].properties.logistic_id
+                const nextTitle = 'AFA.codes: ' + data.features[0].properties.logistic_id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
 
 
-                document.getElementById('fielddecode').value = data.features[0].properties.short_code.split(/[~]/)[1];
+                document.getElementById('fielddecode').value = data.features[0].properties.logistic_id.split(/[~]/)[1];
                 let df_short_code = ''
 
                 if(data.features[0].properties.isolabel_ext_abbrev)
                 {
-                    df_short_code = '<small>'+(data.features[0].properties.isolabel_ext_abbrev)+ '~</small>' + data.features[0].properties.short_code.split(/[~]/)[1];
+                    df_short_code = '<small>'+(data.features[0].properties.isolabel_ext_abbrev)+ '~</small>' + data.features[0].properties.logistic_id.split(/[~]/)[1];
                 }
                 else
                 {
-                    df_short_code = '<small>'+(data.features[0].properties.short_code).replace(/~/,'~</small>');
+                    df_short_code = '<small>'+(data.features[0].properties.logistic_id).replace(/~/,'~</small>');
                 }
 
                 document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
@@ -1300,7 +1329,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)
@@ -1312,9 +1341,9 @@ function afterData(data,layer)
                     document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
                 }
             }
-            else if(data.features[0].properties.code)
+            else if(data.features[0].id)
             {
-                document.getElementById('fielddecode').value = data.features[0].properties.code;
+                document.getElementById('fielddecode').value = data.features[0].id;
             }
         }
     }
@@ -1328,7 +1357,7 @@ function afterDataOlcGhs(data,layer)
         {
             sizeCurrentCell = data.features[0].properties.side;
 
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],defaultMap.postalcodeBase,size_shortestprefix,sizeCurrentCell);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix,sizeCurrentCell);
 
             document.getElementById('tcode').innerHTML = generateSelectTypeCode(data.features[0].properties.type);
 
@@ -1341,8 +1370,8 @@ function afterDataOlcGhs(data,layer)
             document.getElementById('geoUri').innerHTML  = 'geo:' + data.features[0].properties.type + ':' + latRound(lat,decimals) + "," + latRound(lng,decimals);
             document.getElementById('fieldencode').value = 'geo:' + data.features[0].properties.type + ':' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
 
-            var nextURL = uri_base + "/geo:" + data.features[0].properties.type + ':' + data.features[0].properties.code
-            const nextTitle = 'AFA.codes: ' + data.features[0].properties.code;
+            var nextURL = uri_base + "/geo:" + data.features[0].properties.type + ':' + data.features[0].id
+            const nextTitle = 'AFA.codes: ' + data.features[0].id;
             const nextState = { additionalInformation: 'to canonical.' };
 
             window.history.pushState(nextState, nextTitle, nextURL);
