@@ -175,7 +175,7 @@ var sizeCurrentCell = 0;
 var centerCurrentCell;
 var getJurisdAfterLoad = false;
 var jurisdIsMultipolygon = false;
-var size_shortestprefix = 0;
+var min_level = 0;
 var getCover = true;
 
 function checkCountry(string,reset=true)
@@ -524,19 +524,8 @@ function toggleOfficialBordersLayers()
 {
     map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
 }
-function generateSelectLevel(base,size_shortestprefix,size=0)
+function generateSelectLevel(base,min_level,size=0)
 {
-    // let html = '';
-    //
-    // for (let i = base.iniLevel, k=base.iniDigit; i <= base.endLevel; i+=base.modLevel, k++)
-    // {
-    //     if (k > size_shortestprefix)
-    //     {
-    //         html += '<option value="' + levelValues[i] + (  size > 0 ?  (Math.floor(size) <= levelSize[i] ? '" selected>' : '">')  :  (i == base.levelDefault ? '" selected>' : '">')  ) + 'L' + (0.5*i - 0.5*base.diffl0br).toString() + ' (' + ((levelSize[i]<1000)? Math.round(levelSize[i]*100.0)/100 : Math.round(levelSize[i]*100.0/1000)/100) + ((levelSize[i]<1000)? 'm': 'km') + ') ' + (i % 2 == 0 ? '&#9643;' : '&#9645;') + '</option>'
-    //     }
-    // }
-    // return html
-
     let html = '';
 
     let m=0, p=5, q=base.iniLevel;
@@ -545,7 +534,7 @@ function generateSelectLevel(base,size_shortestprefix,size=0)
 
     for (let j=0; j <= endLevel; j++)
     {
-        if(j % p !== q) continue;
+        if( (j % p !== q) || (j > min_level) ) continue;
 
         m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
 
@@ -1192,7 +1181,7 @@ function onEachFeatureJurisd(feature,layer)
     layer.bindPopup(popupContent);
 
     jurisdIsMultipolygon = feature.properties.is_multipolygon;
-    size_shortestprefix = feature.properties.size_shortestprefix;
+    min_level = feature.properties.min_level;
 }
 
 // Layer layerCoverAll
@@ -1249,7 +1238,7 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
 
     if(genSelect)
     {
-        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix);
+        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level);
     }
 }
 
@@ -1329,7 +1318,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)
@@ -1357,7 +1346,7 @@ function afterDataOlcGhs(data,layer)
         {
             sizeCurrentCell = data.features[0].properties.side;
 
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],size_shortestprefix,sizeCurrentCell);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level,sizeCurrentCell);
 
             document.getElementById('tcode').innerHTML = generateSelectTypeCode(data.features[0].properties.type);
 
