@@ -534,21 +534,21 @@ function generateSelectLevel(base,min_level,size=0)
 
     for (let j=0; j <= endLevel; j++)
     {
-        if( (j % p !== q) || (j > min_level) ) continue;
+        if( (j % p !== q) || (j < min_level) ) continue;
 
         m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
 
-        const levelSize = (j % 2 === 0)
-            ? Math.pow(2, (endLevel - j) / 2)
-            : Math.pow(2, (endLevel - j - 1) / 2) * 1.41;
+        const area = Math.pow(2, endLevel - j );
+        const side = Math.sqrt(area);
+        const limiar = side*1.18
 
-        const formattedSize = levelSize<1000 ? (Math.round(levelSize*100.0)/100)+'m' : (Math.round(levelSize*100.0/1000)/100)+'km' ;
+        const formattedSize = side<1000 ? (Math.round(side*100.0)/100)+'m' : (Math.round(side*100.0/1000)/100)+'km' ;
 
         const symbol = j % 2 === 0 ? '&#9643;' : '&#9645;';
 
-        const selected = ( Math.floor(size) <= levelSize ? ' selected' : '' )
+        const selected = ( size <= limiar ? ' selected' : '' )
 
-        html += `<option value="${levelValues[j]}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
+        html += `<option value="${limiar}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
     }
 
     return html
@@ -574,8 +574,6 @@ function isMarkerInsidePolygonOrMultiPolygon(x, y, poly) {
 
     // Check if the input is a multi-polygon or a single polygon
     const isMultiPolygon = Array.isArray(polys[0]) && Array.isArray(polys[0][0]);
-
-    console.log(isMultiPolygon)
 
     // Function to check if a point is inside a polygon
     const checkInside = (polyPoints) => {

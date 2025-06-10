@@ -395,17 +395,17 @@ function generateSelectLevel(base,size=0,filter=0) // 0: all, 1:meio, 2:inteiro,
 
         m = (j%4 == 0 ? (j/4)+1 : Math.floor(j/4)+2 )
 
-        const levelSize = (j % 2 === 0)
-            ? Math.pow(2, (endLevel - j) / 2)
-            : Math.pow(2, (endLevel - j - 1) / 2) * 1.41;
+        const area = Math.pow(2, endLevel - j );
+        const side = Math.sqrt(area);
+        const limiar = side*1.18
 
-        const formattedSize = levelSize<1000 ? (Math.round(levelSize*100.0)/100)+'m' : (Math.round(levelSize*100.0/1000)/100)+'km' ;
+        const formattedSize = side<1000 ? (Math.round(side*100.0)/100)+'m' : (Math.round(side*100.0/1000)/100)+'km' ;
 
         const symbol = j % 2 === 0 ? '&#9643;' : '&#9645;';
 
-        const selected = ( Math.floor(size) <= levelSize ? ' selected' : '' )
+        const selected = ( size <= limiar ? ' selected' : '' )
 
-        html += `<option value="${levelValues[j]}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
+        html += `<option value="${limiar}"${selected}>L${j} (${m}d) (${formattedSize}) ${symbol}</option>`;
     }
 
     return html
@@ -416,14 +416,7 @@ function updateSelectLevel()
     let level = document.getElementById('level_size').value
     let filter = document.getElementById('filter_size').value
 
-    let i = 0;
-
-    while (levelValues[i] > level)
-    {
-        i++;
-    }
-
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],levelSize[i],filter);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],level,filter);
 }
 
 
