@@ -1254,10 +1254,13 @@ function afterData(data,layer)
     {
         if(data.features[0].properties.jurisd_base_id)
         {
+            console.log("tem jurisd_id")
             checkCountry(data.features[0].properties.jurisd_base_id,false)
 
             if(data.features[0].properties.shares_border_with)
             {
+                console.log("tem shares_border_with")
+                console.log("tem shares_border_with")
                 // Usar a função para gerar os links
                 const borderLinksHtml = generateBorderLinks(data.features[0].properties.shares_border_with);
 
