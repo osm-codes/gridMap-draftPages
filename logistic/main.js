@@ -267,7 +267,7 @@ decodeGgeohash.onAdd = function (map) {
     this.label_field.innerHTML = 'Grid code: ';
 
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.postalcodeBase.placeholderDecode;
     this.field.id = 'fielddecode';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
@@ -302,7 +302,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.postalcodeBase.placeholderEncode;
     this.field.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
@@ -464,8 +464,8 @@ function resetDef()
     map.removeLayer(layerCoverAll);
     document.getElementById('fielddecode').value = '';
     document.getElementById('fieldencode').value = '';
-    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+    document.getElementById('fielddecode').placeholder = 'e.g.: ' + defaultMap.postalcodeBase.placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo:'   + defaultMap.postalcodeBase.placeholderEncode;
     document.getElementById('logCode').innerHTML = '(click the map)';
     // map.fitBounds(layerJurisdAll.getBounds());
     const nextTitle = 'Logistic AFAcodes';
@@ -658,7 +658,7 @@ function changePlaceholder()
 
     if ( input === null || input === '' )
     {
-        document.getElementById('fieldencode').placeholder = `e.g.: ${geoPrefix}${defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode}`;
+        document.getElementById('fieldencode').placeholder = `e.g.: ${geoPrefix}${defaultMap.postalcodeBase.placeholderEncode}`;
     }
     else
     {
@@ -681,7 +681,7 @@ function checkUValue(input)
 
         if(u_value == 0)
         {
-            u_value = levelValues[defaultMap.bases[defaultMap.postalcodeBase].endLevel]
+            u_value = levelValues[defaultMap.postalcodeBase.endLevel]
         }
 
         u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
@@ -778,7 +778,7 @@ function getDecode(data)
 
             if (isAfacode && context !== null)
             {
-                geouri = buildGeoPrefix(false) + context + defaultMap.bases[defaultMap.defaultBase].symbol + geouri
+                geouri = buildGeoPrefix(false) + context + defaultMap.postalcodeBase.symbol + geouri
             }
             processGeoUri(geouri, isAfacode, encode = false, isLex = false, geolocation = false);
         }
@@ -1236,7 +1236,7 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
 
     if(genSelect)
     {
-        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level);
+        document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.postalcodeBase,min_level);
     }
 }
 
@@ -1255,6 +1255,7 @@ function afterData(data,layer)
         if(data.features[0].properties.jurisd_base_id)
         {
             console.log("tem jurisd_id")
+            console.log(data.features[0].properties)
             checkCountry(data.features[0].properties.jurisd_base_id,false)
 
             if(data.features[0].properties.shares_border_with)
@@ -1319,7 +1320,7 @@ function afterData(data,layer)
                 {
                     sizeCurrentCell = data.features[0].properties.side;
 
-                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level,sizeCurrentCell);
+                    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.postalcodeBase,min_level,sizeCurrentCell);
 
                     let level = document.getElementById('level_size').value
                     let decimals = (level <= 64 ? 5 : 4)
@@ -1347,7 +1348,7 @@ function afterDataOlcGhs(data,layer)
         {
             sizeCurrentCell = data.features[0].properties.side;
 
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.postalcodeBase],min_level,sizeCurrentCell);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.postalcodeBase,min_level,sizeCurrentCell);
 
             document.getElementById('tcode').innerHTML = generateSelectTypeCode(data.features[0].properties.type);
 

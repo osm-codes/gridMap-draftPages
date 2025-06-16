@@ -171,7 +171,7 @@ decodeGgeohash.onAdd = function (map) {
     this.label_field.innerHTML = 'Grid code: ';
 
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.scientificBase.placeholderDecode;
     this.field.id = 'fielddecode';
     this.button.type = 'button';
     this.button.innerHTML= "Decode";
@@ -203,7 +203,7 @@ encodeGgeohash.onAdd = function (map) {
     this.label_field.for = 'fieldencode';
     this.label_field.innerHTML = 'Equivalent Geo URI:<br/>';
     this.field.type = 'text';
-    this.field.placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
+    this.field.placeholder = 'e.g.: ' + defaultMap.scientificBase.placeholderEncode;
     this.field.id = 'fieldencode';
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
@@ -229,13 +229,13 @@ level.onAdd = function (map) {
     this.label_grid.innerHTML = ' ';
     this.select_grid.id = 'grid';
     this.select_grid.name = 'grid';
-    this.select_grid.innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid)
+    this.select_grid.innerHTML = generateSelectGrid(defaultMap.scientificBase.selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = '<a href="https://wiki.addressforall.org/doc/osmc:Viz/Navega%C3%A7%C3%A3o" target="_help">Level</a>: ';
     this.select_level.id = 'level_size';
     this.select_level.name = 'level';
-    this.select_level.innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase]);
+    this.select_level.innerHTML = generateSelectLevel(defaultMap.scientificBase);
 
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
@@ -334,10 +334,10 @@ function resetDef()
     layerOlcGhsAll.clearLayers();
     map.removeLayer(layerCoverAll); toggleCoverStatus = true
     // map.setView(defaultMap.center, defaultMap.zoom);
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase]);
-    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.bases[defaultMap.scientificBase].selectGrid);
-    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.bases[defaultMap.scientificBase].placeholderDecode;
-    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.bases[defaultMap.scientificBase].placeholderEncode;
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase);
+    document.getElementById('grid').innerHTML = generateSelectGrid(defaultMap.scientificBase.selectGrid);
+    document.getElementById('fielddecode').placeholder = 'geocode, e.g.: ' + defaultMap.scientificBase.placeholderDecode;
+    document.getElementById('fieldencode').placeholder = 'geo: ' + defaultMap.scientificBase.placeholderEncode;
 }
 
 function zoomToJurisd()
@@ -416,7 +416,7 @@ function updateSelectLevel()
     let level = document.getElementById('level_size').value
     let filter = document.getElementById('filter_size').value
 
-    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],level,filter);
+    document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,level,filter);
 }
 
 
@@ -438,7 +438,7 @@ function getDecode(data)
 
         if(!regex.test(input))
         {
-            uri += defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol
+            uri += defaultMap.isocode + defaultMap.scientificBase.symbol
         }
 
         uri += input + ".json"
@@ -495,7 +495,7 @@ function getEncode(noData)
 
                 if(u_value == 0)
                 {
-                    u_value = levelValues[defaultMap.bases[defaultMap.scientificBase].endLevel]
+                    u_value = levelValues[defaultMap.scientificBase.endLevel]
                 }
 
                 u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
@@ -523,7 +523,7 @@ function getEncode(noData)
             {
                 document.getElementById('fielddecode').value = '';
 
-                uri += "/" + defaultMap.scientificBase;
+                uri += "/" + defaultMap.scientificBase.name;
 
                 layerPolygonCurrent.clearLayers();
                 if(grid !== '')
@@ -582,8 +582,8 @@ function onMapClick(e)
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
 
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + '/' + defaultMap.isocode
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase.name + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -961,7 +961,7 @@ function afterData(data,layer)
         {
             if(data.features[0].id)
             {
-                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + data.features[0].id
+                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.scientificBase.symbol + data.features[0].id
                 const nextTitle = 'OSM.codes: ' + data.features[0].id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
@@ -977,7 +977,7 @@ function afterData(data,layer)
 
             if(data.features[0].properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],data.features[0].properties.side,document.getElementById('filter_size').value);
+                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
@@ -996,7 +996,7 @@ function afterDataOlcGhs(data,layer)
     {
         if(data.features[0].properties.side)
         {
-            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.bases[defaultMap.scientificBase],data.features[0].properties.side,document.getElementById('filter_size').value);
+            document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
 
             const center = layer.getBounds().getCenter();
             const { lat, lng } = center;
