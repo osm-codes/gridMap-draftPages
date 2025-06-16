@@ -1028,7 +1028,7 @@ function onEachFeature(feature,layer)
     if(feature.id)
     {
         const codsci = (feature.id).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol + feature.id + '">' + defaultMap.isocode + defaultMap.bases[defaultMap.scientificBase].symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.scientificBase.symbol + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
     }
 
     if(feature.properties.logistic_id)
