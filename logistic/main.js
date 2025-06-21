@@ -159,15 +159,15 @@ var layerMarkerCurrent = new L.featureGroup();
 var layerMarkerAll = new L.featureGroup();
 
 var overlays = {
-    'Current Ggeohash': layerPolygonCurrent,
-    'All Ggeohash': layerPolygonAll,
-    'Current OLC or GHS': layerOlcGhsCurrent,
-    'All OLC or GHS': layerOlcGhsAll,
-    'Current marker': layerMarkerCurrent,
-    'All markers': layerMarkerAll,
-    'Covers': layerCoverAll,
-    'Jurisdictions': layerJurisdAll,
-    'Jurisdictions2': layerJurisdAll2,
+    'AFAcode (Active)': layerPolygonCurrent,
+    'AFAcode (All)':    layerPolygonAll,
+    'OLC/GHS (Active)': layerOlcGhsCurrent,
+    'OLC/GHS (All)':    layerOlcGhsAll,
+    'Markers (Active)': layerMarkerCurrent,
+    'Markers (All)':    layerMarkerAll,
+    'Coverage':         layerCoverAll,
+    'Jurisdiction (Official)': layerJurisdAll,
+    'Jurisdiction (Buffered)': layerJurisdAll2,
 };
 
 var defaultMap = countries['BR'];
@@ -1240,81 +1240,85 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,genSelect=true)
     }
 }
 
-function generateBorderLinks(borderList)
+function generateBorderLinks(list)
 {
-    return borderList.map(item => {
-        // Monta o link (a URL pode ser ajustada conforme necessário)
-        return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;
-    }).join(', ');  // Une os links
+    return list.map(item => {return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;}).join(', ');
+}
+
+function generateEquivalentgeocodes(list)
+{
+    return list.map(item => {return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;}).join(', ');
 }
 
 function afterData(data,layer)
 {
-    if(data.features.length = 1)
+    if( data.type === "Feature" || ( data.type === "FeatureCollection" && data.features.length == 1) )
     {
-        if(data.features[0].properties.jurisd_base_id)
+        if( data.type === "FeatureCollection")
         {
-            checkCountry(data.features[0].properties.jurisd_base_id,false)
+            data = data.features[0]
+        }
 
-            if(data.features[0].properties.shares_border_with)
+        if(data.properties.jurisd_base_id)
+        {
+            checkCountry(data.properties.jurisd_base_id,false)
+            if(data.properties.shares_border_with)
             {
                 // Usar a função para gerar os links
-                const borderLinksHtml = generateBorderLinks(data.features[0].properties.shares_border_with);
-
+                const borderLinksHtml = generateBorderLinks(data.properties.shares_border_with);
                 document.getElementById('borderLinks').innerHTML = borderLinksHtml;
             }
         }
 
-        if(data.features[0].properties.isolabel_ext && !data.features[0].properties.logistic_id)
+        if(data.properties.isolabel_ext && !data.properties.logistic_id)
         {
-            var nextURL = uri_base + "/" + data.features[0].properties.canonical_pathname
-            const nextTitle = 'AFA.codes: ' + data.features[0].properties.canonical_pathname;
+            var nextURL = uri_base + "/" + data.properties.canonical_pathname
+            const nextTitle = 'AFA.codes: ' + data.properties.canonical_pathname;
             const nextState = { additionalInformation: 'to canonical.' };
 
             window.history.pushState(nextState, nextTitle, nextURL);
         }
-        else if (!data.features[0].properties.index)
+        else if (!data.properties.index)
         {
-            if(data.features[0].properties.logistic_id)
+            if(data.properties.logistic_id)
             {
+                let logistic_id = data.properties.logistic_id;
+                let logistic_id_code = logistic_id.split(/[~]/)[1];
+
                 if(getJurisdAfterLoad)
                 {
                     getJurisdAfterLoad = false;
-
-                    var uri = uri_base + "/geo:iso_ext:" + data.features[0].properties.isolabel_ext + ".json";
-
+                    var uri = uri_base + "/geo:iso_ext:" + data.properties.isolabel_ext + ".json";
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
 
-                var nextURL = uri_base + "/" + data.features[0].properties.logistic_id
-                const nextTitle = 'AFA.codes: ' + data.features[0].properties.logistic_id;
+                var nextURL = uri_base + "/" + logistic_id
+                const nextTitle = 'AFA.codes: ' + logistic_id;
                 const nextState = { additionalInformation: 'to canonical.' };
-
                 window.history.pushState(nextState, nextTitle, nextURL);
 
-
-                document.getElementById('fielddecode').value = data.features[0].properties.logistic_id.split(/[~]/)[1];
+                document.getElementById('fielddecode').value = logistic_id_code;
                 let df_short_code = ''
 
-                if(data.features[0].properties.isolabel_ext_abbrev)
+                if(data.properties.isolabel_ext_abbrev)
                 {
-                    df_short_code = '<small>'+(data.features[0].properties.isolabel_ext_abbrev)+ '~</small>' + data.features[0].properties.logistic_id.split(/[~]/)[1];
+                    // df_short_code = '<small>'+(data.properties.isolabel_ext_abbrev)+ '~</small>' + logistic_id_code;
+                    df_short_code = (data.properties.isolabel_ext_abbrev).map(item => {return `<a href="./${item}~${logistic_id_code}" title="AFAcodes of ${item}"><small>${item}~</small>${logistic_id_code}</a>`;}).join(', ');
+                    document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
                 }
                 else
                 {
-                    df_short_code = '<small>'+(data.features[0].properties.logistic_id).replace(/~/,'~</small>');
+                    document.getElementById('canonicalCode').innerHTML = "";
                 }
 
-                document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
-
-                if(data.features[0].properties.truncated_code)
+                if(data.properties.truncated_code)
                 {
                     alert("Geocódigo truncado. Número de dígitos excedeu o limite de níveis da grade.");
                 }
 
-                if(data.features[0].properties.side)
+                if(data.properties.side)
                 {
-                    sizeCurrentCell = data.features[0].properties.side;
+                    sizeCurrentCell = data.properties.side;
 
                     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.postalcodeBase,min_level,sizeCurrentCell);
 
@@ -1328,9 +1332,9 @@ function afterData(data,layer)
                     document.getElementById('fieldencode').value = 'geo:' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
                 }
             }
-            else if(data.features[0].id)
+            else if(data.id)
             {
-                document.getElementById('fielddecode').value = data.features[0].id;
+                document.getElementById('fielddecode').value = data.id;
             }
         }
     }
@@ -1366,19 +1370,25 @@ function afterDataOlcGhs(data,layer)
     }
 }
 
-function loadGeojson(uri,arrayLayer,afterLoad,afterData,before=function(e){})
+function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 {
     fetch(uri)
     .then(response => {return response.json()})
     .then((data) =>
     {
-        before(data);
-
         arrayLayer[0].clearLayers();
 
         for (i=0; i < arrayLayer.length; i++)
         {
-            arrayLayer[i].addData(data.features);
+
+            if( data.type === "FeatureCollection")
+            {
+                arrayLayer[i].addData(data.features);
+            }
+            else
+            {
+                arrayLayer[i].addData(data);
+            }
         }
 
         afterLoad(arrayLayer[0]);
