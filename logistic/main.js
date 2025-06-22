@@ -525,8 +525,8 @@ function generateSelectLevel(base,min_level,size=0)
 
     let m=0, p=5, q=base.iniLevel;
 
-    if (base.name === '16h'){p=4;}
-    else if (base.name === '32nvu'){p=5;}
+    if (base.name === 'base16h'){p=4;}
+    else if (base.name === 'base32'){p=5;}
 
     const endLevel = base.endLevel;
 
