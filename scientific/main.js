@@ -98,20 +98,18 @@ var layerMarkerCurrent = new L.featureGroup();
 var layerMarkerAll = new L.featureGroup();
 
 var overlays = {
-    'Current polygon': layerPolygonCurrent,
-    // 'All polygon': layerPolygonAll,
-    'Current center': layerCenterCurrent,
-    // 'All center': layerCenterAll,
-    'Current grid': layerPolygonCurrentGrid,
-    // 'All grid': layerGridAll,
-    'Current marker': layerMarkerCurrent,
-    // 'All markers': layerMarkerAll,
-    // 'Covers': layerCoverAll,
-    'Jurisdictions': layerJurisdAll,
-
-    'Current OLC or GHS': layerOlcGhsCurrent,
-    'All OLC or GHS': layerOlcGhsAll,
-
+    'AFAcode (Active)': layerPolygonCurrent,
+    // 'AFAcode (All)': layerPolygonAll,
+    'AFAcode (Center)': layerCenterCurrent,
+    // 'AFAcode (All center)': layerCenterAll,
+    'AFAcode (Grid)': layerPolygonCurrentGrid,
+    // 'AFAcode (All grid)': layerGridAll,
+    'Markers (Active)': layerMarkerCurrent,
+    // 'Markers (All)': layerMarkerAll,
+    // 'Coverage': layerCoverAll,
+    'Jurisdiction (Official)': layerJurisdAll,
+    'OLC/GHS (Active)': layerOlcGhsCurrent,
+    'OLC/GHS (All)': layerOlcGhsAll,
 };
 
 var defaultMap;
@@ -419,7 +417,6 @@ function updateSelectLevel()
     document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,level,filter);
 }
 
-
 function getDecode(data)
 {
     let input = document.getElementById('fielddecode').value
@@ -573,8 +570,7 @@ function fixZOrder(dataLayers) {
 
 function latRound(x)
 {
-    return Number.parseFloat(x).toFixed(6);
-    // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
+    return Number.parseFloat(x).toFixed(6); // 5 or 6 decimal digits for 1 meter, see https://gis.stackexchange.com/a/208739/7505
 }
 
 function onMapClick(e)
@@ -950,34 +946,39 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true)
 
 function afterData(data,layer)
 {
-    if(data.features.length = 1)
+    if( data.type === "Feature" || ( data.type === "FeatureCollection" && data.features.length == 1) )
     {
-        if(data.features[0].properties.jurisd_base_id)
+        if( data.type === "FeatureCollection")
         {
-            checkCountry(data.features[0].properties.jurisd_base_id,false)
+            data = data.features[0]
         }
 
-        if (!data.features[0].properties.index)
+        if(data.properties.jurisd_base_id)
         {
-            if(data.features[0].id)
+            checkCountry(data.properties.jurisd_base_id,false)
+        }
+
+        if (!data.properties.index)
+        {
+            if(data.id)
             {
-                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.scientificBase.symbol + data.features[0].id
-                const nextTitle = 'OSM.codes: ' + data.features[0].id;
+                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.scientificBase.symbol + data.id
+                const nextTitle = 'OSM.codes: ' + data.id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
 
-                document.getElementById('fielddecode').value = data.features[0].id;
+                document.getElementById('fielddecode').value = data.id;
 
-                if(data.features[0].properties.truncated_code)
+                if(data.properties.truncated_code)
                 {
                     alert("Geocódigo truncado. Número de dígitos excedeu o limite de níveis da grade.");
                 }
             }
 
-            if(data.features[0].properties.side)
+            if(data.properties.side)
             {
-                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,data.features[0].properties.side,document.getElementById('filter_size').value);
+                document.getElementById('level_size').innerHTML = generateSelectLevel(defaultMap.scientificBase,data.properties.side,document.getElementById('filter_size').value);
 
                 const center = layer.getBounds().getCenter();
                 const { lat, lng } = center;
@@ -1018,7 +1019,14 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 
         for (i=0; i < arrayLayer.length; i++)
         {
-            arrayLayer[i].addData(data.features);
+            if( data.type === "FeatureCollection")
+            {
+                arrayLayer[i].addData(data.features);
+            }
+            else
+            {
+                arrayLayer[i].addData(data);
+            }
         }
 
         afterLoad(arrayLayer[0]);

@@ -33,7 +33,7 @@ function sel_jurL1(abbrev)
     if (abbrev>'')
     {
         let jL2dom = document.getElementById('sel_jurL2');
-        let s = '<option value="">- opt -</option>'
+        let s = '<option value="">- States -</option>'
         for ( var i of Object.keys(jurisdictions[abbrev]) )
             s += '<option value="' + i + '">' + (abbrev != 'CO' ? i : jurisdictions[abbrev][i]['name'])
         jL2dom.innerHTML=s
@@ -47,11 +47,11 @@ function sel_jurL2(abbrev)
     let country = defaultMap.isocode;
     let state = document.getElementById('sel_jurL2').value;
     let jL3dom = document.getElementById('sel_jurL3');
-    let s = '<option value="">- City -</option>'
+    let s = '<option value="">- Cities -</option>'
 
     if(state != '')
     {
-        for ( var i of (jurisdictions[country][state]['draft']).concat(jurisdictions[country][state]['work']).sort())
+        for ( var i of (jurisdictions[country][state]['draft'] || []).concat(jurisdictions[country][state]['work'] || []).sort())
             s += '<option>'+i
     }
     jL3dom.innerHTML=s
@@ -102,8 +102,8 @@ function updateJurisd(jurisd)
 
     // Update the dropdowns
     document.getElementById('sel_jurL1').innerHTML = jurisd_country;
-    document.getElementById('sel_jurL2').innerHTML = `<option value="">- opt -</option>${statesOptions}`;
-    document.getElementById('sel_jurL3').innerHTML = `<option value="">- City -</option>${citiesOptions}`;
+    document.getElementById('sel_jurL2').innerHTML = `<option value="">- States -</option>${statesOptions}`;
+    document.getElementById('sel_jurL3').innerHTML = `<option value="">- Cities -</option>${citiesOptions}`;
 }
 
 var openstreetmap = L.tileLayer(osmUrl,{attribution: genericAttrib,detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
@@ -214,12 +214,8 @@ var map = L.map('map',{
 var toggleTooltipStatus = false;
 
 map.attributionControl.setPrefix(false); // Disable the attribution prefix
-
-// Add fullscreen control
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
-
-// Event handler for map click
-map.on('click', handleMapClick);
+map.on('click', handleMapClick); // Event handler for map click
 
 // Standard Leaflet controls
 var zoom   = L.control.zoom({position:'topleft'});
@@ -296,7 +292,6 @@ encodeGgeohash.onAdd = function (map) {
     this.label_tcode.innerHTML = '';
     this.select_tcode.id = 'tcode';
     this.select_tcode.name = 'tcode';
-    // this.select_tcode.innerHTML = '<option value="none">(Free)</option><option value="">AFAcode</option><option value="olc">OLC</option><option value="ghs">GHS</option><option value="ghs64">GHS64</option>'
     this.select_tcode.innerHTML = generateSelectTypeCode('aaa')
 
     this.label_field.for = 'fieldencode';
@@ -1210,7 +1205,6 @@ function afterLoadLayer(featureGroup)
 {
     let zoomclick = document.getElementById('zoomclick')
     let zoom = map.getBoundsZoom(featureGroup.getBounds());
-    // zoomclick.checked ? map.setView(featureGroup.getBounds().getCenter(),map.getZoom()) : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
     zoomclick.checked ? '' : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
 }
 
@@ -1245,11 +1239,6 @@ function generateBorderLinks(list)
     return list.map(item => {return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;}).join(', ');
 }
 
-function generateEquivalentgeocodes(list)
-{
-    return list.map(item => {return `<a href="./${item}" title="AFAcodes of ${item}">${item}</a>`;}).join(', ');
-}
-
 function afterData(data,layer)
 {
     if( data.type === "Feature" || ( data.type === "FeatureCollection" && data.features.length == 1) )
@@ -1264,7 +1253,6 @@ function afterData(data,layer)
             checkCountry(data.properties.jurisd_base_id,false)
             if(data.properties.shares_border_with)
             {
-                // Usar a função para gerar os links
                 const borderLinksHtml = generateBorderLinks(data.properties.shares_border_with);
                 document.getElementById('borderLinks').innerHTML = borderLinksHtml;
             }
@@ -1298,13 +1286,16 @@ function afterData(data,layer)
                 window.history.pushState(nextState, nextTitle, nextURL);
 
                 document.getElementById('fielddecode').value = logistic_id_code;
-                let df_short_code = ''
 
                 if(data.properties.isolabel_ext_abbrev)
                 {
-                    // df_short_code = '<small>'+(data.properties.isolabel_ext_abbrev)+ '~</small>' + logistic_id_code;
-                    df_short_code = (data.properties.isolabel_ext_abbrev).map(item => {return `<a href="./${item}~${logistic_id_code}" title="AFAcodes of ${item}"><small>${item}~</small>${logistic_id_code}</a>`;}).join(', ');
-                    document.getElementById('canonicalCode').innerHTML = df_short_code.replace( /([a-z])([A-Z])/g, '$1.$2' );
+                    const formatLabel = s => s.replace(/([a-z])([A-Z])/g, '$1.$2');
+                    const df_short_code = data.properties.isolabel_ext_abbrev
+                        .map(item => {
+                            const label = formatLabel(item);
+                            return `<a href="./${label}~${logistic_id_code}" title="AFAcodes of ${label}"><small>${label}~</small>${logistic_id_code}</a>`
+                        }).join(', ');
+                    document.getElementById('canonicalCode').innerHTML = df_short_code;
                 }
                 else
                 {
