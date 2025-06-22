@@ -395,7 +395,7 @@ function generateSelectLevel(base,size=0,filter=0) // 0: all, 1:meio, 2:inteiro,
 
         const area = Math.pow(2, endLevel - j );
         const side = Math.sqrt(area);
-        const limiar = side*1.18
+        const limiar = (Math.round(side*111.0)/100)
 
         const formattedSize = side<1000 ? (Math.round(side*100.0)/100)+'m' : (Math.round(side*100.0/1000)/100)+'km' ;
 

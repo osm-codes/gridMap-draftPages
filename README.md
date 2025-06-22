@@ -18,5 +18,5 @@ See `src/view`.
 ```bash
 terser logistic/main.js --compress --mangle --output logistic/main.min.js
 terser scientific/main.js --compress --mangle --output scientific/main.min.js
-terser resources/js/def.js --compress --mangle --output resources/js/def.js
+terser resources/js/def.js --compress --mangle --output resources/js/def.min.js
 ```
