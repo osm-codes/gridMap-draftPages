@@ -535,7 +535,7 @@ function generateSelectLevel(base,min_level,size=0)
 
         const area = Math.pow(2, endLevel - j );
         const side = Math.sqrt(area);
-        const limiar = side*1.18
+        const limiar = (Math.round(side*111.0)/100)
 
         const formattedSize = side<1000 ? (Math.round(side*100.0)/100)+'m' : (Math.round(side*100.0/1000)/100)+'km' ;
 
@@ -1293,7 +1293,7 @@ function afterData(data,layer)
                     const df_short_code = data.properties.isolabel_ext_abbrev
                         .map(item => {
                             const label = formatLabel(item);
-                            return `<a href="./${label}~${logistic_id_code}" title="AFAcodes of ${label}"><small>${label}~</small>${logistic_id_code}</a>`
+                            return `<a href="./${label}~${logistic_id_code}" title="AFAcode ${label}~${logistic_id_code}"><small>${label}~</small>${logistic_id_code}</a>`
                         }).join(', ');
                     document.getElementById('canonicalCode').innerHTML = df_short_code;
                 }
