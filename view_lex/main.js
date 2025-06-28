@@ -90,12 +90,16 @@ function onFeatureClick(feature)
 
 function afterData(data,layer)
 {
-    if(data.features.length = 1)
+    if( data.type === "Feature" || ( data.type === "FeatureCollection" && data.features.length == 1) )
     {
-        if(data.features[0].properties.isolabel_ext)
+        if( data.type === "FeatureCollection")
         {
-            var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.features[0].properties.isolabel_ext + window.location.search
-            const nextTitle = 'OSM.codes: ' + data.features[0].properties.isolabel_ext;
+            data = data.features[0]
+        }
+        if(data.properties.isolabel_ext)
+        {
+            var nextURL = window.location.protocol + "//" + window.location.host + "/" + data.properties.isolabel_ext + window.location.search
+            const nextTitle = 'OSM.codes: ' + data.properties.isolabel_ext;
             const nextState = { additionalInformation: 'to canonical.' };
 
             window.history.pushState(nextState, nextTitle, nextURL);
@@ -120,12 +124,22 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
 
         for (i=0; i < arrayLayer.length; i++)
         {
-            arrayLayer[i].addData(data.features);
+
+            if( data.type === "FeatureCollection")
+            {
+                arrayLayer[i].addData(data.features);
+            }
+            else
+            {
+                arrayLayer[i].addData(data);
+            }
         }
 
         afterLoad(arrayLayer[0]);
 
-        afterData(data);
+        afterData(data,arrayLayer[0]);
+
+        fixZOrder(overlays);
     })
     .catch(err => {})
 }
