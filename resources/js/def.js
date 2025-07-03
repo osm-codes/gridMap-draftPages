@@ -1,4 +1,5 @@
-var uri_base = window.location.protocol + '//api.' + window.location.hostname;
+var uri_base     = window.location.protocol + '//'     + window.location.hostname;
+var uri_base_api = window.location.protocol + '//api.' + window.location.hostname;
 var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 var osmAttrib = '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>';
 var cartoUrl = 'https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}{r}.png';

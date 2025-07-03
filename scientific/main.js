@@ -423,13 +423,13 @@ function getDecode(data)
 
     if (input.match(/^geo:(olc|ghs):.+$/i))
     {
-        var uri = uri_base + "/" + input;
+        var uri = uri_base_api + "/" + input;
 
         loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
     }
     else if(input !== null && input !== '')
     {
-        var uri = uri_base + "/geo:afa:"
+        var uri = uri_base_api + "/geo:afa:"
 
         let regex = new RegExp("^" + defaultMap.isocode + "[+].*","i");
 
@@ -468,7 +468,7 @@ function getEncode(noData)
     let grid = document.getElementById('grid').value
     let context = defaultMap.isocode;
 
-    let uri = uri_base + "/";
+    let uri = uri_base_api + "/";
 
     if(input !== null && input !== '' && input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
     {
@@ -578,8 +578,8 @@ function onMapClick(e)
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
 
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + '/' + defaultMap.isocode
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
+    var uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -1054,8 +1054,8 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 }
 else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
 {
-    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1");
-    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2");
+    uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1");
+    uriApiJurisd = uri_base_api + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2");
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {

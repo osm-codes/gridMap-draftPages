@@ -506,7 +506,7 @@ function toggleCoverLayers()
     if(getCover)
     {
         let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
-        loadGeojson(uri_base + "/" + input + ".json/cover",[layerCoverAll],function(e){},function(e){});
+        loadGeojson(uri_base_api + "/" + input + "/cover",[layerCoverAll],function(e){},function(e){});
         getCover = false;
     }
     else
@@ -709,7 +709,7 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
     let layerToLoad;
     let afterDataCallback;
     let context;
-    let uri = `${uri_base}/${geouri}.json`;
+    let uri = `${uri_base_api}/${geouri}`;
 
     if (isLex) {
         loadGeojson(geouri,[layerJurisdAll],afterLoadJurisdAll,afterData);
@@ -717,7 +717,7 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
     }
 
     if (geolocation) {
-        window.location.href = `${uri_base}/${geouri}`;
+        window.location.href = `${uri_base_api}/${geouri}`;
         return;
     }
 
@@ -1279,7 +1279,7 @@ function afterData(data,layer)
                 if(getJurisdAfterLoad)
                 {
                     getJurisdAfterLoad = false;
-                    var uri = uri_base + "/geo:iso_ext:" + data.properties.isolabel_ext + ".json";
+                    var uri = uri_base_api + "/geo:iso_ext:" + data.properties.isolabel_ext;
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
 
@@ -1355,7 +1355,7 @@ function afterDataOlcGhs(data,layer)
             document.getElementById('geoUri').innerHTML  = 'geo:' + data.features[0].properties.type + ':' + latRound(lat,decimals) + "," + latRound(lng,decimals);
             document.getElementById('fieldencode').value = 'geo:' + data.features[0].properties.type + ':' + latRound(lat)          + "," + latRound(lng)          + ";u=" + document.getElementById('level_size').value;
 
-            var nextURL = uri_base + "/geo:" + data.features[0].properties.type + ':' + data.features[0].id
+            var nextURL = uri_base_api + "/geo:" + data.features[0].properties.type + ':' + data.features[0].id
             const nextTitle = 'AFA.codes: ' + data.features[0].id;
             const nextState = { additionalInformation: 'to canonical.' };
 
@@ -1414,58 +1414,58 @@ const loadGeoApi = (pattern, prefix, suffix, afterLoad, afterData) => {
 
 // Define patterns and corresponding parameters
 const patterns = [
-    { regex: /\/CO-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:co-divipola',  suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
-    { regex: /\/BR-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
-    { regex: /\/CM-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:cm-code', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
-    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:iso_ext', suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData },
-    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})\/geo:(olc|ghs):.+$/i, prefix: 'geo:iso_ext', suffix: '.json', afterLoad: (e) => afterLoadJurisdAll(e, false), afterData: function(e){} }/*,
-    { regex: /\/([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i, prefix: 'geo:iso_ext',  suffix: '.json', afterLoad: afterLoadJurisdAll, afterData: afterData }*/
+    { regex: /\/CO-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:co-divipola',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /\/BR-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /\/CM-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:cm-code', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+    { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})\/geo:(olc|ghs):.+$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: (e) => afterLoadJurisdAll(e, false), afterData: function(e){} }/*,
+    { regex: /\/([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i, prefix: 'geo:iso_ext',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData }*/
 ];
 // Load GeoJSON for each pattern
 // Resolve jurisdiction
-// Exemplo: /CO-15001       -> /geo:co-divipola:15001.json
-//          /BR-3550308     -> /geo:br-geocodigo:3550308.json
-//          /CM-20101       -> /geo:cm-code:20101.json
-//          /BR-Sampa       -> /geo:iso_ext:BR-Sampa.json
-//          /BR-SP-SaoPaulo -> /geo:iso_ext:BR-SP-SaoPaulo.json
-//          /BR-SP-SP       -> /geo:iso_ext:BR-SP-SP.json
-//          /BR-SP          -> /geo:iso_ext:BR-SP.json
-//          /CM-YE1         -> /geo:iso_ext:CM-YE1.json
-//          /BR-Rio         -> /geo:iso_ext:BR-Rio.json
+// Exemplo: /CO-15001       -> /geo:co-divipola:15001
+//          /BR-3550308     -> /geo:br-geocodigo:3550308
+//          /CM-20101       -> /geo:cm-code:20101
+//          /BR-Sampa       -> /geo:iso_ext:BR-Sampa
+//          /BR-SP-SaoPaulo -> /geo:iso_ext:BR-SP-SaoPaulo
+//          /BR-SP-SP       -> /geo:iso_ext:BR-SP-SP
+//          /BR-SP          -> /geo:iso_ext:BR-SP
+//          /CM-YE1         -> /geo:iso_ext:CM-YE1
+//          /BR-Rio         -> /geo:iso_ext:BR-Rio
 patterns.forEach(({ regex, prefix, suffix, afterLoad }) => {
     loadGeoApi(regex, prefix, suffix, afterLoad, afterData);
 });
 
 // Resolve requisições OLC e GHS com e sem contexto
-// Acresenta sufixo '.json' se existir o sufixo geo:(olc|ghs):.
-// Exemplo:  /geo:olc:-23.550408,-46.633110;u=3           -> /geo:olc:-23.550408,-46.633110;u=3.json
-// Exemplo:  /BR-Sampa/geo:olc:-23.550408,-46.633110;u=3  -> /geo:olc:-23.550408,-46.633110;u=3.json
+// Acresenta sufixo '' se existir o sufixo geo:(olc|ghs):.
+// Exemplo:  /geo:olc:-23.550408,-46.633110;u=3           -> /geo:olc:-23.550408,-46.633110;u=3
+// Exemplo:  /BR-Sampa/geo:olc:-23.550408,-46.633110;u=3  -> /geo:olc:-23.550408,-46.633110;u=3
 if (pathname.match(/^(\/[A-Z]{2}(-[A-Z0-9]+){1,2})?\/geo:(olc|ghs):.+$/i))
 {
-    loadGeojson(pathname.replace(/^(\/[A-Z]{2}(-[A-Z0-9]+){1,2})?\/(geo:(olc|ghs):.+)$/i, "/$3.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
+    loadGeojson(pathname.replace(/^(\/[A-Z]{2}(-[A-Z0-9]+){1,2})?\/(geo:(olc|ghs):.+)$/i, "/$3"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
 }
 else
 {
     let uriApi = ''
     // Resolve AFAcodes logistico se municipio é numérico ou string.
-    // Exemplo: /BR-3550308~LCGHJ     -> /geo:afa:BR-3550308~LCGHJ.json
-    //          /CO-15001~8HJF20      -> /geo:afa:CO-15001~8HJF20.json
-    //          /CM-20101~0G220       -> /geo:afa:CM-20101~0G220.json
-    //          /CM-CE-Yaounde1~0G220 -> /geo:afa:CM-CE-Yaounde1~0G220.json
-    //          /CM-YE1~0G220         -> /geo:afa:CM-YE1~0G220.json
+    // Exemplo: /BR-3550308~LCGHJ     -> /geo:afa:BR-3550308~LCGHJ
+    //          /CO-15001~8HJF20      -> /geo:afa:CO-15001~8HJF20
+    //          /CM-20101~0G220       -> /geo:afa:CM-20101~0G220
+    //          /CM-CE-Yaounde1~0G220 -> /geo:afa:CM-CE-Yaounde1~0G220
+    //          /CM-YE1~0G220         -> /geo:afa:CM-YE1~0G220
     if (pathname.match(/^\/((([A-Z]{2})-\d+)|([A-Z]{2}((-[A-Z0-9]+){1,2})))(~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i))
     {
         pathname = pathname.replace(/\./g,""); // Remove ponto, caso exista
-        uriApi = pathname.replace(/\/(.+)$/i, "/geo:afa:$1.json");
+        uriApi = pathname.replace(/\/(.+)$/i, "/geo:afa:$1");
     }
     else if (pathname.match(/^\/geo:.+$/i))
     {
-        uriApi = pathname + '.json';
+        uriApi = pathname;
         getJurisdAfterLoad = true;
     }
 
     if(uriApi !== '')
     {
-        loadGeojson(uri_base + uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
+        loadGeojson(uri_base_api + uriApi,[layerPolygonCurrent,layerPolygonAll],afterLoadCurrent,afterData);
     }
 }
