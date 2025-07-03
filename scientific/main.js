@@ -703,7 +703,7 @@ function onEachFeature(feature,layer)
 
     if(feature.id)
     {
-        document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
+        document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)[1]).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
     }
 
     layer.on({
