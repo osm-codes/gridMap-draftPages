@@ -1407,8 +1407,8 @@ const loadGeoApi = (pattern, prefix, suffix, afterLoad, afterData) => {
     const match = pathname.match(pattern);
     if (match)
     {
-        loadGeojson( pathname.replace(pattern, `/geo:iso_ext:${match[1]}${suffix}/buffer`) , [layerJurisdAll2] , null , null );
-        loadGeojson( pathname.replace(pattern, `/${prefix}:${match[1]}${suffix}`) , [layerJurisdAll] , afterLoad , afterData );
+        loadGeojson( uri_base_api + pathname.replace(pattern, `/geo:iso_ext:${match[1]}${suffix}/buffer`) , [layerJurisdAll2] , null , null );
+        loadGeojson( uri_base_api + pathname.replace(pattern, `/${prefix}:${match[1]}${suffix}`) , [layerJurisdAll] , afterLoad , afterData );
     }
 };
 
