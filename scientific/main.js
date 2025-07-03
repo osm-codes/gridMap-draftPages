@@ -625,11 +625,11 @@ function popUpFeature(feature,layer)
     }
     else if(feature.properties.index)
     {
-        popupContent += "Code: <big><code>" + (feature.properties.index) + "</code></big><br>";
+        popupContent += "Id: <big><code>" + (feature.properties.index) + "</code></big><br>";
     }
     else
     {
-        popupContent += "Code: <big><code>" + (feature.id) + "</code></big><br>";
+        popupContent += "Id: <big><code>" + (feature.id) + "</code></big><br>";
     }
 
     popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
@@ -703,7 +703,7 @@ function onEachFeature(feature,layer)
 
     if(feature.id)
     {
-        document.getElementById('sciCode').innerHTML = (((feature.id).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.');
+        document.getElementById('sciCode').innerHTML = ((((feature.id).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.')).split("+", 2);
     }
 
     layer.on({
@@ -962,8 +962,8 @@ function afterData(data,layer)
         {
             if(data.id)
             {
-                var nextURL = uri_base + "/" + defaultMap.isocode + defaultMap.scientificBase.symbol + data.id
-                const nextTitle = 'OSM.codes: ' + data.id;
+                var nextURL = uri_base + "/" + data.id
+                const nextTitle = 'AFA.codes: ' + data.id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
