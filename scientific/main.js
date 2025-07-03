@@ -423,7 +423,7 @@ function getDecode(data)
 
     if (input.match(/^geo:(olc|ghs):.+$/i))
     {
-        var uri = uri_base + "/" + input + ".json";
+        var uri = uri_base + "/" + input;
 
         loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
     }
@@ -438,7 +438,7 @@ function getDecode(data)
             uri += defaultMap.isocode + defaultMap.scientificBase.symbol
         }
 
-        uri += input + ".json"
+        uri += input
         document.getElementById('fieldencode').value = '';
 
         loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
@@ -504,7 +504,7 @@ function getEncode(noData)
 
             input = input.replace(regex, "$1$2" + ';u=' + u_value)
 
-            uri += input + ".json";
+            uri += input;
 
             let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
             let popupContent = "latlng: " + latlong;
@@ -578,8 +578,8 @@ function onMapClick(e)
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
 
-    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase.name + '/' + defaultMap.isocode
-    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + ".json/" + defaultMap.scientificBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
+    var uri = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMap.scientificBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -1046,25 +1046,25 @@ pathnameNoDot = pathname.replace(reg_esp_caracter,"");
 
 if (pathname.match(/\/base16\/grid/))
 {
-    uriApi = uri.replace(/(\/base16\/grid)/, ".json$1");
+    uriApi = uri.replace(/(\/base16\/grid)/, "$1");
 }
 else if (pathname.match(/(\/base16h)?\/grid/))
 {
-    uriApi = uri.replace(/((\/base16h)?\/grid)/, ".json$1");
+    uriApi = uri.replace(/((\/base16h)?\/grid)/, "$1");
 }
 else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
 {
-    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1.json");
-    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2.json");
+    uriApi = uri_base + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1");
+    uriApiJurisd = uri_base + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2");
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
-    loadGeojson(uri.replace(/\/[A-Z]{2}\/(geo:(olc|ghs).*)$/i, "/$1.json"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
-    loadGeojson(uri.replace(/\/([A-Z]{2})\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1.json"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
+    loadGeojson(uri.replace(/\/[A-Z]{2}\/(geo:(olc|ghs).*)$/i, "/$1"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
+    loadGeojson(uri.replace(/\/([A-Z]{2})\/(geo:(olc|ghs).*)$/i, "/geo:iso_ext:$1"),[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
 }
 else if (pathname.match(/^\/geo:.+$/i))
 {
-    uriApi = uri + '.json';
+    uriApi = uri;
     getJurisdAfterLoad = true;
 }
 
