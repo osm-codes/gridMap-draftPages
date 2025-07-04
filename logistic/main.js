@@ -1283,7 +1283,7 @@ function afterData(data,layer)
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
 
-                var nextURL = uri_base + "/" + logistic_id
+                var nextURL = `${uri_base}/${data.properties.isolabel_ext}~(${logistic_id.split(/[~]/)[1]})`
                 const nextTitle = 'AFA.codes: ' + logistic_id;
                 const nextState = { additionalInformation: 'to canonical.' };
                 window.history.pushState(nextState, nextTitle, nextURL);
