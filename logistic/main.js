@@ -910,9 +910,9 @@ function popUpFeature(feature,layer)
 
     var popupContent = "";
 
-    if(feature.properties.logistic_id )
+    if(feature.properties.logistic_id)
     {
-        popupContent += "Logistic code: <big><code>" + (feature.properties.logistic_id.split(/[~]/)[1]) + "</code></big><br>";
+        popupContent += "Logistic id: <big><code>" + feature.properties.logistic_id + "</code></big><br>";
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
 
@@ -923,7 +923,7 @@ function popUpFeature(feature,layer)
 
         if(feature.properties.jurisd_local_id )
         {
-            popupContent += "Jurisdiction code: " + feature.properties.jurisd_local_id + "<br>";
+            popupContent += "Jurisdiction id: " + feature.properties.jurisd_local_id + "<br>";
         }
     }
     else
@@ -934,11 +934,11 @@ function popUpFeature(feature,layer)
         }
         else if(feature.properties.index)
         {
-            popupContent += "Id: <big><code>" + (feature.properties.index) + "</code></big><br>";
+            popupContent += "Id: <big><code>" + feature.properties.index + "</code></big><br>";
         }
         else
         {
-            popupContent += "Id: <big><code>" + (feature.id) + "</code></big><br>";
+            popupContent += "Id: <big><code>" + feature.id + "</code></big><br>";
         }
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
@@ -1298,7 +1298,7 @@ function afterData(data,layer)
                             const label = formatLabel(item);
                             return `<a href="./${label}~${logistic_id_code}" title="AFAcode ${label}~${logistic_id_code}"><small>${label}~</small>${logistic_id_code}</a>`
                         }).join(', ');
-                    document.getElementById('canonicalCode').innerHTML = df_short_code;
+                    document.getElementById('canonicalCode').innerHTML = `<a href="./${logistic_id}" title="AFAcode ${logistic_id}">${logistic_id}</a> (${df_short_code})`;
                 }
                 else
                 {
