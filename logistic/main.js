@@ -1283,7 +1283,9 @@ function afterData(data,layer)
                     loadGeojson(uri,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false)},function(e){});
                 }
 
-                var nextURL = `${uri_base}/${data.properties.isolabel_ext}~${logistic_id.split(/[~]/)[1]}`
+                const [jurisd_country, jurisd_state, jurisd_city] = (data.properties.isolabel_ext).split("-", 3);
+
+                var nextURL = jurisd_country !== 'CO' ? `${uri_base}/${data.properties.isolabel_ext}~${logistic_id.split(/[~]/)[1]}` : `${uri_base}/${logistic_id}`;
                 const nextTitle = 'AFA.codes: ' + logistic_id;
                 const nextState = { additionalInformation: 'to canonical.' };
                 window.history.pushState(nextState, nextTitle, nextURL);
