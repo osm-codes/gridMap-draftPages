@@ -930,15 +930,15 @@ function popUpFeature(feature,layer)
     {
         if(feature.properties.type)
         {
-            popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.id) + "</code></big><br>";
+            popupContent += (feature.properties.type).toUpperCase() + " Id: <big><code>" + (feature.id) + "</code></big><br>";
         }
         else if(feature.properties.index)
         {
-            popupContent += "Code: <big><code>" + (feature.properties.index) + "</code></big><br>";
+            popupContent += "Id: <big><code>" + (feature.properties.index) + "</code></big><br>";
         }
         else
         {
-            popupContent += "Code: <big><code>" + (feature.id) + "</code></big><br>";
+            popupContent += "Id: <big><code>" + (feature.id) + "</code></big><br>";
         }
         popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
         popupContent += "Side: " + value_side + " " + sufix_side + "<br>";
@@ -1025,8 +1025,8 @@ function onEachFeature(feature,layer)
 
     if(feature.id)
     {
-        const codsci = (feature.id).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + defaultMap.isocode + defaultMap.scientificBase.symbol + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+        const codsci = ((feature.id).split("+",2)[1]).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
     }
 
     if(feature.properties.logistic_id)
