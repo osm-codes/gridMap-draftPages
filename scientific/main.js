@@ -166,7 +166,7 @@ decodeGgeohash.onAdd = function (map) {
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
 
     this.label_field.for = 'fielddecode';
-    this.label_field.innerHTML = 'Grid code: ';
+    this.label_field.innerHTML = 'Grid id: ';
 
     this.field.type = 'text';
     this.field.placeholder = 'e.g.: ' + defaultMap.scientificBase.placeholderDecode;
