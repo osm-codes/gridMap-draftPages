@@ -1300,9 +1300,9 @@ function afterData(data,layer)
                     const df_short_code = data.properties.isolabel_ext_abbrev
                         .map(item => {
                             const label = formatLabel(item);
-                            return `<a href="./${label}~${logistic_id_code}" title="AFAcode ${label}~${logistic_id_code}"><small>${label}~</small>${logistic_id_code}</a>`
+                            return `<a href="./${label}~${logistic_id_code}" title="AFAcode ${label}~${logistic_id_code}">${label}~${logistic_id_code}</a>`
                         }).join(', ');
-                    document.getElementById('canonicalCode').innerHTML = `<a href="./${logistic_id}" title="AFAcode ${logistic_id}">${logistic_id}</a> (${df_short_code})`;
+                    document.getElementById('canonicalCode').innerHTML = `<a href="./${logistic_id}" title="AFAcode ${logistic_id}">${logistic_id}</a> <small>(${df_short_code})</small>`;
                 }
                 else
                 {
