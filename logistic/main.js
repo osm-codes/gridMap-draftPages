@@ -392,6 +392,8 @@ const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep pr
 // No-tooltip control
 const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
 
+// Open with Geohack
+const openWithGeohackControl = createControl({id: 'geohack', buttonLabel: 'Open with Geohack', buttonAction: openWithGeohack, position: 'topleft'});
 
 var geoUriDiv = L.control({position: 'topright'});
 geoUriDiv.onAdd = function (map) {
@@ -431,13 +433,14 @@ const myLocationControl = L.Control.extend({
 
 map.addControl(new myLocationControl());
 
-[zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl]
+[zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl, openWithGeohackControl]
     .forEach(control => control.addTo(map));
 
 var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
 var c = document.getElementById('custom-map-controlsc');
 var d = document.getElementById('custom-map-controlsd');
+var e = document.getElementById('custom-map-controlse');
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
@@ -449,6 +452,7 @@ b.appendChild(officialBordersControl.getContainer());
 d.appendChild(noTooltipControl.getContainer());
 d.appendChild(zoomClickControl.getContainer());
 d.appendChild(keepPreviousClickControl.getContainer());
+e.appendChild(openWithGeohackControl.getContainer());
 
 function resetDef()
 {
@@ -521,6 +525,40 @@ function toggleOfficialBordersLayers()
 {
     map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
 }
+
+function geoURI_to_geohackString(geoURI)
+{
+    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)/i;
+    const a = geoURI.match(re);
+    latd = a[1];
+	lond = a[2];
+	if ( latd != '' ) {
+		sign = latd > 0 ? 1 : -1 ;
+		lat4 = latd > 0 ? 'N' : 'S' ;
+		latd *= sign ;
+		lat1 = Math.floor ( latd ) ;
+		lat2 = Math.floor ( ( latd - lat1 ) * 60 ) ;
+		lat3 = Math.floor ( ( latd - lat1 - lat2 / 60 ) * 3600 ) ;
+	}
+	if ( lond != '' ) {
+		sign = lond > 0 ? 1 : -1 ;
+		lon4 = lond > 0 ? 'E' : 'W' ;
+		lond *= sign ;
+		lon1 = Math.floor ( lond ) ;
+		lon2 = Math.floor ( ( lond - lon1 ) * 60 ) ;
+		lon3 = Math.floor ( ( lond - lon1 - lon2 / 60 ) * 3600 ) ;
+	}
+	p = lat1 + '_' + lat2 + '_' + lat3 + '_' + lat4 + '_' ;
+	p += lon1 + '_' + lon2 + '_' + lon3 + '_' + lon4 ;
+	return p;
+}
+function go_to_geohackString(geoURI)
+{
+  const url = 'https://geohack.toolforge.org/geohack.php?params=';
+  const p   = geoURI_to_geohackString(geoURI);
+  window.open(url+p, '_blank').focus();
+}
+
 function generateSelectLevel(base,min_level,size=0)
 {
     let html = '';
