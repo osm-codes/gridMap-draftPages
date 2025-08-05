@@ -393,7 +393,7 @@ const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep pr
 const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
 
 // Open with Geohack
-const openWithGeohackControl = createControl({id: 'geohack', buttonLabel: 'Open with Geohack', buttonAction: openWithGeohack, position: 'topleft'});
+const openWithGeohackControl = createControl({id: 'geohack', buttonLabel: 'Open with Geohack', buttonAction: go_to_geohackString, position: 'topleft'});
 
 var geoUriDiv = L.control({position: 'topright'});
 geoUriDiv.onAdd = function (map) {
