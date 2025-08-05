@@ -624,13 +624,14 @@ function isLatLngInsideJurisdiction(lat,lng,layer)
 
     return inside;
 }
+
 // Regular expressions for geoURI validation
 const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
 const regexLex  = /^(urn|geo):lex:.+$/i;
 
 function geoURI_to_geohackString(geoURI)
 {
-    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)/i;
+    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)$/i;
     const a = geoURI.match(re);
     latd = a[1];
 	lond = a[2];
@@ -656,18 +657,18 @@ function geoURI_to_geohackString(geoURI)
 }
 function go_to_geohackString()
 {
+    const input = document.getElementById('geoUri').innerHTML;
+    console.log(input)
 
-    let geoURI = document.getElementById('geoUri');
-
-    if(geoURI)
+    if ( input === null || input === '' )
     {
-        const url = 'https://geohack.toolforge.org/geohack.php?params=';
-        const p   = geoURI_to_geohackString(geoURI);
-        window.open(url+p, '_blank').focus();
+        alert("Error: click the map.");
     }
     else
     {
-        alert("Error: click the map.");
+        const url = 'https://geohack.toolforge.org/geohack.php?params=';
+        const p   = geoURI_to_geohackString(input);
+        window.open(url+p, '_blank').focus();
     }
 }
 

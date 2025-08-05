@@ -16,7 +16,7 @@ a#hasGeoUri, a#hasGeoUri:link, a#hasGeoUri:visited, a#hasGeoUri:active{color:#66
 a#hasGeoUri:hover{color:hotpink;}
 #custom-map-controlsa,#custom-map-controlsb,#custom-map-controlsc,#custom-map-controlsd,#custom-map-controlse{float:left;padding:0.5% 0;}
 #custom-map-controlsb .leaflet-control{clear:none;}
-#custom-map-controlsd{clear:both;}
+#custom-map-controlsd,.section-footer{clear:both;}
 .leaflet-control{padding-top:2%;}
 .leaflet-tooltip.tooltipbase16h1c{border:#ff0;background:#ff0}
 .leaflet-tooltip.tooltipbase16h1ca{border:#fff;background:#fff}
