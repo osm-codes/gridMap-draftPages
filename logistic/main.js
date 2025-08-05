@@ -526,39 +526,6 @@ function toggleOfficialBordersLayers()
     map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
 }
 
-function geoURI_to_geohackString(geoURI)
-{
-    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)/i;
-    const a = geoURI.match(re);
-    latd = a[1];
-	lond = a[2];
-	if ( latd != '' ) {
-		sign = latd > 0 ? 1 : -1 ;
-		lat4 = latd > 0 ? 'N' : 'S' ;
-		latd *= sign ;
-		lat1 = Math.floor ( latd ) ;
-		lat2 = Math.floor ( ( latd - lat1 ) * 60 ) ;
-		lat3 = Math.floor ( ( latd - lat1 - lat2 / 60 ) * 3600 ) ;
-	}
-	if ( lond != '' ) {
-		sign = lond > 0 ? 1 : -1 ;
-		lon4 = lond > 0 ? 'E' : 'W' ;
-		lond *= sign ;
-		lon1 = Math.floor ( lond ) ;
-		lon2 = Math.floor ( ( lond - lon1 ) * 60 ) ;
-		lon3 = Math.floor ( ( lond - lon1 - lon2 / 60 ) * 3600 ) ;
-	}
-	p = lat1 + '_' + lat2 + '_' + lat3 + '_' + lat4 + '_' ;
-	p += lon1 + '_' + lon2 + '_' + lon3 + '_' + lon4 ;
-	return p;
-}
-function go_to_geohackString(geoURI)
-{
-  const url = 'https://geohack.toolforge.org/geohack.php?params=';
-  const p   = geoURI_to_geohackString(geoURI);
-  window.open(url+p, '_blank').focus();
-}
-
 function generateSelectLevel(base,min_level,size=0)
 {
     let html = '';
@@ -657,6 +624,52 @@ function isLatLngInsideJurisdiction(lat,lng,layer)
 
     return inside;
 }
+// Regular expressions for geoURI validation
+const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
+const regexLex  = /^(urn|geo):lex:.+$/i;
+
+function geoURI_to_geohackString(geoURI)
+{
+    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)/i;
+    const a = geoURI.match(re);
+    latd = a[1];
+	lond = a[2];
+	if ( latd != '' ) {
+		sign = latd > 0 ? 1 : -1 ;
+		lat4 = latd > 0 ? 'N' : 'S' ;
+		latd *= sign ;
+		lat1 = Math.floor ( latd ) ;
+		lat2 = Math.floor ( ( latd - lat1 ) * 60 ) ;
+		lat3 = Math.floor ( ( latd - lat1 - lat2 / 60 ) * 3600 ) ;
+	}
+	if ( lond != '' ) {
+		sign = lond > 0 ? 1 : -1 ;
+		lon4 = lond > 0 ? 'E' : 'W' ;
+		lond *= sign ;
+		lon1 = Math.floor ( lond ) ;
+		lon2 = Math.floor ( ( lond - lon1 ) * 60 ) ;
+		lon3 = Math.floor ( ( lond - lon1 - lon2 / 60 ) * 3600 ) ;
+	}
+	p = lat1 + '_' + lat2 + '_' + lat3 + '_' + lat4 + '_' ;
+	p += lon1 + '_' + lon2 + '_' + lon3 + '_' + lon4 ;
+	return p;
+}
+function go_to_geohackString()
+{
+
+    let geoURI = document.getElementById('geoUri');
+
+    if(geoURI)
+    {
+        const url = 'https://geohack.toolforge.org/geohack.php?params=';
+        const p   = geoURI_to_geohackString(geoURI);
+        window.open(url+p, '_blank').focus();
+    }
+    else
+    {
+        alert("Error: click the map.");
+    }
+}
 
 // Function to get the jurisdiction context based on selected values
 function getJurisdictionContext() {
@@ -684,10 +697,6 @@ function buildGeoPrefix(encode = true)
 {
     return encode ? `geo:${isTypeAfaCode() ? '' : `${document.getElementById('tcode').value}:`}` : 'geo:afa:';
 }
-
-// Regular expressions for geoURI validation
-const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
-const regexLex  = /^(urn|geo):lex:.+$/i;
 
 function changePlaceholder()
 {
