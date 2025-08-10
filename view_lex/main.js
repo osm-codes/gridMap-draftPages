@@ -144,12 +144,12 @@ function loadGeojson(uri,arrayLayer,afterLoad,afterData)
     .catch(err => {})
 }
 
-var uri = window.location.href;
+var uri = window.location.protocol + '//api.' + window.location.hostname;
 let pathname = window.location.pathname;
 
 if (pathname.match(/^\/(urn|geo):(lex|ghs|olc):.+$/i))
 {
-    var uriApi = uri + '.json'
+    var uriApi = uri + pathname
 
     loadGeojson(uriApi,[layerJurisd],afterLoadJurisdAll,function(e){});
 }

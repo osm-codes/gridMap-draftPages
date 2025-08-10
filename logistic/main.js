@@ -440,10 +440,10 @@ var a = document.getElementById('custom-map-controlsa');
 var b = document.getElementById('custom-map-controlsb');
 var c = document.getElementById('custom-map-controlsc');
 var d = document.getElementById('custom-map-controlsd');
-var e = document.getElementById('custom-map-controlse');
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
+a.appendChild(openWithGeohackControl.getContainer());
 c.appendChild(level.getContainer());
 b.appendChild(clearControl.getContainer());
 // b.appendChild(toggleTooltipControl.getContainer());
@@ -452,7 +452,7 @@ b.appendChild(officialBordersControl.getContainer());
 d.appendChild(noTooltipControl.getContainer());
 d.appendChild(zoomClickControl.getContainer());
 d.appendChild(keepPreviousClickControl.getContainer());
-e.appendChild(openWithGeohackControl.getContainer());
+
 
 function resetDef()
 {
@@ -1467,9 +1467,9 @@ const loadGeoApi = (pattern, prefix, suffix, afterLoad, afterData) => {
 // Define patterns and corresponding parameters
 const patterns = [
 { regex: /\/CO-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:co-divipola',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
-{ regex: /\/BR-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+{ regex: /\/BR-(\d+\{6,\})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
 { regex: /\/CM-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:cm-code',      suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
-{ regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+{ regex: /^\/(([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?)$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
 { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})\/geo:(olc|ghs):.+$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: (e) => afterLoadJurisdAll(e, false), afterData: function(e){} }/*,
 { regex: /\/([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i, prefix: 'geo:iso_ext',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData }*/
 ];
