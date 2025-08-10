@@ -1469,7 +1469,7 @@ const patterns = [
 { regex: /\/CO-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:co-divipola',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
 { regex: /\/BR-(\d+\{6,\})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:br-geocodigo', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
 { regex: /\/CM-(\d+)((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:cm-code',      suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
-{ regex: /^\/(([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?)$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
+{ regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})((~|-)[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)?$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData },
 { regex: /^\/([A-Z]{2}(-[A-Z0-9]+){1,2})\/geo:(olc|ghs):.+$/i, prefix: 'geo:iso_ext', suffix: '', afterLoad: (e) => afterLoadJurisdAll(e, false), afterData: function(e){} }/*,
 { regex: /\/([A-Z]{2})~[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+(,[0123456789BCDFGHJKLMNPQRSTUVWXYZ\.]+)*$/i, prefix: 'geo:iso_ext',  suffix: '', afterLoad: afterLoadJurisdAll, afterData: afterData }*/
 ];
