@@ -124,7 +124,7 @@ function checkCountry(string,reset=true)
         if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
-            var defaultMapBase = defaultMap.postalcodeBaseAbs;
+            defaultMapBase = defaultMap.postalcodeBaseAbs;
             reset ? resetDef() : '';
             break;
         }
@@ -437,7 +437,7 @@ function getDecode(data)
 
         if(!regex.test(input))
         {
-            uri += defaultMap.isocode + defaultMapBase.symbol
+            // uri += defaultMap.isocode + defaultMapBase.symbol
         }
 
         uri += input
@@ -454,11 +454,11 @@ function changePlaceholder()
 
     if (tcode.match(/^(olc|ghs|ghs64)$/i) && (input === null || input === ''))
     {
-        document.getElementById('fieldencode').placeholder = 'e.g.: geo:' + ( tcode === '' ? '' : tcode + ':' ) + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+        document.getElementById('fieldencode').placeholder = 'e.g.: geo:' + ( tcode === '' ? '' : tcode + ':' ) + defaultMap.bases[defaultMap.postalcodeBaseAbs].placeholderEncode;
     }
     else
     {
-        document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBase].placeholderEncode;
+        document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMap.bases[defaultMap.postalcodeBaseAbs].placeholderEncode;
     }
 }
 
@@ -522,7 +522,7 @@ function getEncode(noData)
             {
                 document.getElementById('fielddecode').value = '';
 
-                uri += "/" + defaultMapBase.name;
+                // uri += "/" + defaultMapBase.name;
 
                 layerPolygonCurrent.clearLayers();
                 if(grid !== '')
@@ -580,8 +580,8 @@ function onMapClick(e)
     let level = document.getElementById('level_size').value
     let grid = document.getElementById('grid').value
 
-    var uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMapBase.name + '/' + defaultMap.isocode
-    var uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMapBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
+    var uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + '/' + defaultMap.isocode
+    var uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
     var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
 
     document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
@@ -623,7 +623,7 @@ function popUpFeature(feature,layer)
 
     if(feature.properties.type)
     {
-        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.id) + "</code></big><br>";
+        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.logistic_id) + "</code></big><br>";
     }
     else if(feature.properties.index)
     {
@@ -631,7 +631,7 @@ function popUpFeature(feature,layer)
     }
     else
     {
-        popupContent += "Id: <big><code>" + (feature.id) + "</code></big><br>";
+        popupContent += "Id: <big><code>" + (feature.properties.logistic_id) + "</code></big><br>";
     }
 
     popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
@@ -662,7 +662,7 @@ function layerTooltipFeature(feature,layer)
     }
     else
     {
-        var layerTooltip = (feature.id);
+        var layerTooltip = (feature.properties.logistic_id);
     }
 
     layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1c'});
@@ -670,7 +670,7 @@ function layerTooltipFeature(feature,layer)
 
 function layerTooltipFeature2(feature,layer)
 {
-    layer.bindTooltip(feature.id,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+    layer.bindTooltip(feature.properties.logistic_id,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
 function layerTooltipFeature3(feature,layer)
@@ -703,9 +703,9 @@ function onEachFeature(feature,layer)
 
     L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterCurrent);
 
-    if(feature.id)
+    if(feature.properties.logistic_id)
     {
-        document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)[1]).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
+        document.getElementById('sciCode').innerHTML = (((((feature.properties.logistic_id).split("~", 2)[1]).replace(/(...)(?!$)/g,'$1.'))).replace(/(\.\.)/g,'\.'));
     }
 
     layer.on({
@@ -962,15 +962,15 @@ function afterData(data,layer)
 
         if (!data.properties.index)
         {
-            if(data.id)
+            if(data.properties.logistic_id)
             {
-                var nextURL = uri_base + "/" + data.id
-                const nextTitle = 'AFA.codes: ' + data.id;
+                var nextURL = uri_base + "/" + data.properties.logistic_id
+                const nextTitle = 'AFA.codes: ' + data.properties.logistic_id;
                 const nextState = { additionalInformation: 'to canonical.' };
 
                 window.history.pushState(nextState, nextTitle, nextURL);
 
-                document.getElementById('fielddecode').value = data.id;
+                document.getElementById('fielddecode').value = data.properties.logistic_id;
 
                 if(data.properties.truncated_code)
                 {
