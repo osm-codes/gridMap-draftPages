@@ -113,7 +113,7 @@ var overlays = {
 };
 
 var defaultMap;
-var defaultMapBase = defaultMap.scientificBase;
+var defaultMapBase;
 
 function checkCountry(string,reset=true)
 {
@@ -124,6 +124,7 @@ function checkCountry(string,reset=true)
         if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
+            defaultMapBase = defaultMap.scientificBase;
             reset ? resetDef() : '';
             break;
         }
