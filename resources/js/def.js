@@ -30,7 +30,15 @@ postalcodeBase:{
  placeholderDecode:'42',
  placeholderEncode:'-15.7,-47.8;u=10',
  placeholderList:'3,5,A',
- selectGrid:[32]}},
+ selectGrid:[32]},
+postalcodeBaseAbs:{
+ name:'base32nvu',
+ endLevel:40,
+ symbol:'~',
+ placeholderDecode:'BR~3H',
+ placeholderEncode:'-15.7,-47.8;u=10',
+ placeholderList:'3,5,B',
+ selectGrid:[2,4,8,16]}},
 CM:{
 name:'Cameroun',
 center:[4.8,11.9],
