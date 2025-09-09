@@ -193,6 +193,8 @@ encodeGgeohash.onAdd = function (map) {
     this.select_tcode   = L.DomUtil.create('select', '', this.container);
     this.field = L.DomUtil.create('input', '', this.container);
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
+    this.span = L.DomUtil.create('span','', this.container);
+    this.button2 = L.DomUtil.create('button','getGeo-button',this.container);
 
     this.label_tcode.for = 'tcode';
     this.label_tcode.innerHTML = '';
@@ -208,9 +210,14 @@ encodeGgeohash.onAdd = function (map) {
     this.button.type = 'button';
     this.button.innerHTML= "Encode";
 
+    this.span.innerHTML= " or ";
+
+    this.button2.type = 'button';
+    this.button2.innerHTML= "Open with Geohack";
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
-    L.DomEvent.on(this.button, 'click', getEncode, this.container);
+    L.DomEvent.on(this.button,  'click', getEncode, this.container);
+    L.DomEvent.on(this.button2, 'click', () => go_to_geohackString, this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
     L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
 
@@ -222,14 +229,14 @@ level.onAdd = function (map) {
     this.container     = L.DomUtil.create('div');
     this.label_level   = L.DomUtil.create('label', '', this.container);
     this.select_level  = L.DomUtil.create('select', '', this.container);
-    this.label_grid    = L.DomUtil.create('label', '', this.container);
-    this.select_grid   = L.DomUtil.create('select', '', this.container);
-
-    this.label_grid.for = 'grid';
-    this.label_grid.innerHTML = ' ';
-    this.select_grid.id = 'grid';
-    this.select_grid.name = 'grid';
-    this.select_grid.innerHTML = generateSelectGrid(defaultMapBase.selectGrid)
+    // this.label_grid    = L.DomUtil.create('label', '', this.container);
+    // this.select_grid   = L.DomUtil.create('select', '', this.container);
+    //
+    // this.label_grid.for = 'grid';
+    // this.label_grid.innerHTML = ' ';
+    // this.select_grid.id = 'grid';
+    // this.select_grid.name = 'grid';
+    // this.select_grid.innerHTML = generateSelectGrid(defaultMapBase.selectGrid)
 
     this.label_level.for = 'level';
     this.label_level.innerHTML = '<a href="https://wiki.addressforall.org/doc/osmc:Viz/Navega%C3%A7%C3%A3o" target="_help">Level</a>: ';
@@ -541,6 +548,49 @@ function getEncode(noData)
                 }
             }
         }
+    }
+}
+
+function geoURI_to_geohackString(geoURI)
+{
+    const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)$/i;
+    const a = geoURI.match(re);
+    latd = a[1];
+	lond = a[2];
+	if ( latd != '' ) {
+		sign = latd > 0 ? 1 : -1 ;
+		lat4 = latd > 0 ? 'N' : 'S' ;
+		latd *= sign ;
+		lat1 = Math.floor ( latd ) ;
+		lat2 = Math.floor ( ( latd - lat1 ) * 60 ) ;
+		lat3 = Math.floor ( ( latd - lat1 - lat2 / 60 ) * 3600 ) ;
+	}
+	if ( lond != '' ) {
+		sign = lond > 0 ? 1 : -1 ;
+		lon4 = lond > 0 ? 'E' : 'W' ;
+		lond *= sign ;
+		lon1 = Math.floor ( lond ) ;
+		lon2 = Math.floor ( ( lond - lon1 ) * 60 ) ;
+		lon3 = Math.floor ( ( lond - lon1 - lon2 / 60 ) * 3600 ) ;
+	}
+	p = lat1 + '_' + lat2 + '_' + lat3 + '_' + lat4 + '_' ;
+	p += lon1 + '_' + lon2 + '_' + lon3 + '_' + lon4 ;
+	return p;
+}
+function go_to_geohackString()
+{
+    const input = document.getElementById('geoUri').innerHTML;
+    console.log(input)
+
+    if ( input === null || input === '' )
+    {
+        alert("Error: click the map.");
+    }
+    else
+    {
+        const url = 'https://geohack.toolforge.org/geohack.php?params=';
+        const p   = geoURI_to_geohackString(input);
+        window.open(url+p, '_blank').focus();
     }
 }
 

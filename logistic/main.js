@@ -289,6 +289,8 @@ encodeGgeohash.onAdd = function (map) {
     this.button = L.DomUtil.create('button','leaflet-control-button',this.container);
     this.span = L.DomUtil.create('span','', this.container);
     this.button2 = L.DomUtil.create('button','getGeo-button',this.container);
+    this.span2 = L.DomUtil.create('span','', this.container);
+    this.button3 = L.DomUtil.create('button','getGeo-button',this.container);
 
     this.label_tcode.for = 'tcode';
     this.label_tcode.innerHTML = '';
@@ -309,10 +311,16 @@ encodeGgeohash.onAdd = function (map) {
     this.button2.type = 'button';
     this.button2.innerHTML= "My Location";
 
+    this.span2.innerHTML= " or ";
+
+    this.button3.type = 'button';
+    this.button3.innerHTML= "Open with Geohack";
+
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
     L.DomEvent.on(this.button2, 'click', () => getMyLocation(handleLocation), this.container);
+    L.DomEvent.on(this.button3, 'click', () => go_to_geohackString, this.container);
     L.DomEvent.on(this.field, 'keyup', (data) => {if(data.keyCode === 13){getEncode(data);}}, this.container);
     L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
 
@@ -392,9 +400,6 @@ const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep pr
 // No-tooltip control
 const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
 
-// Open with Geohack
-const openWithGeohackControl = createControl({id: 'geohack', buttonLabel: 'Open with Geohack', buttonAction: go_to_geohackString, position: 'topleft'});
-
 var geoUriDiv = L.control({position: 'topright'});
 geoUriDiv.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -433,7 +438,7 @@ const myLocationControl = L.Control.extend({
 
 map.addControl(new myLocationControl());
 
-[zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl, openWithGeohackControl]
+[zoom, layers, escala, geoUriDiv, decodeGgeohash, encodeGgeohash, level, clearControl, toggleCoverageControl, officialBordersControl, jurisdictionGgeohash, noTooltipControl, zoomClickControl, keepPreviousClickControl]
     .forEach(control => control.addTo(map));
 
 var a = document.getElementById('custom-map-controlsa');
@@ -443,7 +448,6 @@ var d = document.getElementById('custom-map-controlsd');
 a.appendChild(jurisdictionGgeohash.getContainer());
 a.appendChild(decodeGgeohash.getContainer());
 a.appendChild(encodeGgeohash.getContainer());
-a.appendChild(openWithGeohackControl.getContainer());
 c.appendChild(level.getContainer());
 b.appendChild(clearControl.getContainer());
 // b.appendChild(toggleTooltipControl.getContainer());
