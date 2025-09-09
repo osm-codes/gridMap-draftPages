@@ -217,7 +217,7 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.disableScrollPropagation(this.container);
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button,  'click', getEncode, this.container);
-    L.DomEvent.on(this.button2, 'click', () => go_to_geohackString, this.container);
+    L.DomEvent.on(this.button2, 'click', () => go_to_geohackString(), this.container);
     L.DomEvent.on(this.field, 'keyup', function(data){if(data.keyCode === 13){getEncode(data);}}, this.container);
     L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
 
@@ -474,7 +474,7 @@ function getEncode(noData)
     let input = document.getElementById('fieldencode').value
     let level = document.getElementById('level_size').value
     let tcode = document.getElementById('tcode').value
-    let grid = document.getElementById('grid').value
+    let grid = '' //document.getElementById('grid').value
     let context = defaultMap.isocode;
 
     let uri = uri_base_api + "/";
@@ -589,7 +589,7 @@ function go_to_geohackString()
     else
     {
         const url = 'https://geohack.toolforge.org/geohack.php?params=';
-        const p   = geoURI_to_geohackString(input);
+        const p   = geoURI_to_geohackString(input.split(';u=')[0]);
         window.open(url+p, '_blank').focus();
     }
 }
@@ -628,7 +628,7 @@ function latRound(x)
 function onMapClick(e)
 {
     let level = document.getElementById('level_size').value
-    let grid = document.getElementById('grid').value
+    let grid = '' //document.getElementById('grid').value
 
     var uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + '/' + defaultMap.isocode
     var uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + (grid ? '/' + grid : '') + '/' + defaultMap.isocode

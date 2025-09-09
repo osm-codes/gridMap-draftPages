@@ -320,7 +320,7 @@ encodeGgeohash.onAdd = function (map) {
     L.DomEvent.disableClickPropagation(this.container);
     L.DomEvent.on(this.button, 'click', getEncode, this.container);
     L.DomEvent.on(this.button2, 'click', () => getMyLocation(handleLocation), this.container);
-    L.DomEvent.on(this.button3, 'click', () => go_to_geohackString, this.container);
+    L.DomEvent.on(this.button3, 'click', () => go_to_geohackString(), this.container);
     L.DomEvent.on(this.field, 'keyup', (data) => {if(data.keyCode === 13){getEncode(data);}}, this.container);
     L.DomEvent.on(this.select_tcode, 'change', changePlaceholder, this.container);
 
@@ -671,7 +671,7 @@ function go_to_geohackString()
     else
     {
         const url = 'https://geohack.toolforge.org/geohack.php?params=';
-        const p   = geoURI_to_geohackString(input);
+        const p   = geoURI_to_geohackString(input.split(';u=')[0]);
         window.open(url+p, '_blank').focus();
     }
 }
