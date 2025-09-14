@@ -117,7 +117,7 @@ function geoURI_to_geohackString(geoURI)
 function go_to_geohackString()
 {
     const input = document.getElementById('geoUri').innerHTML;
-    console.log(input)
+    // console.log(input)
 
     if ( input === null || input === '' )
     {
@@ -183,11 +183,12 @@ function checkCountry(string,reset=true)
         {
             defaultMap = countries[key];
 
-            if (/^\/*[A-Z]{2}\+/.test(string))
+            if (/^\/*[A-Z]{2}\+.+/.test(string))
             {
                 defaultMapBase = defaultMap.scientificBase;
+                isLogAfaCodeAbs = false;
             }
-            else
+            else if (/^\/*[A-Z]{2}\~.+/.test(string))
             {
                 defaultMapBase = defaultMap.postalcodeBaseAbs;
                 isLogAfaCodeAbs = true;
@@ -886,9 +887,16 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
 
         // if(isAfacode && context !== null)
         // {
-            uri += '/BR'// + context;
+            // uri += '/BR'// + context;
         // }
-        //
+        if(isLogAfaCodeAbs)
+        {
+            uri += '/' + defaultMap.isocode
+        }
+        else
+        {
+            uri += "/" + defaultMapBase.name + '/' + defaultMap.isocode
+        }
         // if( isAfacode && context !== null && !insidePolygon )
         // {
         //     alert("Error: outside of current jurisdiction.");
@@ -1352,7 +1360,7 @@ function popUpFeature(feature,layer)
 
     if(feature.properties.type)
     {
-        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + isLogAfaCodeAbs ? (feature.id) : (feature.properties.logistic_id) + "</code></big><br>";
+        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) ) + "</code></big><br>";
     }
     else if(feature.properties.index)
     {
@@ -1360,7 +1368,7 @@ function popUpFeature(feature,layer)
     }
     else
     {
-        popupContent += "Id: <big><code>" + isLogAfaCodeAbs ? (feature.id) : (feature.properties.logistic_id) + "</code></big><br>";
+        popupContent += "Id: <big><code>" + (isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) ) + "</code></big><br>";
     }
 
     popupContent += "Area: " + value_area + " " + sufix_area + "<br>";
@@ -1391,7 +1399,7 @@ function layerTooltipFeature(feature,layer)
     }
     else
     {
-        var layerTooltip = isLogAfaCodeAbs ? (feature.id) : (feature.properties.logistic_id);
+        var layerTooltip = (isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) );
     }
 
     layer.bindTooltip(layerTooltip,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1c'});
@@ -1399,7 +1407,7 @@ function layerTooltipFeature(feature,layer)
 
 function layerTooltipFeature2(feature,layer)
 {
-    layer.bindTooltip(isLogAfaCodeAbs ? (feature.id) : (feature.properties.logistic_id),{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+    layer.bindTooltip((isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) ),{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
 
@@ -1467,8 +1475,6 @@ function afterData(data,layer)
 
         if (!data.properties.index)
         {
-            isLogAfaCodeAbs ? (feature.id) : (feature.properties.logistic_id)
-
             if(isLogAfaCodeAbs)
             {
                 if(data.properties.logistic_id)
