@@ -1542,6 +1542,11 @@ else if (pathnameNoDot.match(/\/[A-Z]{2}\~.*$/i))
     uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\~.*)$/i, "/geo:afa:$1");
     uriApiJurisd = uri_base_api + pathnameNoDot.replace(/\/(([A-Z]{2})\~.*)$/i, "/geo:iso_ext:$2");
 }
+else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
+{
+    uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1");
+    uriApiJurisd = uri_base_api + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2");
+}
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
     loadGeojson(uri.replace(/\/[A-Z]{2}\/(geo:(olc|ghs).*)$/i, "/$1"),[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,afterDataOlcGhs)
@@ -1563,15 +1568,3 @@ if(uriApiJurisd !== null && uriApiJurisd !== '')
     loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
     loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
 }
-
-
-
-
-
-
-
-
-
-
-
-
