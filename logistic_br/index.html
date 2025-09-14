@@ -14,7 +14,7 @@
 <body>
 <header>
 <h3>Logistic AFAcode:
-    <code class="feSchrift" id="sciCode"></code>
+    <code class="feSchrift" id="logCode"></code>
     <a title="higher level (less digits)" href="#" onclick="changeLevel_byDigits(-1)"><img src="/resources/img/osmCodes-lessDigits.png"/></a>
     <a title="lower level (more digits)"  href="#" onclick="changeLevel_byDigits(+1)"><img src="/resources/img/osmCodes-moreDigits.png"/></a>
     <span id="nameJurisd" onclick="zoomToJurisd()"></span>
@@ -31,6 +31,7 @@
     <a href="." title="Back to AFAcodes homepage"><img src="/resources/img/OSMcodes-logo-transp.png" alt="A logo representing the AFAcodes project" class="geocode-logo"></a>
     <p>Equivalent cell geocodes:</p>
     <p class="space-before">Scientific: <code id="sciCode">(click the map)</code></p>
+    <div id="qr-container"></div>
 </section>
 <footer class="section-divider section-footer">
     <p class="font_small"><a href="." title="Go to the AFA.codes homepage">AFA.codes Homepage</a></p>
@@ -40,7 +41,8 @@
 </footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/kjua@0.10.0/dist/kjua.min.js"></script>
 <script src="/resources/js/def.min.js"></script>
-<script src="/logistic_br/main.min.js"></script>
+<script src="/scientific/main.min.js"></script>
 </body>
 </html>

@@ -177,6 +177,7 @@ var getJurisdAfterLoad = false;
 var jurisdIsMultipolygon = false;
 var min_level = 0;
 var getCover = true;
+var toggleTooltipStatus = false;
 
 function checkCountry(string,reset=true)
 {
@@ -212,8 +213,6 @@ var map = L.map('map',{
     zoomControl: false,
     renderer: L.svg(),
     layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll2,layerOlcGhsCurrent,layerOlcGhsAll] });
-
-var toggleTooltipStatus = false;
 
 map.attributionControl.setPrefix(false); // Disable the attribution prefix
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
@@ -343,6 +342,42 @@ level.onAdd = function (map) {
 
     return this.container; };
 
+
+var geoUriDiv = L.control({position: 'topright'});
+geoUriDiv.onAdd = function (map) {
+    this.container = L.DomUtil.create('div');
+
+    this.container.innerHTML= '<a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a>';
+
+    L.DomEvent.disableScrollPropagation(this.container);
+    L.DomEvent.disableClickPropagation(this.container);
+
+    return this.container; };
+
+// Create a "My Location" control
+const myLocationControl = L.Control.extend({
+    options: {
+        position: 'topleft'
+    },
+    onAdd: function () {
+        // Criação do contêiner para o botão com as classes do Leaflet
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+
+        // Criar o botão dentro do contêiner
+        const button = L.DomUtil.create('a', '', container);
+        button.innerHTML = '&#8982';
+        button.href = '#';
+        button.title = 'My location';
+
+        // Event handler for the button click
+        container.onclick = () => { getMyLocation(handleLocationJurisd); };
+
+        L.DomEvent.disableScrollPropagation(container);
+        L.DomEvent.disableClickPropagation(container);
+        return container;
+    }
+});
+
 // Function to create a basic Leaflet control with a label and button
 function createControl({ id, label, buttonLabel, buttonAction, position = 'topleft', type = 'button', checkbox = false, checked = false }) {
     const control = L.control({ position });
@@ -399,42 +434,6 @@ const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep pr
 
 // No-tooltip control
 const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
-
-var geoUriDiv = L.control({position: 'topright'});
-geoUriDiv.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-
-    this.container.innerHTML= '<a id="hasGeoUri" href="#fieldencode" title="Latitude,Longitude: click here to get it as Geo URI standard"><span id="geoUri" class="font_small"></span></a>';
-
-    L.DomEvent.disableScrollPropagation(this.container);
-    L.DomEvent.disableClickPropagation(this.container);
-
-    return this.container; };
-
-// Create a "My Location" control
-const myLocationControl = L.Control.extend({
-    options: {
-        position: 'topleft'
-    },
-    onAdd: function () {
-        // Criação do contêiner para o botão com as classes do Leaflet
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-
-        // Criar o botão dentro do contêiner
-        const button = L.DomUtil.create('a', '', container);
-        button.innerHTML = '&#8982';
-        button.href = '#';
-        button.title = 'My location';
-
-        // Event handler for the button click
-        container.onclick = () => { getMyLocation(handleLocationJurisd); };
-
-        L.DomEvent.disableScrollPropagation(container);
-        L.DomEvent.disableClickPropagation(container);
-        return container;
-    }
-});
-
 
 map.addControl(new myLocationControl());
 
@@ -629,10 +628,6 @@ function isLatLngInsideJurisdiction(lat,lng,layer)
     return inside;
 }
 
-// Regular expressions for geoURI validation
-const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
-const regexLex  = /^(urn|geo):lex:.+$/i;
-
 function geoURI_to_geohackString(geoURI)
 {
     const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)$/i;
@@ -676,6 +671,29 @@ function go_to_geohackString()
     }
 }
 
+function changePlaceholder()
+{
+    let input = (document.getElementById('fieldencode').value).trim()
+    const geoPrefix = buildGeoPrefix();
+
+    if ( input === null || input === '' )
+    {
+        document.getElementById('fieldencode').placeholder = `e.g.: ${geoPrefix}${defaultMap.postalcodeBase.placeholderEncode}`;
+    }
+    else
+    {
+        if(input.match(regexGeoUri))
+        {
+            input = input.replace(regexGeoUri, `${geoPrefix}$4$5`)
+            document.getElementById('fieldencode').value = `${input}`;
+        }
+    }
+}
+
+// Regular expressions for geoURI validation
+const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
+const regexLex  = /^(urn|geo):lex:.+$/i;
+
 // Function to get the jurisdiction context based on selected values
 function getJurisdictionContext() {
     const country = defaultMap.isocode;
@@ -701,25 +719,6 @@ function isTypeAfaCode()
 function buildGeoPrefix(encode = true)
 {
     return encode ? `geo:${isTypeAfaCode() ? '' : `${document.getElementById('tcode').value}:`}` : 'geo:afa:';
-}
-
-function changePlaceholder()
-{
-    let input = (document.getElementById('fieldencode').value).trim()
-    const geoPrefix = buildGeoPrefix();
-
-    if ( input === null || input === '' )
-    {
-        document.getElementById('fieldencode').placeholder = `e.g.: ${geoPrefix}${defaultMap.postalcodeBase.placeholderEncode}`;
-    }
-    else
-    {
-        if(input.match(regexGeoUri))
-        {
-            input = input.replace(regexGeoUri, `${geoPrefix}$4$5`)
-            document.getElementById('fieldencode').value = `${input}`;
-        }
-    }
 }
 
 function checkUValue(input)
