@@ -500,14 +500,7 @@ function toggleTooltipLayers()
 
 function toggleKeepClick()
 {
-    if(map.hasLayer(layerPolygonAll))
-    {
-        map.removeLayer(layerPolygonAll);
-    }
-    else
-    {
-        map.addLayer(layerPolygonAll)
-    }
+    map.hasLayer(layerPolygonAll) ? map.removeLayer(layerPolygonAll) : map.addLayer(layerPolygonAll)
 }
 
 function toggleCoverLayers()

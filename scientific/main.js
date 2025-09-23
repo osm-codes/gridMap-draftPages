@@ -154,10 +154,12 @@ function latRound(x)
 
 
 var defaultMap;
+var defaultMapIsocode;
 var defaultMapBase;
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
 var isLogAfaCodeAbs = false;
+var getCover = true;
 var uri = window.location.href;
 
 let pathname = window.location.pathname;
@@ -172,6 +174,7 @@ function checkCountry(string,reset=true)
         if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
+            defaultMapIsocode = key;
 
             if (/^\/*[A-Z]{2}\+.+/.test(string))
             {
@@ -248,7 +251,7 @@ var map = L.map('map',{
     attributionControl: true,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll, layerJurisdAll2, layerOlcGhsCurrent, layerOlcGhsAll] });
+    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerJurisdAll2, layerOlcGhsCurrent, layerOlcGhsAll] });
 
 map.attributionControl.setPrefix(false);
 map.on('click', handleMapClick);
@@ -591,29 +594,21 @@ function toggleTooltipLayers()
 
 function toggleKeepClick()
 {
-    if(map.hasLayer(layerPolygonAll))
-    {
-        map.removeLayer(layerPolygonAll);
-    }
-    else
-    {
-        map.addLayer(layerPolygonAll)
-    }
+    map.hasLayer(layerPolygonAll) ? map.removeLayer(layerPolygonAll) : map.addLayer(layerPolygonAll)
 }
 
 function toggleCoverLayers()
 {
-    // if(getCover)
-    // {
-    //     let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
-    //     loadGeojson(uri_base_api + "/" + input + "/cover",[layerCoverAll],function(e){},function(e){});
-    //     getCover = false;
-    // }
-    // else
-    // {
+    if(getCover)
+    {
+        loadGeojson(uri_base_api + "/geo:iso_ext:" + defaultMapIsocode + "/cover",[layerCoverAll],function(e){},function(e){});
+        getCover = false;
+    }
+    else
+    {
         map.hasLayer(layerCoverAll) ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll);
         fixZOrder(overlays);
-    // }
+    }
 }
 
 function toggleOfficialBordersLayers()
@@ -737,11 +732,11 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
         {
             if(isLogAfaCodeAbs)
             {
-                uri += '/' + defaultMap.isocode
+                uri += '/' + defaultMapIsocode
             }
             else
             {
-                uri += "/" + defaultMapBase.name + '/' + defaultMap.isocode
+                uri += "/" + defaultMapBase.name + '/' + defaultMapIsocode
             }
         }
         // if( isAfacode && context !== null && !insidePolygon )
@@ -913,12 +908,6 @@ function addCircleMarkerToLayer(layer, targetLayer) {
 }
 
 
-
-function layerTooltipFeature3(feature,layer)
-{
-    layer.bindTooltip(feature.properties.code_subcell,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
-}
-
 function onFeatureClick(feature)
 {
     map.fitBounds(feature.target.getBounds());
@@ -992,7 +981,6 @@ function onEachFeatureOlcGhs(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
     addCircleMarkerToLayer(layer, layerOlcGhsCurrent);
-
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeature,
@@ -1005,7 +993,6 @@ function onEachFeatureOlcGhsAll(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
     addCircleMarkerToLayer(layer,layerOlcGhsAll);
-
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeatureOlcGhs,
@@ -1019,7 +1006,6 @@ function onEachFeaturePolygonAll(feature,layer)
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
     addCircleMarkerToLayer(layer,layerCenterAll);
-
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeature,
@@ -1040,7 +1026,6 @@ function onEachFeaturePolygonCurrentGrid(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature3(feature,layer);
-
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeature,
@@ -1052,7 +1037,6 @@ function onEachFeaturePolygonAllGrid(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature2(feature,layer);
-
     layer.on({
         click: onFeatureClick
     });
@@ -1086,7 +1070,6 @@ function onEachFeature(feature,layer)
 
     addCircleMarkerToLayer(layer,layerCenterCurrent);
 
-
     if(isLogAfaCodeAbs)
     {
         if(feature.properties.logistic_id)
@@ -1106,7 +1089,7 @@ function onEachFeature(feature,layer)
         if(feature.id)
         {
             const codsci = ((feature.id).split("+",2)[1]).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-            document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+            document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMapIsocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
         }
     }
     else
@@ -1164,15 +1147,15 @@ function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true)
 
 function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true)
 {
-    if(toggleCoverStatus)
-    {
+    // if(toggleCoverStatus)
+    // {
         afterLoadJurisdAll(featureGroup,fittobounds,setmaxbounds)
-    }
-    else
-    {
-        map.removeLayer(featureGroup);
-        toggleCoverStatus = true
-    }
+    // }
+    // else
+    // {
+    //     map.removeLayer(featureGroup);
+    //     toggleCoverStatus = true
+    // }
 }
 
 function afterDataOlcGhs(data,layer)
@@ -1276,7 +1259,7 @@ function layerTooltipFeature(feature,layer)
     {
         var layerTooltip = '.' + feature.properties.index
     }
-    if(feature.properties.type)
+    else if(feature.properties.type)
     {
         var layerTooltip = feature.properties.code;
     }
@@ -1293,9 +1276,10 @@ function layerTooltipFeature2(feature,layer)
     layer.bindTooltip((isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) ),{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
 }
 
-
-
-
+function layerTooltipFeature3(feature,layer)
+{
+    layer.bindTooltip(feature.properties.code_subcell,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
+}
 
 function afterData(data,layer)
 {
@@ -1384,12 +1368,12 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 else if (pathnameNoDot.match(/\/[A-Z]{2}\~.*$/i))
 {
     uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\~.*)$/i, "/geo:afa:$1");
-    uriApiJurisd = uri_base_api + pathnameNoDot.replace(/\/(([A-Z]{2})\~.*)$/i, "/geo:iso_ext:$2");
+    uriApiJurisd = uri_base_api + "/geo:iso_ext:" + defaultMapIsocode;
 }
 else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
 {
     uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\+.*)$/i, "/geo:afa:$1");
-    uriApiJurisd = uri_base_api + pathnameNoDot.replace(/\/(([A-Z]{2})\+.*)$/i, "/geo:iso_ext:$2");
+    uriApiJurisd = uri_base_api + "/geo:iso_ext:" + defaultMapIsocode;
 }
 else if (pathname.match(/\/[A-Z]{2}\/geo:(olc|ghs):.+$/i))
 {
@@ -1410,5 +1394,5 @@ if(uriApi !== null && uriApi !== '')
 if(uriApiJurisd !== null && uriApiJurisd !== '')
 {
     loadGeojson(uriApiJurisd,[layerJurisdAll],function(e){afterLoadJurisdAll(e,false,false)},afterData);
-    loadGeojson(uriApiJurisd + '/cover',[layerCoverAll],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
+    loadGeojson(uriApiJurisd + '/buffer',[layerJurisdAll2],function(e){afterLoadLayerCoverAll(e,false,false)},function(e){});
 }

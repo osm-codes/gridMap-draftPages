@@ -11,7 +11,6 @@ BR:{
 name:'Brasil',
 center:[-15.796,-47.880],
 zoom:4,
-isocode:'BR',
 isocoden:76,
 scientificBase:{
  name:'base16h',
@@ -43,7 +42,6 @@ CM:{
 name:'Cameroun',
 center:[4.8,11.9],
 zoom:6,
-isocode:'CM',
 isocoden:120,
 scientificBase:{
  name:'base16h',
@@ -67,7 +65,6 @@ CO:{
 name:'Colombia',
 center:[3.5,-72.3],
 zoom:6,
-isocode:'CO',
 isocoden:170,
 scientificBase:{
  name:'base16h',
@@ -91,7 +88,6 @@ EC:{
 name:'Equador',
 center:[-0.944,-83.895],
 zoom:6,
-isocode:'EC',
 isocoden:218,
 scientificBase:{
  name:'base16h',
@@ -115,7 +111,6 @@ UY:{
 name:'Uruguai',
 center:[-32.981,-55.921],
 zoom:7,
-isocode:'UY',
 isocoden:868,
 scientificBase:{
  name:'base16h',
@@ -139,7 +134,6 @@ SV:{
 name:'El Salvador',
 center:[13.6,-89.1],
 zoom:6,
-isocode:'SV',
 isocoden:222,
 scientificBase:{
  name:'base16h',
