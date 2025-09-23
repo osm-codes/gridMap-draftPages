@@ -26,9 +26,6 @@ function changeLevel_byDigits(x)
     }
 }
 
-
-
-
 function generateSelectGrid(grids)
 {
     let htmlA = '';
@@ -79,15 +76,6 @@ function generateSelectLevel(base,size=0,filter=0) // 0: all, 1:meio, 2:inteiro,
     return html
 }
 
-
-
-
-
-
-
-
-
-
 function geoURI_to_geohackString(geoURI)
 {
     const re = /^\s*geo:(?:[a-zA-Z_][a-zA-Z_0-9]+:)?(\-?[0-9\.]+),(\-?[0-9\.]+)$/i;
@@ -114,6 +102,7 @@ function geoURI_to_geohackString(geoURI)
 	p += lon1 + '_' + lon2 + '_' + lon3 + '_' + lon4 ;
 	return p;
 }
+
 function go_to_geohackString()
 {
     const input = document.getElementById('geoUri').innerHTML;
@@ -164,14 +153,15 @@ function latRound(x)
 
 
 
-
-
-
 var defaultMap;
 var defaultMapBase;
 var toggleTooltipStatus = false;
 var toggleCoverStatus = false;
 var isLogAfaCodeAbs = false;
+var uri = window.location.href;
+
+let pathname = window.location.pathname;
+pathname = pathname.split(/[#]/)[0]
 
 function checkCountry(string,reset=true)
 {
@@ -200,86 +190,32 @@ function checkCountry(string,reset=true)
     }
 }
 
-var uri = window.location.href;
-
-let pathname = window.location.pathname;
-pathname = pathname.split(/[#]/)[0]
-
 if (pathname.match(/^\/[A-Z]{2}.+$/i))
 {
     checkCountry(pathname,false)
 }
 
 
-var openstreetmap = L.tileLayer(osmUrl,{/*attribution: genericAttrib,*/detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
-    grayscale = L.tileLayer(cartoUrl, {id:'light_all', /*attribution: genericAttrib,*/detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+function createGeoJSONLayer(styleFunc, featureFunc, filterFunc) {
+    return new L.geoJSON(null, {
+        style: styleFunc || style,
+        onEachFeature: featureFunc || onEachFeature,
+        pointToLayer: pointToLayer,
+        filter: filterFunc || undefined
+    });
+}
 
-var baseLayers = {
-    'Grayscale': grayscale,
-    'OpenStreetMap': openstreetmap };
-
-var layerPolygonCurrent = new L.geoJSON(null, {
-            style: style,
-            onEachFeature: onEachFeature,
-            pointToLayer: pointToLayer,
-        });
-
-var layerCenterCurrent = new L.geoJSON(null, {
-            style: style,
-            onEachFeature: onEachFeature,
-            pointToLayer: pointToLayer,
-        });
-
-var layerPolygonCurrentGrid = new L.geoJSON(null, {
-            style: stylePolygonCurrentGrid,
-            onEachFeature: onEachFeaturePolygonCurrentGrid,
-            pointToLayer: pointToLayer,
-            filter: filterLayer,
-        });
-
-var layerOlcGhsCurrent = new L.geoJSON(null, {
-            style: styleOlcGhs,
-            onEachFeature: onEachFeatureOlcGhs,
-            pointToLayer: pointToLayer,
-        });
-
-var layerOlcGhsAll = new L.geoJSON(null,{
-            style: styleOlcGhs,
-            onEachFeature: onEachFeatureOlcGhsAll,
-            pointToLayer: pointToLayer,
-        });
-
-var layerGridAll = new L.geoJSON(null, {
-            style: stylePolygonCurrentGrid,
-            onEachFeature: onEachFeaturePolygonCurrentGrid,
-            pointToLayer: pointToLayer,
-            filter: filterLayer,
-        });
-
-var layerPolygonAll = new L.geoJSON(null,{
-            style: style,
-            onEachFeature: onEachFeaturePolygonAll,
-            pointToLayer: pointToLayer,
-        });
-
-var layerCenterAll = new L.geoJSON(null,{
-            style: style,
-            onEachFeature: onEachFeaturePolygonAll,
-            pointToLayer: pointToLayer,
-        });
-
-var layerJurisdAll = new L.geoJSON(null,{
-            style: styleJurisdAll,
-            onEachFeature: onEachFeatureJurisd,
-            pointToLayer: pointToLayer,
-        });
-
-var layerCoverAll = new L.geoJSON(null,{
-            style: styleCoverAll,
-            onEachFeature: onEachFeatureCoverAll,
-            pointToLayer: pointToLayer,
-        });
-
+var layerPolygonCurrent = createGeoJSONLayer();
+var layerCenterCurrent = createGeoJSONLayer();
+var layerPolygonCurrentGrid = createGeoJSONLayer(stylePolygonCurrentGrid,onEachFeaturePolygonCurrentGrid,filterLayer);
+var layerOlcGhsCurrent = createGeoJSONLayer(styleOlcGhs, onEachFeatureOlcGhs);
+var layerOlcGhsAll = createGeoJSONLayer(styleOlcGhs, onEachFeatureOlcGhsAll);
+var layerGridAll = createGeoJSONLayer(stylePolygonCurrentGrid,onEachFeaturePolygonCurrentGrid,filterLayer);
+var layerJurisdAll = createGeoJSONLayer(styleJurisdAll,onEachFeatureJurisd);
+var layerCoverAll = createGeoJSONLayer(styleCoverAll,onEachFeatureCoverAll);
+var layerJurisdAll2 = createGeoJSONLayer(styleJurisdAll2,onEachFeatureJurisd);
+var layerPolygonAll = createGeoJSONLayer(style,onEachFeaturePolygonAll);
+var layerCenterAll = createGeoJSONLayer(style,onEachFeaturePolygonAll);
 var layerMarkerCurrent = new L.featureGroup();
 var layerMarkerAll = new L.featureGroup();
 
@@ -292,11 +228,19 @@ var overlays = {
     // 'AFAcode (All grid)': layerGridAll,
     'Markers (Active)': layerMarkerCurrent,
     // 'Markers (All)': layerMarkerAll,
-    // 'Coverage': layerCoverAll,
+    'Coverage': layerCoverAll,
     'Jurisdiction (Official)': layerJurisdAll,
+    'Jurisdiction (Buffered)': layerJurisdAll2,
     'OLC/GHS (Active)': layerOlcGhsCurrent,
     'OLC/GHS (All)': layerOlcGhsAll,
 };
+
+var openstreetmap = L.tileLayer(osmUrl,{/*attribution: genericAttrib,*/detectRetina: true,minZoom: 0,maxNativeZoom: 19,maxZoom: 25 }),
+    grayscale = L.tileLayer(cartoUrl, {id:'light_all', /*attribution: genericAttrib,*/detectRetina: true,maxNativeZoom: 22,maxZoom: 25 });
+
+var baseLayers = {
+    'Grayscale': grayscale,
+    'OpenStreetMap': openstreetmap };
 
 var map = L.map('map',{
     center: defaultMap.center,
@@ -304,15 +248,12 @@ var map = L.map('map',{
     attributionControl: true,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll,layerOlcGhsCurrent,layerOlcGhsAll] });
+    layers: [grayscale, layerPolygonCurrent, layerCenterCurrent, layerPolygonCurrentGrid, layerCoverAll, layerJurisdAll, layerJurisdAll2, layerOlcGhsCurrent, layerOlcGhsAll] });
 
 map.attributionControl.setPrefix(false);
-map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
 map.on('click', handleMapClick);
 
-var zoom   = L.control.zoom({position:'topleft'});
-var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
-// var escala = L.control.scale({position:'bottomright',imperial: false});
+
 
 var decodeGgeohash = L.control({position: 'topleft'});
 decodeGgeohash.onAdd = function (map) {
@@ -451,34 +392,6 @@ levelFilter.onAdd = function (map) {
 
     return this.container; };
 
-var clear = L.control({position: 'topleft'});
-clear.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.button.type = 'button';
-    this.button.innerHTML= "Clear all";
-
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', resetDef, this.container);
-
-    return this.container; };
-
-var toggleTooltip = L.control({position: 'topleft'});
-toggleTooltip.onAdd = function (map) {
-    this.container = L.DomUtil.create('div');
-    this.button    = L.DomUtil.create('button','leaflet-control-button',this.container);
-
-    this.button.type = 'button';
-    this.button.innerHTML= "Tooltip";
-
-    L.DomEvent.disableScrollPropagation(this.button);
-    L.DomEvent.disableClickPropagation(this.button);
-    L.DomEvent.on(this.button, 'click', toggleTooltipLayers, this.container);
-
-    return this.container; };
-
 var geoUriDiv = L.control({position: 'topright'});
 geoUriDiv.onAdd = function (map) {
     this.container = L.DomUtil.create('div');
@@ -514,59 +427,125 @@ const myLocationControl = L.Control.extend({
     }
 });
 
-map.addControl(new myLocationControl());
 
+// Cria um container de controle customizado
+const CustomControlContainer = L.Control.extend({
+options: { position: 'bottomright' },
 
-  // Cria um container de controle customizado
-  const CustomControlContainer = L.Control.extend({
-    options: { position: 'bottomright' },
+onAdd: function(map) {
+    const container = L.DomUtil.create('div', 'custom-control-container');
 
-    onAdd: function(map) {
-      const container = L.DomUtil.create('div', 'custom-control-container');
+    // Cria o botão de créditos
+    const creditBtn = L.DomUtil.create('div', 'leaflet-control');
+    creditBtn.innerHTML = '&#8505';
+    creditBtn.title = 'Credits';
+    creditBtn.onclick = function() {
+    window.location.href = 'https://wiki.addressforall.org/doc/osmc:Atribui%C3%A7%C3%B5es'; // Substitua pela URL real
+    };
 
-      // Cria o botão de créditos
-      const creditBtn = L.DomUtil.create('div', 'leaflet-control');
-      creditBtn.innerHTML = '&#8505';
-      creditBtn.title = 'Credits';
-      creditBtn.onclick = function() {
-        window.location.href = 'https://wiki.addressforall.org/doc/osmc:Atribui%C3%A7%C3%B5es'; // Substitua pela URL real
-      };
+    L.DomEvent.disableClickPropagation(creditBtn);
+    container.appendChild(creditBtn);
 
-      L.DomEvent.disableClickPropagation(creditBtn);
-      container.appendChild(creditBtn);
+    // Adiciona a escala dentro do container
+    const scale = L.control.scale({ position:'bottomright',imperial: false });
+    scale.addTo(map);
 
-      // Adiciona a escala dentro do container
-      const scale = L.control.scale({ position:'bottomright',imperial: false });
-      scale.addTo(map);
-
-      // Move o elemento da escala para dentro do nosso container customizado
-      setTimeout(() => {
-        const scaleEl = document.querySelector('.leaflet-control-scale');
-        if (scaleEl) {
-          container.appendChild(scaleEl);
-        }
-      }, 0);
-
-
-
-      return container;
+    // Move o elemento da escala para dentro do nosso container customizado
+    setTimeout(() => {
+    const scaleEl = document.querySelector('.leaflet-control-scale');
+    if (scaleEl) {
+        container.appendChild(scaleEl);
     }
-  });
-
-  map.addControl(new CustomControlContainer());
+    }, 0);
 
 
-[zoom, layers, geoUriDiv, /*escala,*/ decodeGgeohash, encodeGgeohash, level, levelFilter, clear, toggleTooltip]
-    .forEach(control => control.addTo(map));
 
-var a = document.getElementById('custom-map-controlsa');
-var b = document.getElementById('custom-map-controlsb');
-a.appendChild(decodeGgeohash.getContainer());
-a.appendChild(encodeGgeohash.getContainer());
-a.appendChild(level.getContainer());
-a.appendChild(levelFilter.getContainer());
-b.appendChild(clear.getContainer());
-b.appendChild(toggleTooltip.getContainer());
+    return container;
+}
+});
+
+
+
+
+
+// Function to create a basic Leaflet control with a label and button
+function createControl({ id, label, buttonLabel, buttonAction, position = 'topleft', type = 'button', checkbox = false, checked = false }) {
+    const control = L.control({ position });
+    control.onAdd = function (map) {
+        const container = L.DomUtil.create('div');
+
+        if (label)
+        {
+            const controlLabel = L.DomUtil.create('label', '', container);
+            controlLabel.innerHTML = label;
+        }
+
+        if (checkbox)
+        {
+            const checkboxInput = L.DomUtil.create('input', '', container);
+            checkboxInput.type = 'checkbox';
+            checkboxInput.id = id;
+            checkboxInput.checked = checked;
+            L.DomEvent.on(checkboxInput, 'click', buttonAction);
+        }
+        else
+        {
+            const button = L.DomUtil.create(type, '', container);
+            button.innerHTML = buttonLabel;
+            L.DomEvent.on(button, 'click', buttonAction);
+        }
+
+        L.DomEvent.disableScrollPropagation(container);
+        L.DomEvent.disableClickPropagation(container);
+
+        return container;
+    };
+
+    return control;
+}
+
+
+const clearControl = createControl({id: 'clear', buttonLabel: 'Clear all', buttonAction: resetDef, position: 'topleft'});
+const toggleTooltipControl = createControl({id: 'tooltip', buttonLabel: 'Tooltip', buttonAction: toggleTooltipLayers, position: 'topleft'});
+const toggleCoverageControl = createControl({id: 'coverage', buttonLabel: 'Coverage', buttonAction: toggleCoverLayers, position: 'topleft'});
+const officialBordersControl = createControl({id: 'officialborders', buttonLabel: 'Official Borders', buttonAction: toggleOfficialBordersLayers, position: 'topleft'});
+const zoomClickControl = createControl({id: 'zoomclick', label: 'Disable zoom-click: ', checkbox: true, checked: false, buttonAction: () => {}, position: 'topleft'});
+const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep previous clicks: ', checkbox: true, checked: true, buttonAction: toggleKeepClick, position: 'topleft'});
+const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
+
+map.addControl(new myLocationControl());
+map.addControl(new CustomControlContainer());
+map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
+var zoom   = L.control.zoom({position:'topleft'});
+var layers = L.control.layers(baseLayers, overlays,{position:'topleft'});
+// var escala = L.control.scale({position:'bottomright',imperial: false});
+
+var controlsToAdd = [
+    {control: zoom, target: null},
+    {control: layers, target: null},
+    // {control: escala, target: null},
+    {control: geoUriDiv, target: null},
+    {control: decodeGgeohash, target: 'custom-map-controlsa'},
+    {control: encodeGgeohash, target: 'custom-map-controlsa'},
+    {control: level, target: 'custom-map-controlsa'},
+    {control: levelFilter, target: 'custom-map-controlsa'},
+    {control: clearControl, target: 'custom-map-controlsb'},
+    {control: toggleTooltipControl, target: 'custom-map-controlsb'},
+    {control: officialBordersControl, target: 'custom-map-controlsb'},
+    {control: toggleCoverageControl, target: 'custom-map-controlsb'}
+];
+
+controlsToAdd.forEach(function(item) {
+    item.control.addTo(map);
+
+    if (item.target) {
+        var targetElement = document.getElementById(item.target);
+        if (targetElement) {
+            targetElement.appendChild(item.control.getContainer());
+        }
+    }
+});
+
 
 function resetDef()
 {
@@ -610,6 +589,37 @@ function toggleTooltipLayers()
     toggleTooltipStatus ? toggleTooltipStatus = false : toggleTooltipStatus = true;
 }
 
+function toggleKeepClick()
+{
+    if(map.hasLayer(layerPolygonAll))
+    {
+        map.removeLayer(layerPolygonAll);
+    }
+    else
+    {
+        map.addLayer(layerPolygonAll)
+    }
+}
+
+function toggleCoverLayers()
+{
+    // if(getCover)
+    // {
+    //     let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
+    //     loadGeojson(uri_base_api + "/" + input + "/cover",[layerCoverAll],function(e){},function(e){});
+    //     getCover = false;
+    // }
+    // else
+    // {
+        map.hasLayer(layerCoverAll) ? map.removeLayer(layerCoverAll) : map.addLayer(layerCoverAll);
+        fixZOrder(overlays);
+    // }
+}
+
+function toggleOfficialBordersLayers()
+{
+    map.hasLayer(layerJurisdAll) ? map.removeLayer(layerJurisdAll) : map.addLayer(layerJurisdAll);
+}
 
 function updateSelectLevel()
 {
@@ -633,168 +643,6 @@ function changePlaceholder()
         document.getElementById('fieldencode').placeholder = 'e.g.: ' + defaultMapBase.placeholderEncode;
     }
 }
-
-/*
-
-function getDecode(data)
-{
-    let input = document.getElementById('fielddecode').value
-
-    if (input.match(/^geo:(olc|ghs):.+$/i))
-    {
-        var uri = uri_base_api + "/" + input;
-
-        loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){});
-    }
-    else if(input !== null && input !== '')
-    {
-        var uri = uri_base_api + "/geo:afa:"
-
-        let regex = new RegExp("^" + defaultMap.isocode + "[+].*","i");
-
-        if(!regex.test(input))
-        {
-            if(defaultMapBase.name === 'base16h')
-            {
-                uri += defaultMap.isocode + defaultMapBase.symbol
-            }
-        }
-
-        uri += input
-        document.getElementById('fieldencode').value = '';
-
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData);
-    }
-}
-
-function getEncode(noData)
-{
-    let input = document.getElementById('fieldencode').value
-    let level = document.getElementById('level_size').value
-    let tcode = document.getElementById('tcode').value
-    let grid = '' // document.getElementById('grid').value
-    let context = defaultMap.isocode;
-
-    let uri = uri_base_api + "/";
-
-    if(input !== null && input !== '' && input.match(/^((geo:((olc|ghs|ghs64|lex):)?)?|(urn:lex:))?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i))
-    {
-        let tp = 'geo:' + ( tcode === '' ? '' :  ( tcode === 'none' ? '' : tcode + ':' )  ) ;
-
-        let regex  = /^(.*:)?(\-?\d+\.?\d*,\-?\d+\.?\d*)(;u=\d+\.?\d*)?$/i;
-        let regex2 = /^(.*)(;u=)(\d+\.?\d*)$/i;
-
-        if(input.match(regex))
-        {
-            if (!input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-            {
-                input = input.replace(regex, tp + "$2$3")
-            }
-
-            let u_value;
-
-            if(input.match(regex2))
-            {
-                u_value = Number(input.split(';u=')[1])
-
-                if(u_value == 0)
-                {
-                    u_value = levelValues[defaultMapBase.endLevel]
-                }
-
-                u_value = (u_value > 9 ? Math.round(u_value) : Math.round(u_value*10)/10 )
-            }
-            else
-            {
-                u_value = level
-            }
-
-            input = input.replace(regex, "$1$2" + ';u=' + u_value)
-
-            uri += input;
-
-            let latlong = input.replace(/^geo:(.*:)?(.*)$/i, "$2")
-            let popupContent = "latlng: " + latlong;
-            layerMarkerCurrent.clearLayers();
-            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerCurrent).bindPopup(popupContent);
-            L.marker(latlong.split(/[;,]/,2)).addTo(layerMarkerAll).bindPopup(popupContent);
-
-            if (input.match(/^geo:(olc|ghs|ghs64):.+$/i))
-            {
-                loadGeojson(uri,[layerOlcGhsCurrent,layerOlcGhsAll],afterLoadLayer,function(e){})
-            }
-            else
-            {
-                document.getElementById('fielddecode').value = '';
-
-                if(defaultMapBase.name === 'base16h')
-                {
-                    uri += "/" + defaultMapBase.name;
-                }
-
-                layerPolygonCurrent.clearLayers();
-                if(grid !== '')
-                {
-                    uri += '/' + context
-                    layerPolygonCurrent.clearLayers();
-                    layerCenterCurrent.clearLayers();
-                    layerPolygonCurrentGrid.clearLayers();
-                    loadGeojson(uriGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
-                }
-                else
-                {
-                    uri += '/' + grid + '/' + context
-                    layerPolygonCurrentGrid.clearLayers();
-                    loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
-                }
-            }
-        }
-    }
-}
-
-function onMapClick(e)
-{
-    let level = document.getElementById('level_size').value
-    let grid = '' // document.getElementById('grid').value
-
-    var uri;
-    var uriWithGrid;
-
-    if(defaultMapBase.name === 'base16h')
-    {
-        uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMapBase.name + '/' + defaultMap.isocode
-        uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + "/" + defaultMapBase.name + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
-    }
-    else
-    {
-        uri = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + '/' + defaultMap.isocode
-        uriWithGrid = uri_base_api + "/geo:" + e.latlng['lat'] + "," + e.latlng['lng'] + ";u=" + level + (grid ? '/' + grid : '') + '/' + defaultMap.isocode
-    }
-    var popupContent = "latlng: " + e.latlng['lat'] + "," + e.latlng['lng'];
-
-    document.getElementById('fieldencode').value = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-    document.getElementById('geoUri').innerHTML = 'geo:' + latRound(e.latlng['lat']) + "," + latRound(e.latlng['lng']) + ";u=" + level;
-
-    layerMarkerCurrent.clearLayers();
-
-    L.marker(e.latlng).addTo(layerMarkerCurrent).bindPopup(popupContent);
-    L.marker(e.latlng).addTo(layerMarkerAll).bindPopup(popupContent);
-
-    if(grid !== '')
-    {
-        layerPolygonCurrent.clearLayers();
-        layerCenterCurrent.clearLayers();
-        layerPolygonCurrentGrid.clearLayers();
-        loadGeojson(uriWithGrid,[layerPolygonCurrentGrid,layerGridAll],afterLoadLayer,afterData)
-    }
-    else
-    {
-        layerPolygonCurrentGrid.clearLayers();
-        loadGeojson(uri,[layerPolygonCurrent,layerPolygonAll],afterLoadLayer,afterData)
-    }
-}*/
-
-
 
 // Regular expressions for geoURI validation
 const regexGeoUri  = /^(geo:((olc|ghs|ghs64):)?)?(\-?\d+\.?\d*,\-?\d+\.?\d*)((;u=)(\d+\.?\d*))?$/i;
@@ -885,17 +733,16 @@ function processGeoUri(geouri,isAfacode,encode, isLex = false, geolocation = fal
         // const insidePolygon = isLatLngInsideJurisdiction(latLngArray[0],latLngArray[1],layerJurisdAll2);
         // const context = getJurisdictionContext();
 
-        // if(isAfacode && context !== null)
-        // {
-            // uri += '/BR'// + context;
-        // }
-        if(isLogAfaCodeAbs)
+        if(isAfacode)
         {
-            uri += '/' + defaultMap.isocode
-        }
-        else
-        {
-            uri += "/" + defaultMapBase.name + '/' + defaultMap.isocode
+            if(isLogAfaCodeAbs)
+            {
+                uri += '/' + defaultMap.isocode
+            }
+            else
+            {
+                uri += "/" + defaultMapBase.name + '/' + defaultMap.isocode
+            }
         }
         // if( isAfacode && context !== null && !insidePolygon )
         // {
@@ -943,7 +790,8 @@ function getEncode(noData)
     {
         const isCode = geouri.match(regexGeoUri);
         const isLex  = geouri.match(regexLex);
-        let isAfacode = isCode && (isCode[3] === undefined);
+        // let isAfacode = isCode && (isCode[3] === undefined);
+        let isAfacode = isTypeAfaCode();
 
         if (isCode || isLex)
         {
@@ -1030,28 +878,45 @@ function handleLocationJurisd(position)
 
 
 
+// ========== CONFIGURAÇÕES CONSOLIDADAS ==========
+var LayerConfig = {
+    styles: {
+        default: { color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight: 0 },
+        olcGhs: { color: 'black', fillColor: 'yellow', fillOpacity: 0.1, weight: 0 },
+        cover: { color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight: 1 },
+        jurisdOfficial: { color: 'red', fillColor: 'none', fillOpacity: 0.1, weight: 2, dashArray: '5, 5' },
+        jurisdBuffered: { color: 'red', fillColor: 'none', fillOpacity: 0.1 },
+        grid: function(feature) {
+            return feature.geometry.type === 'Point' ?
+                { color: 'deeppink', weight: 1 } :
+                { color: 'deeppink', fillColor: 'deeppink', fillOpacity: 0.1, weight: 1 };
+        }
+    },
+    tooltips: {
+        default: 'tooltipbase16h1c',
+        subcell: 'tooltipbase16h1ca'
+    },
+    circleMarker: { color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }
+};
 
+// ========== FUNÇÕES DE ESTILO CONSOLIDADAS ==========
+function style(feature) { return LayerConfig.styles.default; }
+function styleOlcGhs(feature) { return LayerConfig.styles.olcGhs; }
+function styleCoverAll(feature) { return LayerConfig.styles.cover; }
+function styleJurisdAll(feature) { return LayerConfig.styles.jurisdOfficial; }
+function styleJurisdAll2(feature) { return LayerConfig.styles.jurisdBuffered; }
+function stylePolygonCurrentGrid(feature) { return LayerConfig.styles.grid(feature); }
 
-
-// Layer layerPolygonCurrent
-function style(feature)
-{
-    return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:0};
+// ========== UTILITÁRIO PARA CIRCLE MARKERS ==========
+function addCircleMarkerToLayer(layer, targetLayer) {
+    L.circleMarker(layer.getBounds().getCenter(), LayerConfig.circleMarker).addTo(targetLayer);
 }
+
+
+
 function layerTooltipFeature3(feature,layer)
 {
     layer.bindTooltip(feature.properties.code_subcell,{ permanent:toggleTooltipStatus,direction:'auto',className:'tooltipbase16h1ca'});
-}
-
-function highlightFeature(e)
-{
-    this.openTooltip();
-}
-
-function resetHighlight(e,layer)
-{
-    layerPolygonCurrent.resetStyle(e.target);
-    layerPolygonAll.resetStyle(e.target);
 }
 
 function onFeatureClick(feature)
@@ -1059,22 +924,18 @@ function onFeatureClick(feature)
     map.fitBounds(feature.target.getBounds());
 }
 
-
-
-
-
 function pointToLayer(feature,latlng)
 {
-    return L.circleMarker(latlng,{
-        radius: 3,
-        weight: 1,
-        opacity: 0.8,
-        fillOpacity: 0.6,
-    });
+    return L.circleMarker(latlng,LayerConfig.circleMarker);
 }
+function filterLayer(feature, layer) {
+        return feature.properties.code_subcell;
+    }
 
-// Layer layerOlcGhsAll
-
+function highlightFeature(e)
+{
+    this.openTooltip();
+}
 function highlightFeatureOlcGhs(e)
 {
     const layer = e.target;
@@ -1097,23 +958,40 @@ function highlightFeatureOlcGhs(e)
     }
 }
 
+
+
+function resetHighlight(e,layer)
+{
+    layerPolygonCurrent.resetStyle(e.target);
+    layerPolygonAll.resetStyle(e.target);
+}
 function resetHighlightOlcGhs(e,layer)
 {
     layerOlcGhsCurrent.resetStyle(e.target);
     layerOlcGhsAll.resetStyle(e.target);
 }
 
-function styleOlcGhs(feature)
+function resetHighlightCoverAll(e,layer)
 {
-    return {color: 'black', fillColor: 'yellow', fillOpacity: 0.1, weight:0};
+    layerCoverAll.resetStyle(e.target);
 }
+function resetHighlightPolygonCurrentGrid(e,layer)
+{
+    layerPolygonCurrentGrid.resetStyle(e.target);
+    layerGridAll.resetStyle(e.target);
+}
+
+
+
+
+
+
 
 function onEachFeatureOlcGhs(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
-
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsCurrent);
+    addCircleMarkerToLayer(layer, layerOlcGhsCurrent);
 
     layer.on({
         click: onFeatureClick,
@@ -1126,8 +1004,7 @@ function onEachFeatureOlcGhsAll(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
-
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerOlcGhsAll);
+    addCircleMarkerToLayer(layer,layerOlcGhsAll);
 
     layer.on({
         click: onFeatureClick,
@@ -1141,8 +1018,7 @@ function onEachFeaturePolygonAll(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
-
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterAll);
+    addCircleMarkerToLayer(layer,layerCenterAll);
 
     layer.on({
         click: onFeatureClick,
@@ -1150,89 +1026,16 @@ function onEachFeaturePolygonAll(feature,layer)
         mouseout: resetHighlight
     });
 }
-
-// Layer layerJurisdAll
-function styleJurisdAll(feature)
-{
-    return {color: 'red', fillColor: 'none', fillOpacity: 0.1};
-}
-
-function onEachFeatureJurisd(feature,layer)
-{
-    var popupContent = "";
-    popupContent += "osm_id: " + feature.properties.osm_id + "<br>";
-    popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-    popupContent += "jurisd_local_id: " + feature.properties.jurisd_local_id + "<br>";
-    popupContent += "parent_id: " + feature.properties.parent_id + "<br>";
-    popupContent += "admin_level: " + feature.properties.admin_level + "<br>";
-    popupContent += "name: " + feature.properties.name + "<br>";
-    popupContent += "parent_abbrev: " + feature.properties.parent_abbrev + "<br>";
-    popupContent += "abbrev: " + feature.properties.abbrev + "<br>";
-    popupContent += "wikidata_id: " + feature.properties.wikidata_id + "<br>";
-    popupContent += "lexlabel: " + feature.properties.lexlabel + "<br>";
-    popupContent += "isolabel_ext: " + feature.properties.isolabel_ext + "<br>";
-    popupContent += "lex_urn: " + feature.properties.lex_urn + "<br>";
-    popupContent += "name_en: " + feature.properties.name_en + "<br>";
-    popupContent += "isolevel: " + feature.properties.isolevel + "<br>";
-    popupContent += "area: " + feature.properties.area + "<br>";
-    popupContent += "jurisd_base_id: " + feature.properties.jurisd_base_id + "<br>";
-
-    document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
-
-    layer.bindPopup(popupContent);
-}
-
-// Layer layerCoverAll
-function resetHighlightCoverAll(e,layer)
-{
-    layerCoverAll.resetStyle(e.target);
-}
-
 function onEachFeatureCoverAll(feature,layer)
 {
     popUpFeature(feature,layer);
     layerTooltipFeature(feature,layer);
-
     layer.on({
         click: onFeatureClick,
         mouseover: highlightFeature,
         mouseout: resetHighlightCoverAll
     });
 }
-
-function styleCoverAll(feature)
-{
-    return {color: 'black', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
-}
-
-// Layer layerPolygonCurrentGrid
-function highlightFeaturePolygonCurrentGrid(e)
-{
-    this.openTooltip();
-}
-
-function filterLayer(feature, layer) {
-        return feature.properties.code_subcell;
-    }
-
-function resetHighlightPolygonCurrentGrid(e,layer)
-{
-    layerPolygonCurrentGrid.resetStyle(e.target);
-    layerGridAll.resetStyle(e.target);
-}
-
-function stylePolygonCurrentGrid(feature)
-{
-    if(feature.geometry.type === 'Point')
-    {
-        return {color: 'deeppink', weight:1};
-    }
-    else
-    {
-        return {color: 'deeppink', fillColor: 'deeppink', fillOpacity: 0.1, weight:1};
-    }
-}
-
 function onEachFeaturePolygonCurrentGrid(feature,layer)
 {
     popUpFeature(feature,layer);
@@ -1240,7 +1043,7 @@ function onEachFeaturePolygonCurrentGrid(feature,layer)
 
     layer.on({
         click: onFeatureClick,
-        mouseover: highlightFeaturePolygonCurrentGrid,
+        mouseover: highlightFeature,
         mouseout: resetHighlightPolygonCurrentGrid
     });
 }
@@ -1254,6 +1057,84 @@ function onEachFeaturePolygonAllGrid(feature,layer)
         click: onFeatureClick
     });
 }
+
+
+function onEachFeatureJurisd(feature,layer)
+{
+    // Criar popup com dados da jurisdição
+    var fields = [
+        'osm_id', 'jurisd_base_id', 'jurisd_local_id', 'parent_id', 'admin_level',
+        'name', 'parent_abbrev', 'abbrev', 'wikidata_id', 'lexlabel', 'isolabel_ext',
+        'lex_urn', 'name_en', 'isolevel', 'area'
+    ];
+
+    var popupContent = fields.map(function(field) {
+        return field + ': ' + (feature.properties[field] || '');
+    }).join('<br>');
+
+    document.getElementById('nameJurisd').innerHTML = ' of ' + feature.properties.name;
+
+    layer.bindPopup(popupContent);
+}
+
+function onEachFeature(feature,layer)
+{
+    popUpFeature(feature,layer);
+    layerTooltipFeature(feature,layer);
+
+    layerCenterCurrent.clearLayers();
+
+    addCircleMarkerToLayer(layer,layerCenterCurrent);
+
+
+    if(isLogAfaCodeAbs)
+    {
+        if(feature.properties.logistic_id)
+        {
+            document.getElementById('logCode').innerHTML = (((((feature.properties.logistic_id).split("~", 2)[1]).replace(/(...)(?!$)/g,'$1.'))).replace(/(\.\.)/g,'\.'));
+
+            const qr = kjua({
+                text: (window.location.origin).toUpperCase() +'/'+ feature.properties.logistic_id,
+                render: 'svg',
+                size: 150,
+                ecLevel: 'L' // L = Low
+            });
+
+            document.getElementById('qr-container').replaceChildren(qr);
+        }
+
+        if(feature.id)
+        {
+            const codsci = ((feature.id).split("+",2)[1]).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
+            document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+        }
+    }
+    else
+    {
+        if(feature.id)
+        {
+            document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)[1]).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
+
+            const qr = kjua({
+                text: (window.location.origin).toUpperCase() +'/'+ feature.id,
+                render: 'svg',
+                size: 150,
+                ecLevel: 'L' // L = Low
+            });
+
+            document.getElementById('qr-container').replaceChildren(qr);
+        }
+    }
+
+    layer.on({
+        click: onFeatureClick,
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
+}
+
+
+
 
 //
 
@@ -1293,8 +1174,6 @@ function afterLoadLayerCoverAll(featureGroup,fittobounds=true,setmaxbounds=true)
         toggleCoverStatus = true
     }
 }
-
-
 
 function afterDataOlcGhs(data,layer)
 {
@@ -1360,7 +1239,7 @@ function popUpFeature(feature,layer)
 
     if(feature.properties.type)
     {
-        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) ) + "</code></big><br>";
+        popupContent += (feature.properties.type).toUpperCase() + " code: <big><code>" + (feature.properties.code) + "</code></big><br>";
     }
     else if(feature.properties.index)
     {
@@ -1397,6 +1276,10 @@ function layerTooltipFeature(feature,layer)
     {
         var layerTooltip = '.' + feature.properties.index
     }
+    if(feature.properties.type)
+    {
+        var layerTooltip = feature.properties.code;
+    }
     else
     {
         var layerTooltip = (isLogAfaCodeAbs ? (feature.properties.logistic_id) : (feature.id) );
@@ -1411,52 +1294,7 @@ function layerTooltipFeature2(feature,layer)
 }
 
 
-function onEachFeature(feature,layer)
-{
-    popUpFeature(feature,layer);
-    layerTooltipFeature(feature,layer);
 
-    layerCenterCurrent.clearLayers();
-
-    L.circleMarker(layer.getBounds().getCenter(),{color: 'black', radius: 3, weight: 1, opacity: 0.8, fillOpacity: 0.6 }).addTo(layerCenterCurrent);
-
-
-    if(isLogAfaCodeAbs)
-    {
-        if(feature.properties.logistic_id)
-        {
-            document.getElementById('logCode').innerHTML = (((((feature.properties.logistic_id).split("~", 2)[1]).replace(/(...)(?!$)/g,'$1.'))).replace(/(\.\.)/g,'\.'));
-
-            const qr = kjua({
-                text: (window.location.origin).toUpperCase() +'/'+ feature.properties.logistic_id,
-                render: 'svg',
-                size: 150,
-                ecLevel: 'L' // L = Low
-            });
-
-            document.getElementById('qr-container').replaceChildren(qr);
-        }
-
-        if(feature.id)
-        {
-            const codsci = ((feature.id).split("+",2)[1]).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-            document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
-        }
-    }
-    else
-    {
-        if(feature.id)
-        {
-            document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)[1]).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
-        }
-    }
-
-    layer.on({
-        click: onFeatureClick,
-        mouseover: highlightFeature,
-        mouseout: resetHighlight
-    });
-}
 
 
 function afterData(data,layer)

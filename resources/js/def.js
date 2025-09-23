@@ -33,7 +33,7 @@ postalcodeBase:{
  selectGrid:[32]},
 postalcodeBaseAbs:{
  name:'base32nvu',
- endLevel:36,
+ endLevel:40,
  symbol:'~',
  placeholderDecode:'BR~3H',
  placeholderEncode:'-15.7,-47.8;u=10',

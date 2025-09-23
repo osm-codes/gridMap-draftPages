@@ -212,7 +212,7 @@ var map = L.map('map',{
     attributionControl: true,
     zoomControl: false,
     renderer: L.svg(),
-    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll2,layerOlcGhsCurrent,layerOlcGhsAll] });
+    layers: [grayscale, layerPolygonCurrent, layerPolygonAll, layerCoverAll, layerJurisdAll2, layerOlcGhsCurrent, layerOlcGhsAll] });
 
 map.attributionControl.setPrefix(false); // Disable the attribution prefix
 map.addControl(new L.Control.Fullscreen({position:'topleft'})); /* https://github.com/Leaflet/Leaflet.fullscreen */
