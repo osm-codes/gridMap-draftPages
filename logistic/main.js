@@ -44,7 +44,7 @@ function sel_jurL1(abbrev)
 
 function sel_jurL2(abbrev)
 {
-    let country = defaultMap.isocode;
+    let country = defaultMapIsocode;
     let state = document.getElementById('sel_jurL2').value;
     let jL3dom = document.getElementById('sel_jurL3');
     let s = '<option value="">- Cities -</option>'
@@ -60,7 +60,7 @@ function sel_jurL2(abbrev)
 function sel_jurL3(abbrev)
 {
     // let country = document.getElementById('sel_jurL1').value;
-    let country = defaultMap.isocode;
+    let country = defaultMapIsocode;
     let state = document.querySelector('#sel_jurL2').value;
     let city = document.getElementById('sel_jurL3').value;
     if(city != '' && state != '')
@@ -171,6 +171,7 @@ var overlays = {
 };
 
 var defaultMap = countries['BR'];
+var defaultMapIsocode;
 var sizeCurrentCell = 0;
 var centerCurrentCell;
 var getJurisdAfterLoad = false;
@@ -188,6 +189,7 @@ function checkCountry(string,reset=true)
         if(regex.test(string) || countries[key].isocoden === string)
         {
             defaultMap = countries[key];
+            defaultMapIsocode = key;
             reset ? resetDef() : '';
             break;
         }
@@ -234,7 +236,7 @@ jurisdictionGgeohash.onAdd = function (map) {
     this.select_mun = L.DomUtil.create('select', '', this.container);
 
     this.label_country.for = 'country';
-    this.label_country.innerHTML = 'Jurisdiction: <span id="sel_jurL1">' + defaultMap.isocode +'</span>';
+    this.label_country.innerHTML = 'Jurisdiction: <span id="sel_jurL1">' + defaultMapIsocode +'</span>';
     this.label_state.for = 'state';
     this.label_state.innerHTML = '-';
     this.label_mun.for = 'mun';
@@ -507,7 +509,7 @@ function toggleCoverLayers()
 {
     if(getCover)
     {
-        let input = defaultMap.isocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
+        let input = defaultMapIsocode + '-' + document.getElementById('sel_jurL2').value + '-' + document.getElementById('sel_jurL3').value
         loadGeojson(uri_base_api + "/" + input + "/cover",[layerCoverAll],function(e){},function(e){});
         getCover = false;
     }
@@ -689,7 +691,7 @@ const regexLex  = /^(urn|geo):lex:.+$/i;
 
 // Function to get the jurisdiction context based on selected values
 function getJurisdictionContext() {
-    const country = defaultMap.isocode;
+    const country = defaultMapIsocode;
     const state = document.getElementById('sel_jurL2').value;
     const city = document.getElementById('sel_jurL3').value;
 
@@ -1072,7 +1074,7 @@ function onEachFeature(feature,layer)
     if(feature.id)
     {
         const codsci = ((feature.id).split("+",2)[1]).replace(/([GQHMRVJKNPSTZY])/g,'\.$1');
-        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMap.isocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
+        document.getElementById('sciCode').innerHTML = '<a href="' + uri_base + '/' + feature.id + '">' + defaultMapIsocode + defaultMap.scientificBase.symbol +'<span class="feSchrift">'+ codsci +'</span></a>';
     }
 
     if(feature.properties.logistic_id)

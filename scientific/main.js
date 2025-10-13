@@ -512,7 +512,7 @@ const clearControl = createControl({id: 'clear', buttonLabel: 'Clear all', butto
 const toggleTooltipControl = createControl({id: 'tooltip', buttonLabel: 'Tooltip', buttonAction: toggleTooltipLayers, position: 'topleft'});
 const toggleCoverageControl = createControl({id: 'coverage', buttonLabel: 'Coverage', buttonAction: toggleCoverLayers, position: 'topleft'});
 const officialBordersControl = createControl({id: 'officialborders', buttonLabel: 'Official Borders', buttonAction: toggleOfficialBordersLayers, position: 'topleft'});
-const zoomClickControl = createControl({id: 'zoomclick', label: 'Disable zoom-click: ', checkbox: true, checked: false, buttonAction: () => {}, position: 'topleft'});
+const zoomClickControl = createControl({id: 'zoomclick', label: 'Disable zoom-click: ', checkbox: true, checked: true, buttonAction: () => {}, position: 'topleft'});
 const keepPreviousClickControl = createControl({id: 'keepclick', label: 'Keep previous clicks: ', checkbox: true, checked: true, buttonAction: toggleKeepClick, position: 'topleft'});
 const noTooltipControl = createControl({id: 'notooltip', label: 'No tooltip: ', checkbox: true, checked: true, buttonAction: toggleTooltipLayers, position: 'topleft'});
 
@@ -527,6 +527,7 @@ var controlsToAdd = [
     {control: zoom, target: null},
     {control: layers, target: null},
     // {control: escala, target: null},
+    {control: zoomClickControl, target: 'custom-map-controlsa'},
     {control: geoUriDiv, target: null},
     {control: decodeGgeohash, target: 'custom-map-controlsa'},
     {control: encodeGgeohash, target: 'custom-map-controlsa'},
@@ -910,7 +911,8 @@ function addCircleMarkerToLayer(layer, targetLayer) {
 
 function onFeatureClick(feature)
 {
-    map.fitBounds(feature.target.getBounds());
+    let zoomclick = document.getElementById('zoomclick')
+    zoomclick.checked ? '' : map.fitBounds(feature.target.getBounds())
 }
 
 function pointToLayer(feature,latlng)
@@ -1074,7 +1076,7 @@ function onEachFeature(feature,layer)
     {
         if(feature.properties.logistic_id)
         {
-            document.getElementById('logCode').innerHTML = (((((feature.properties.logistic_id).split("~", 2)[1]).replace(/(...)(?!$)/g,'$1.'))).replace(/(\.\.)/g,'\.'));
+            document.getElementById('logCode').innerHTML = feature.properties.logistic_id.split("~")[1].replace(/^(.{5})/, '$1-');
 
             const qr = kjua({
                 text: (window.location.origin).toUpperCase() +'/'+ feature.properties.logistic_id,
@@ -1097,6 +1099,8 @@ function onEachFeature(feature,layer)
         if(feature.id)
         {
             document.getElementById('sciCode').innerHTML = (((((feature.id).split("+", 2)[1]).replace(/(...)(?!$)/g,'$1.')).replace(/([GQHMRVJKNPSTZY])/g,'\.$1')).replace(/(\.\.)/g,'\.'));
+
+
 
             const qr = kjua({
                 text: (window.location.origin).toUpperCase() +'/'+ feature.id,
@@ -1123,8 +1127,9 @@ function onEachFeature(feature,layer)
 
 function afterLoadLayer(featureGroup)
 {
+    let zoomclick = document.getElementById('zoomclick')
     let zoom = map.getBoundsZoom(featureGroup.getBounds());
-    map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))));
+    zoomclick.checked ? '' : map.setView(featureGroup.getBounds().getCenter(),zoom-(zoom < 10 ? 1: (zoom < 20 ? 2: (zoom < 24 ? 3: 4))))
 }
 
 function afterLoadJurisdAll(featureGroup,fittobounds=true,setmaxbounds=true)
@@ -1365,9 +1370,19 @@ else if (pathname.match(/(\/base16h)?\/grid/))
 {
     uriApi = uri.replace(/((\/base16h)?\/grid)/, "$1");
 }
-else if (pathnameNoDot.match(/\/[A-Z]{2}\~.*$/i))
+else if (pathnameNoDot.match(/\/[A-Z]{2}[\~\-].*$/i))
 {
-    uriApi = uri_base_api + pathnameNoDot.replace(/\/([A-Z]{2}\~.*)$/i, "/geo:afa:$1");
+
+    // Extrai o código após a barra
+    const match = pathnameNoDot.match(/\/([A-Z]{2})([\~\-])(.*)$/i);
+
+    const countryCode = match[1]; // BR
+    const restOfCode = match[3];  // 9Z0QQVGR ou 9Z0QQ-VGR
+
+    // Remove qualquer hífen, normaliza com ~
+    const normalizedCode = `${countryCode}~${restOfCode.replace(/-/g, "")}`;
+
+    uriApi = uriApi = `${uri_base_api}/geo:afa:${normalizedCode}`;
     uriApiJurisd = uri_base_api + "/geo:iso_ext:" + defaultMapIsocode;
 }
 else if (pathnameNoDot.match(/\/[A-Z]{2}\+.*$/i))
